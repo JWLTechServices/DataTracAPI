@@ -504,14 +504,13 @@ namespace DatatracAPIOrder_OrderSettlement
 
     public class Id
     {
-        public object reference_text { get; set; }
+        public object id { get; set; }
         public object company_number { get; set; }
         public object control_number { get; set; }
-        public object id { get; set; }
         public object service_level { get; set; }
         public object customer_number { get; set; }
-        public object bol_number { get; set; }
         public object reference { get; set; }
+        public object bol_number { get; set; }
         public object pickup_requested_date { get; set; }
         public object pickup_requested_arr_time { get; set; }
         public object pickup_requested_dep_time { get; set; }
@@ -523,6 +522,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object pickup_city { get; set; }
         public object pickup_state { get; set; }
         public object pickup_zip { get; set; }
+        public object pickup_signature { get; set; }
         public object deliver_requested_date { get; set; }
         public object deliver_requested_arr_time { get; set; }
         public object deliver_requested_dep_time { get; set; }
@@ -539,11 +539,13 @@ namespace DatatracAPIOrder_OrderSettlement
         public object rate_buck_amt3 { get; set; }
         public object rate_buck_amt10 { get; set; }
         public object number_of_pieces { get; set; }
+        public object deliver_actual_pieces { get; set; }
         public object rate_miles { get; set; }
+        public object actual_miles { get; set; }
         public object driver1 { get; set; }
         public object ordered_by { get; set; }
         public object csr { get; set; }
-
+        public object reference_text { get; set; }
         public object roundtrip_actual_date { get; set; }
         public List<object> notes { get; set; }
         public object pickup_phone_ext { get; set; }
@@ -701,8 +703,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object cod_accept_cashiers_check { get; set; }
         public object add_charge_amt4 { get; set; }
         public object add_charge_code7 { get; set; }
-        public object deliver_actual_pieces { get; set; }
-      
+       
         public object cod_accept_company_check { get; set; }
         
         public object previous_ctrl_number { get; set; }
@@ -744,7 +745,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object rt_actual_location_accuracy { get; set; }
         public object rate_chart_used { get; set; }
         public object pickup_longitude { get; set; }
-        public object pickup_signature { get; set; }
+      
         public object add_charge_amt5 { get; set; }
         public object pu_arrive_notification_sent { get; set; }
 
@@ -786,7 +787,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object add_charge_occur3 { get; set; }
         public object blocks { get; set; }
         public object add_charge_code9 { get; set; }
-        public object actual_miles { get; set; }
+       
         public object add_charge_occur10 { get; set; }
         public object add_charge_code11 { get; set; }
         public object pickup_address_point_number_text { get; set; }

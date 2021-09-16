@@ -141,21 +141,27 @@ namespace DatatracAPIOrder_OrderSettlement
             return objresponse;
         }
 
-        public DSResponse GetCustomerMappingDetails(int company, int customer_number)
+        public DSResponse GetRouteStopDetails(string CustomerName, string LocationCode, string ProductCode)
         {
             DSResponse objResponse = new DSResponse();
             try
             {
                 DataSet dsDtls = new DataSet();
 
-                SqlParameter paramcompany = new SqlParameter("@COMPANY", SqlDbType.Int);
-                paramcompany.Value = company;
+                SqlParameter paramCustomerName = new SqlParameter("@CustomerName", SqlDbType.VarChar);
+                paramCustomerName.Value = CustomerName;
 
-                SqlParameter paramcustomer_number = new SqlParameter("@CUSTOMER_NUMBER", SqlDbType.Int);
-                paramcustomer_number.Value = customer_number;
+                SqlParameter paramLocationCode = new SqlParameter("@LocationCode", SqlDbType.VarChar);
+                paramLocationCode.Value = LocationCode;
+
+                SqlParameter paramProductCode = new SqlParameter("@ProductCode", SqlDbType.VarChar);
+                paramProductCode.Value = ProductCode;
+
+                //SqlParameter paramServiceType = new SqlParameter("@ServiceType", SqlDbType.VarChar);
+                //paramServiceType.Value = ServiceType;
 
                 dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_ROUTESTOP_CUSTOMERMAPPING",
-                    paramcompany, paramcustomer_number);
+                    paramCustomerName, paramLocationCode, paramProductCode);
                 if (dsDtls.Tables[0].Rows.Count > 0)
                 {
                     objResponse.DS = dsDtls;
@@ -170,7 +176,44 @@ namespace DatatracAPIOrder_OrderSettlement
             catch (Exception ex)
             {
                 objResponse.dsResp.ResponseVal = false;
-                LogEvents(ex, "GetCustomerMappingDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
+                LogEvents(ex, "GetRouteStopDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
+            }
+            return objResponse;
+        }
+
+        public DSResponse GetServiceTypeDetails(string CompanyNumber, string CustomerNumber)
+        {
+            DSResponse objResponse = new DSResponse();
+            try
+            {
+                DataSet dsDtls = new DataSet();
+
+                SqlParameter paramCompanyNumber = new SqlParameter("@CompanyNumber", SqlDbType.Int);
+                paramCompanyNumber.Value = CompanyNumber;
+
+
+                SqlParameter paramCustomerNumber = new SqlParameter("@CustomerNumber", SqlDbType.VarChar);
+                paramCustomerNumber.Value = CustomerNumber;
+
+                
+
+                dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_SERVICETYPE_CUSTOMERMAPPING",
+                    paramCompanyNumber, paramCustomerNumber);
+                if (dsDtls.Tables[0].Rows.Count > 0)
+                {
+                    objResponse.DS = dsDtls;
+                    objResponse.dsResp.ResponseVal = true;
+                }
+                else
+                {
+                    objResponse.dsResp.ResponseVal = false;
+                    objResponse.dsResp.Reason = "No Service Type Details Found";
+                }
+            }
+            catch (Exception ex)
+            {
+                objResponse.dsResp.ResponseVal = false;
+                LogEvents(ex, "GetServiceTypeDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
             }
             return objResponse;
         }

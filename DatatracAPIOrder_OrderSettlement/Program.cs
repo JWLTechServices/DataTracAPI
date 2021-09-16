@@ -3241,892 +3241,976 @@ namespace DatatracAPIOrder_OrderSettlement
                             //.Distinct();
 
                             DataView view = new DataView(dtDataTable);
-                            DataTable dtdistinctValues = view.ToTable(true, "Company", "Reference", "Customer_Number");
+                            DataTable dtdistinctValues = view.ToTable(true, "Customer_Reference");
                             clsRoute objclsRoute = new clsRoute();
 
+                            string CustomerName = strFileName.Split('-')[0];
+                            string LocationCode = strFileName.Split('-')[1];
+                            string ProductCode = strFileName.Split('-')[2];
 
-                            foreach (DataRow dr in dtdistinctValues.Rows)
+                            clsCommon.DSResponse objDsResponse = new clsCommon.DSResponse();
+                            objDsResponse = objclsRoute.GetRouteStopDetails(CustomerName, LocationCode, ProductCode);
+                            if (objDsResponse.dsResp.ResponseVal)
                             {
+                                DataTable dtCustomerMapping = objDsResponse.DS.Tables[0];
+                                DataTable dtServiceTypes;
+                                clsCommon.DSResponse objDsServviceTypeResponse = new clsCommon.DSResponse();
+                                objDsServviceTypeResponse = objclsRoute.GetServiceTypeDetails(Convert.ToString(dtCustomerMapping.Rows[0]["Company"]), Convert.ToString(dtCustomerMapping.Rows[0]["CustomerNumber"]));
+                                if (objDsServviceTypeResponse.dsResp.ResponseVal)
+                                {
+                                    //objroute_stop.service_level = Convert.ToInt32(objDsServviceTypeResponse.DS.Tables[0].Rows[0]["service_type"]);
+                                    dtServiceTypes = objDsServviceTypeResponse.DS.Tables[0];
+                                }
+                                else
+                                {
+                                    strExecutionLogMessage = "RouteHeaderPostAPI Service Type Mapping Not Found " + System.Environment.NewLine;
+                                    strExecutionLogMessage += "CustomerName -" + CustomerName + System.Environment.NewLine;
+                                    strExecutionLogMessage += "LocationCode -" + LocationCode + System.Environment.NewLine;
+                                    strExecutionLogMessage += "Company -" + Convert.ToString(dtCustomerMapping.Rows[0]["Company"]) + System.Environment.NewLine;
+                                    strExecutionLogMessage += "CustomerNumber -" + Convert.ToString(dtCustomerMapping.Rows[0]["CustomerNumber"]) + System.Environment.NewLine;
 
-                                object value = dr["Company"];
-                                if (value == DBNull.Value)
-                                    break;
-                                ReferenceId = Convert.ToString(dr["Reference"]);
-                                try
+                                    strExecutionLogMessage += "Please Put entry for this service type in Service Type mapping" + System.Environment.NewLine;
+                                    objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                    continue;
+                                }
+
+                                foreach (DataRow dr in dtdistinctValues.Rows)
                                 {
 
-                                    DataRow[] drresult = dtDataTable.Select("Company = '" + dr["Company"] + "' AND Reference = '" + dr["Reference"]+ "' AND Customer_Number = '" + dr["Customer_Number"] +"'");
-
-                                    List<items> objitemsList = new List<items>();
-                                    foreach (DataRow drItems in drresult)
+                                    object value = dr["Customer_Reference"];
+                                    if (value == DBNull.Value)
+                                        break;
+                                    ReferenceId = Convert.ToString(dr["Customer_Reference"]);
+                                    try
                                     {
-                                        items objitems = new items();
-                                        objitems.company_number = Convert.ToInt32(drItems["Company"]);
-                                        // objitems.unique_id = Convert.ToInt32(dr["unique_id"]);
-                                        objitems.actual_cod_type = Convert.ToString(drItems["Actual Cod Type"]);
-                                        objitems.barcodes_unique = Convert.ToString(drItems["Barcodes Unique"]);
-                                        objitems.cod_type = Convert.ToString(drItems["Cod Type"]);
-                                        objitems.photos_exist = Convert.ToString(drItems["Photos Exist"]);
-                                        objitems.@return = Convert.ToString(drItems["Return"]);
-                                        objitems.expected_pieces = Convert.ToInt32(drItems["Expected Pieces"]);
-                                        objitems.expected_weight = Convert.ToInt32(drItems["Expected Weight"]);
-                                        objitems.item_description = Convert.ToString(drItems["Item Description"]);
-                                        objitems.item_number = Convert.ToString(drItems["Item Number"]);
-                                        objitems.container_id = Convert.ToString(drItems["Container Id"]);
-                                        objitems.reference = Convert.ToString(drItems["Reference"]);
-                                        objitemsList.Add(objitems);
-                                    }
 
-                                    route_stopdetails objroute_stopdetails = new route_stopdetails();
-                                    route_stop objroute_stop = new route_stop();
-                                    objroute_stop.company_number = Convert.ToString(drresult[0]["Company"]);
-                                    //objroute_stop.unique_id = Convert.ToInt32(objCommon.GeneareteUnigueId()); // Convert.ToInt32(dr["Unique Id"]);
-                                    objroute_stop.actual_cod_type = Convert.ToString(drresult[0]["Actual Cod Type"]);
-                                    objroute_stop.callback_required = Convert.ToString(drresult[0]["Callback Required"]);
-                                    objroute_stop.cod_type = Convert.ToString(drresult[0]["Cod Type"]);
-                                    objroute_stop.customer_number = Convert.ToInt32(drresult[0]["Customer_Number"]);
-                                    objroute_stop.origin_code = Convert.ToString(drresult[0]["Origin Code"]);
-                                    objroute_stop.photos_exist = Convert.ToString(drresult[0]["Photos Exist"]);
-                                    objroute_stop.posted_status = Convert.ToString(drresult[0]["Posted Status"]);
-                                    objroute_stop.required_signature_type = Convert.ToString(drresult[0]["Required Signature Type"]);
-                                    DateTime dtValue = Convert.ToDateTime(drresult[0]["Route Date"]);
-                                    objroute_stop.route_date = dtValue.ToString("yyyy-MM-dd");
-                                    objroute_stop.sent_to_phone = Convert.ToString(drresult[0]["Sent to Phone"]);
-                                    objroute_stop.stop_type = Convert.ToString(drresult[0]["Stop Type"]);
-                                    objroute_stop.verification_id_type = Convert.ToString(drresult[0]["Verification Id Type"]);
-                                    objroute_stop.address_name = Convert.ToString(drresult[0]["Address Name"]);
-                                    objroute_stop.address = Convert.ToString(drresult[0]["Address"]);
-                                    objroute_stop.city = Convert.ToString(drresult[0]["City"]);
-                                    objroute_stop.state = Convert.ToString(drresult[0]["State"]);
-                                    objroute_stop.zip_code = Convert.ToString(drresult[0]["Zip Code"]);
-                                    objroute_stop.service_level = Convert.ToInt32(drresult[0]["Service Level"]);
-                                    objroute_stop.route_code = Convert.ToString(drresult[0]["Route Code"]);
-                                    objroute_stop.reference = Convert.ToString(drresult[0]["Reference"]);
-                                    objroute_stop.phone = Convert.ToString(drresult[0]["Phone"]);
-                                    objroute_stop.bol_number = Convert.ToString(drresult[0]["BOL Number"]);
-                                    objroute_stop.branch_id = Convert.ToString(drresult[0]["Branch Id"]);
-                                    objroute_stop.items = objitemsList;
+                                        DataRow[] drresult = dtDataTable.Select("Customer_Reference= '" + dr["Customer_Reference"] + "'");
 
-                                    clsCommon.DSResponse objDsResponse = new clsCommon.DSResponse();
-                                    objDsResponse = objclsRoute.GetCustomerMappingDetails(Convert.ToInt32(dr["Company"]), Convert.ToInt32(dr["Customer_Number"]));
+                                        route_stopdetails objroute_stopdetails = new route_stopdetails();
+                                        route_stop objroute_stop = new route_stop();
 
-                                    if (objDsResponse.dsResp.ResponseVal)
-                                    {
-                                        DataTable dt = objDsResponse.DS.Tables[0];
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_arrival_time"])))
+                                        int service_level = 0;
+
+                                        DataRow[] drservice_level = dtServiceTypes.Select("CustomerServiceLevelCode= '" + drresult[0]["Service Type"] + "'");
+
+                                        if (drservice_level.Length>0)
                                         {
-                                            objroute_stop.actual_arrival_time = Convert.ToString(dt.Rows[0]["actual_arrival_time"]);
+                                            //service_level
+                                            service_level = Convert.ToInt32(drservice_level[0]["Service_Type"]);
+
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_billing_amt"])))
+                                        else
                                         {
-                                            objroute_stop.actual_billing_amt = Convert.ToDouble(dt.Rows[0]["actual_billing_amt"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_cod_amt"])))
-                                        {
-                                            objroute_stop.actual_cod_amt = Convert.ToDouble(dt.Rows[0]["actual_cod_amt"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_delivery_date"])))
-                                        {
-                                            objroute_stop.actual_delivery_date = Convert.ToString(dt.Rows[0]["actual_delivery_date"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_depart_time"])))
-                                        {
-                                            objroute_stop.actual_depart_time = Convert.ToString(dt.Rows[0]["actual_depart_time"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_latitude"])))
-                                        {
-                                            objroute_stop.actual_latitude = Convert.ToDouble(dt.Rows[0]["actual_latitude"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_longitude"])))
-                                        {
-                                            objroute_stop.actual_longitude = Convert.ToDouble(dt.Rows[0]["actual_longitude"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_pieces"])))
-                                        {
-                                            objroute_stop.actual_pieces = Convert.ToInt32(dt.Rows[0]["actual_pieces"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_settlement_amt"])))
-                                        {
-                                            objroute_stop.actual_settlement_amt = Convert.ToDouble(dt.Rows[0]["actual_settlement_amt"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["actual_weight"])))
-                                        {
-                                            objroute_stop.actual_weight = Convert.ToInt32(dt.Rows[0]["actual_weight"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["additional_instructions"])))
-                                        {
-                                            objroute_stop.additional_instructions = Convert.ToString(dt.Rows[0]["additional_instructions"]);
+                                            strExecutionLogMessage = "RouteHeaderPostAPI Service Type Mapping Not Found " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "CustomerName -" + CustomerName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "LocationCode -" + LocationCode + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Company -" + Convert.ToString(dtCustomerMapping.Rows[0]["Company"]) + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Service Type -" + Convert.ToString(drresult[0]["Service Type"]) + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Please Put entry for this service type in Service Type mapping" + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            continue;
+
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code1"])))
+
+                                        List<items> objitemsList = new List<items>();
+                                        foreach (DataRow drItems in drresult)
                                         {
-                                            objroute_stop.addl_charge_code1 = Convert.ToString(dt.Rows[0]["addl_charge_code1"]);
+                                            items objitems = new items();
+                                            objitems.company_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["Company"]);
+                                            // objitems.unique_id = Convert.ToInt32(dr["unique_id"]);
+                                            objitems.actual_cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_type"]);
+
+                                            if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["barcodes_unique"])))
+                                                objitems.barcodes_unique = Convert.ToString(dtCustomerMapping.Rows[0]["barcodes_unique"]);
+
+                                            if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
+                                                objitems.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
+
+                                            objitems.photos_exist = Convert.ToString(dtCustomerMapping.Rows[0]["photos_exist"]);
+                                            //objitems.@return = Convert.ToString(drItems["Return"]);
+                                            objitems.expected_pieces = Convert.ToInt32(drItems["Pieces"]);
+                                            objitems.expected_weight = Convert.ToInt32(drItems["Weight"]);
+                                            objitems.item_description = Convert.ToString(drItems["Item Description"]);
+                                            objitems.item_number = Convert.ToString(drItems["Item Number"]);
+                                            //  objitems.container_id = Convert.ToString(drItems["Container Id"]);
+                                            objitems.reference = Convert.ToString(drItems["Customer_Reference"]);
+                                            objitemsList.Add(objitems);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code2"])))
+                                        objroute_stop.items = objitemsList;
+
+                                        // objroute_stop.service_level = Convert.ToInt32(objDsServviceTypeResponse.DS.Tables[0].Rows[0]["service_type"]);
+                                        objroute_stop.service_level = Convert.ToInt32(service_level);
+                                        objroute_stop.address_name = Convert.ToString(drresult[0]["Delivery Name"]);
+                                        objroute_stop.address = Convert.ToString(drresult[0]["Delivery Address"]);
+                                        objroute_stop.city = Convert.ToString(drresult[0]["Delivery City"]);
+                                        objroute_stop.state = Convert.ToString(drresult[0]["Delivery State"]);
+                                        objroute_stop.zip_code = Convert.ToString(drresult[0]["Delivery Zip"]);
+                                        objroute_stop.reference = Convert.ToString(drresult[0]["Customer_Reference"]);
+                                        objroute_stop.phone = Convert.ToString(drresult[0]["Delivery Phone Number"]);
+
+                                        objroute_stop.company_number = Convert.ToString(dtCustomerMapping.Rows[0]["Company"]);
+                                        //objroute_stop.unique_id = Convert.ToInt32(objCommon.GeneareteUnigueId()); // Convert.ToInt32(dr["Unique Id"]);
+                                        objroute_stop.actual_cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_type"]);
+                                        objroute_stop.callback_required = Convert.ToString(dtCustomerMapping.Rows[0]["callback_required"]);
+
+                                        objroute_stop.customer_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["CustomerNumber"]);
+                                        objroute_stop.origin_code = Convert.ToString(dtCustomerMapping.Rows[0]["origin_code"]);
+                                        objroute_stop.photos_exist = Convert.ToString(dtCustomerMapping.Rows[0]["photos_exist"]);
+                                        objroute_stop.posted_status = Convert.ToString(dtCustomerMapping.Rows[0]["posted_status"]);
+                                        objroute_stop.required_signature_type = Convert.ToString(dtCustomerMapping.Rows[0]["required_signature_type"]);
+                                        DateTime dtValue = System.DateTime.Now.AddDays(Convert.ToDouble(dtCustomerMapping.Rows[0]["route_date_DaysAddInToDay"]));
+                                        objroute_stop.route_date = dtValue.ToString("yyyy-MM-dd");
+                                        objroute_stop.sent_to_phone = Convert.ToString(dtCustomerMapping.Rows[0]["required_signature_type"]);
+                                        objroute_stop.stop_type = Convert.ToString(dtCustomerMapping.Rows[0]["stop_type"]);
+                                        objroute_stop.verification_id_type = Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_type"]);
+
+
+                                        objroute_stop.branch_id = Convert.ToString(dtCustomerMapping.Rows[0]["LocationCode"]);
+
+
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["route_code"])))
+                                            objroute_stop.route_code = Convert.ToString(dtCustomerMapping.Rows[0]["route_code"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
+                                            objroute_stop.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"])))
                                         {
-                                            objroute_stop.addl_charge_code2 = Convert.ToString(dt.Rows[0]["addl_charge_code2"]);
+                                            objroute_stop.bol_number = Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code3"])))
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_arrival_time"])))
                                         {
-                                            objroute_stop.addl_charge_code3 = Convert.ToString(dt.Rows[0]["addl_charge_code3"]);
+                                            objroute_stop.actual_arrival_time = Convert.ToString(dtCustomerMapping.Rows[0]["actual_arrival_time"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_billing_amt"])))
+                                        {
+                                            objroute_stop.actual_billing_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_billing_amt"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_amt"])))
+                                        {
+                                            objroute_stop.actual_cod_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_cod_amt"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_delivery_date"])))
+                                        {
+                                            objroute_stop.actual_delivery_date = Convert.ToString(dtCustomerMapping.Rows[0]["actual_delivery_date"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_depart_time"])))
+                                        {
+                                            objroute_stop.actual_depart_time = Convert.ToString(dtCustomerMapping.Rows[0]["actual_depart_time"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_latitude"])))
+                                        {
+                                            objroute_stop.actual_latitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_latitude"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_longitude"])))
+                                        {
+                                            objroute_stop.actual_longitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_longitude"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_pieces"])))
+                                        {
+                                            objroute_stop.actual_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["actual_pieces"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_settlement_amt"])))
+                                        {
+                                            objroute_stop.actual_settlement_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_settlement_amt"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_weight"])))
+                                        {
+                                            objroute_stop.actual_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["actual_weight"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["additional_instructions"])))
+                                        {
+                                            objroute_stop.additional_instructions = Convert.ToString(dtCustomerMapping.Rows[0]["additional_instructions"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code4"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code1"])))
                                         {
-                                            objroute_stop.addl_charge_code4 = Convert.ToString(dt.Rows[0]["addl_charge_code4"]);
+                                            objroute_stop.addl_charge_code1 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code1"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code5"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code2"])))
                                         {
-                                            objroute_stop.addl_charge_code5 = Convert.ToString(dt.Rows[0]["addl_charge_code5"]);
+                                            objroute_stop.addl_charge_code2 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code2"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code6"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code3"])))
                                         {
-                                            objroute_stop.addl_charge_code6 = Convert.ToString(dt.Rows[0]["addl_charge_code6"]);
+                                            objroute_stop.addl_charge_code3 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code3"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code7"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code4"])))
                                         {
-                                            objroute_stop.addl_charge_code7 = Convert.ToString(dt.Rows[0]["addl_charge_code7"]);
+                                            objroute_stop.addl_charge_code4 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code4"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code8"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code5"])))
                                         {
-                                            objroute_stop.addl_charge_code8 = Convert.ToString(dt.Rows[0]["addl_charge_code8"]);
+                                            objroute_stop.addl_charge_code5 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code5"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code9"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code6"])))
                                         {
-                                            objroute_stop.addl_charge_code9 = Convert.ToString(dt.Rows[0]["addl_charge_code9"]);
+                                            objroute_stop.addl_charge_code6 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code6"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code10"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code7"])))
                                         {
-                                            objroute_stop.addl_charge_code10 = Convert.ToString(dt.Rows[0]["addl_charge_code10"]);
+                                            objroute_stop.addl_charge_code7 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code7"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code11"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code8"])))
                                         {
-                                            objroute_stop.addl_charge_code11 = Convert.ToString(dt.Rows[0]["addl_charge_code11"]);
+                                            objroute_stop.addl_charge_code8 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code8"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_code12"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code9"])))
                                         {
-                                            objroute_stop.addl_charge_code12 = Convert.ToString(dt.Rows[0]["addl_charge_code12"]);
+                                            objroute_stop.addl_charge_code9 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code9"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur1"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code10"])))
                                         {
-                                            objroute_stop.addl_charge_occur1 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur1"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur2"])))
-                                        {
-                                            objroute_stop.addl_charge_occur2 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur2"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur3"])))
-                                        {
-                                            objroute_stop.addl_charge_occur3 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur3"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur4"])))
-                                        {
-                                            objroute_stop.addl_charge_occur4 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur4"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur5"])))
-                                        {
-                                            objroute_stop.addl_charge_occur5 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur5"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur6"])))
-                                        {
-                                            objroute_stop.addl_charge_occur6 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur6"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur7"])))
-                                        {
-                                            objroute_stop.addl_charge_occur7 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur7"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur8"])))
-                                        {
-
-                                            objroute_stop.addl_charge_occur8 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur8"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur9"])))
-                                        {
-                                            objroute_stop.addl_charge_occur9 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur9"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur10"])))
-                                        {
-                                            objroute_stop.addl_charge_occur10 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur10"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur11"])))
-                                        {
-                                            objroute_stop.addl_charge_occur11 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur11"]);
-                                        }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addl_charge_occur12"])))
-                                        {
-                                            objroute_stop.addl_charge_occur12 = Convert.ToInt32(dt.Rows[0]["addl_charge_occur12"]);
+                                            objroute_stop.addl_charge_code10 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code10"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["addon_billing_amt"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code11"])))
                                         {
-                                            objroute_stop.addon_billing_amt = Convert.ToDouble(dt.Rows[0]["addon_billing_amt"]);
+                                            objroute_stop.addl_charge_code11 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code11"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["address_point"])))
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code12"])))
                                         {
-                                            objroute_stop.address_point = Convert.ToInt32(dt.Rows[0]["address_point"]);
+                                            objroute_stop.addl_charge_code12 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code12"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["address_point_customer"])))
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur1"])))
                                         {
-                                            objroute_stop.address_point_customer = Convert.ToInt32(dt.Rows[0]["address_point_customer"]);
+                                            objroute_stop.addl_charge_occur1 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur1"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["alt_lookup"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur2"])))
                                         {
-                                            objroute_stop.alt_lookup = Convert.ToString(dt.Rows[0]["alt_lookup"]);
+                                            objroute_stop.addl_charge_occur2 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur2"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["arrival_time"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur3"])))
                                         {
-                                            objroute_stop.arrival_time = Convert.ToString(dt.Rows[0]["arrival_time"]);
+                                            objroute_stop.addl_charge_occur3 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur3"]);
                                         }
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["asn_sent"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur4"])))
+                                        {
+                                            objroute_stop.addl_charge_occur4 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur4"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur5"])))
+                                        {
+                                            objroute_stop.addl_charge_occur5 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur5"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur6"])))
+                                        {
+                                            objroute_stop.addl_charge_occur6 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur6"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur7"])))
+                                        {
+                                            objroute_stop.addl_charge_occur7 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur7"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur8"])))
+                                        {
+
+                                            objroute_stop.addl_charge_occur8 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur8"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur9"])))
+                                        {
+                                            objroute_stop.addl_charge_occur9 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur9"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur10"])))
+                                        {
+                                            objroute_stop.addl_charge_occur10 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur10"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur11"])))
+                                        {
+                                            objroute_stop.addl_charge_occur11 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur11"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur12"])))
+                                        {
+                                            objroute_stop.addl_charge_occur12 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur12"]);
+                                        }
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addon_billing_amt"])))
+                                        {
+                                            objroute_stop.addon_billing_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["addon_billing_amt"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["address_point"])))
+                                        {
+                                            objroute_stop.address_point = Convert.ToInt32(dtCustomerMapping.Rows[0]["address_point"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["address_point_customer"])))
+                                        {
+                                            objroute_stop.address_point_customer = Convert.ToInt32(dtCustomerMapping.Rows[0]["address_point_customer"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["alt_lookup"])))
+                                        {
+                                            objroute_stop.alt_lookup = Convert.ToString(dtCustomerMapping.Rows[0]["alt_lookup"]);
+                                        }
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["arrival_time"])))
+                                        {
+                                            objroute_stop.arrival_time = Convert.ToString(dtCustomerMapping.Rows[0]["arrival_time"]);
+                                        }
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["asn_sent"])))
                                         //{
-                                        //    objroute_stop.asn_sent = Convert.ToInt32(dt.Rows[0]["asn_sent"]);
+                                        //    objroute_stop.asn_sent = Convert.ToInt32(dtCustomerMapping.Rows[0]["asn_sent"]);
                                         //}
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["attention"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["attention"])))
                                         {
-                                            objroute_stop.attention = Convert.ToString(dt.Rows[0]["attention"]);
+                                            objroute_stop.attention = Convert.ToString(dtCustomerMapping.Rows[0]["attention"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["billing_override_amt"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["billing_override_amt"])))
                                         {
-                                            objroute_stop.billing_override_amt = Convert.ToDouble(dt.Rows[0]["billing_override_amt"]);
+                                            objroute_stop.billing_override_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["billing_override_amt"]);
                                         }
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["c2_paperwork"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["c2_paperwork"])))
                                         {
-                                            objroute_stop.c2_paperwork = Convert.ToString(dt.Rows[0]["c2_paperwork"]);
+                                            objroute_stop.c2_paperwork = Convert.ToString(dtCustomerMapping.Rows[0]["c2_paperwork"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["cases"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cases"])))
                                         {
-                                            objroute_stop.cases = Convert.ToInt32(dt.Rows[0]["cases"]);
+                                            objroute_stop.cases = Convert.ToInt32(dtCustomerMapping.Rows[0]["cases"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["cod_amount"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_amount"])))
                                         {
-                                            objroute_stop.cod_amount = Convert.ToDouble(dt.Rows[0]["cod_amount"]);
+                                            objroute_stop.cod_amount = Convert.ToDouble(dtCustomerMapping.Rows[0]["cod_amount"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["cod_check_no"])))
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_check_no"])))
                                         {
-                                            objroute_stop.cod_check_no = Convert.ToString(dt.Rows[0]["cod_check_no"]);
+                                            objroute_stop.cod_check_no = Convert.ToString(dtCustomerMapping.Rows[0]["cod_check_no"]);
                                         }
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["combine_data"])))
-                                            objroute_stop.combine_data = Convert.ToString(dt.Rows[0]["combine_data"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["combine_data"])))
+                                            objroute_stop.combine_data = Convert.ToString(dtCustomerMapping.Rows[0]["combine_data"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["comments"])))
-                                            objroute_stop.comments = Convert.ToString(dt.Rows[0]["comments"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["comments"])))
+                                            objroute_stop.comments = Convert.ToString(dtCustomerMapping.Rows[0]["comments"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["created_by"])))
-                                        //    objroute_stop.created_by = Convert.ToString(dt.Rows[0]["created_by"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_by"])))
+                                        //    objroute_stop.created_by = Convert.ToString(dtCustomerMapping.Rows[0]["created_by"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["created_date"])))
-                                        //    objroute_stop.created_date = Convert.ToString(dt.Rows[0]["created_date"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_date"])))
+                                        //    objroute_stop.created_date = Convert.ToString(dtCustomerMapping.Rows[0]["created_date"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["created_time"])))
-                                        //    objroute_stop.created_time = Convert.ToString(dt.Rows[0]["created_time"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_time"])))
+                                        //    objroute_stop.created_time = Convert.ToString(dtCustomerMapping.Rows[0]["created_time"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["departure_time"])))
-                                            objroute_stop.departure_time = Convert.ToString(dt.Rows[0]["departure_time"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["departure_time"])))
+                                            objroute_stop.departure_time = Convert.ToString(dtCustomerMapping.Rows[0]["departure_time"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["dispatch_zone"])))
-                                            objroute_stop.dispatch_zone = Convert.ToString(dt.Rows[0]["dispatch_zone"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["dispatch_zone"])))
+                                            objroute_stop.dispatch_zone = Convert.ToString(dtCustomerMapping.Rows[0]["dispatch_zone"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["driver_app_status"])))
-                                            objroute_stop.driver_app_status = Convert.ToString(dt.Rows[0]["driver_app_status"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["driver_app_status"])))
+                                            objroute_stop.driver_app_status = Convert.ToString(dtCustomerMapping.Rows[0]["driver_app_status"]);
 
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["eta"])))
-                                            objroute_stop.eta = Convert.ToString(dt.Rows[0]["eta"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["eta"])))
+                                            objroute_stop.eta = Convert.ToString(dtCustomerMapping.Rows[0]["eta"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["eta_date"])))
-                                            objroute_stop.eta_date = Convert.ToString(dt.Rows[0]["eta_date"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["eta_date"])))
+                                            objroute_stop.eta_date = Convert.ToString(dtCustomerMapping.Rows[0]["eta_date"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["exception_code"])))
-                                            objroute_stop.exception_code = Convert.ToString(dt.Rows[0]["exception_code"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["exception_code"])))
+                                            objroute_stop.exception_code = Convert.ToString(dtCustomerMapping.Rows[0]["exception_code"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["expected_pieces"])))
-                                            objroute_stop.expected_pieces = Convert.ToInt32(dt.Rows[0]["expected_pieces"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["expected_pieces"])))
+                                            objroute_stop.expected_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["expected_pieces"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["expected_weight"])))
-                                            objroute_stop.expected_weight = Convert.ToInt32(dt.Rows[0]["expected_weight"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["expected_weight"])))
+                                            objroute_stop.expected_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["expected_weight"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["height"])))
-                                            objroute_stop.height = Convert.ToInt32(dt.Rows[0]["height"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["height"])))
+                                            objroute_stop.height = Convert.ToInt32(dtCustomerMapping.Rows[0]["height"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["image_sign_req"])))
-                                            objroute_stop.image_sign_req = Convert.ToString(dt.Rows[0]["image_sign_req"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["image_sign_req"])))
+                                            objroute_stop.image_sign_req = Convert.ToString(dtCustomerMapping.Rows[0]["image_sign_req"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["insurance_value"])))
-                                            objroute_stop.insurance_value = Convert.ToInt32(dt.Rows[0]["insurance_value"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["insurance_value"])))
+                                            objroute_stop.insurance_value = Convert.ToInt32(dtCustomerMapping.Rows[0]["insurance_value"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["invoice_number"])))
-                                            objroute_stop.invoice_number = Convert.ToString(dt.Rows[0]["invoice_number"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["invoice_number"])))
+                                            objroute_stop.invoice_number = Convert.ToString(dtCustomerMapping.Rows[0]["invoice_number"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["item_scans_required"])))
-                                            objroute_stop.item_scans_required = Convert.ToString(dt.Rows[0]["item_scans_required"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["item_scans_required"])))
+                                            objroute_stop.item_scans_required = Convert.ToString(dtCustomerMapping.Rows[0]["item_scans_required"]);
 
 
-                                        //// objroute_stop.items = Convert.ToString(dt.Rows[0]["items"]); // already added
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["late_notice_date"])))
-                                            objroute_stop.late_notice_date = Convert.ToString(dt.Rows[0]["late_notice_date"]);
+                                        //// objroute_stop.items = Convert.ToString(dtCustomerMapping.Rows[0]["items"]); // already added
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_date"])))
+                                            objroute_stop.late_notice_date = Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_date"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["late_notice_time"])))
-                                            objroute_stop.late_notice_time = Convert.ToString(dt.Rows[0]["late_notice_time"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_time"])))
+                                            objroute_stop.late_notice_time = Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_time"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["latitude"])))
-                                            objroute_stop.latitude = Convert.ToDouble(dt.Rows[0]["latitude"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["latitude"])))
+                                            objroute_stop.latitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["latitude"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["length"])))
-                                            objroute_stop.length = Convert.ToInt32(dt.Rows[0]["length"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["length"])))
+                                            objroute_stop.length = Convert.ToInt32(dtCustomerMapping.Rows[0]["length"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["loaded_pieces"])))
-                                            objroute_stop.loaded_pieces = Convert.ToInt32(dt.Rows[0]["loaded_pieces"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["loaded_pieces"])))
+                                            objroute_stop.loaded_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["loaded_pieces"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["location_accuracy"])))
-                                            objroute_stop.location_accuracy = Convert.ToInt32(dt.Rows[0]["location_accuracy"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["location_accuracy"])))
+                                            objroute_stop.location_accuracy = Convert.ToInt32(dtCustomerMapping.Rows[0]["location_accuracy"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["longitude"])))
-                                            objroute_stop.longitude = Convert.ToDouble(dt.Rows[0]["longitude"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["longitude"])))
+                                            objroute_stop.longitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["longitude"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["minutes_late"])))
-                                            objroute_stop.minutes_late = Convert.ToInt32(dt.Rows[0]["minutes_late"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["minutes_late"])))
+                                            objroute_stop.minutes_late = Convert.ToInt32(dtCustomerMapping.Rows[0]["minutes_late"]);
 
-                                        ////  objroute_stop.notes = Convert.ToString(dt.Rows[0]["notes"]);
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["ordered_by"])))
-                                            objroute_stop.ordered_by = Convert.ToString(dt.Rows[0]["ordered_by"]);
+                                        ////  objroute_stop.notes = Convert.ToString(dtCustomerMapping.Rows[0]["notes"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["ordered_by"])))
+                                            objroute_stop.ordered_by = Convert.ToString(dtCustomerMapping.Rows[0]["ordered_by"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["orig_order_number"])))
-                                        //    objroute_stop.orig_order_number = Convert.ToInt32(dt.Rows[0]["orig_order_number"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["orig_order_number"])))
+                                        //    objroute_stop.orig_order_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["orig_order_number"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["original_id"])))
-                                        //    objroute_stop.original_id = Convert.ToInt32(dt.Rows[0]["original_id"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["original_id"])))
+                                        //    objroute_stop.original_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["original_id"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["override_settle_percent"])))
-                                            objroute_stop.override_settle_percent = Convert.ToDouble(dt.Rows[0]["override_settle_percent"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["override_settle_percent"])))
+                                            objroute_stop.override_settle_percent = Convert.ToDouble(dtCustomerMapping.Rows[0]["override_settle_percent"]);
 
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["phone_ext"])))
-                                            objroute_stop.phone_ext = Convert.ToInt32(dt.Rows[0]["phone_ext"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["phone_ext"])))
+                                            objroute_stop.phone_ext = Convert.ToInt32(dtCustomerMapping.Rows[0]["phone_ext"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["posted_by"])))
-                                        //    objroute_stop.posted_by = Convert.ToString(dt.Rows[0]["posted_by"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_by"])))
+                                        //    objroute_stop.posted_by = Convert.ToString(dtCustomerMapping.Rows[0]["posted_by"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["posted_date"])))
-                                        //    objroute_stop.posted_date = Convert.ToString(dt.Rows[0]["posted_date"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_date"])))
+                                        //    objroute_stop.posted_date = Convert.ToString(dtCustomerMapping.Rows[0]["posted_date"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["posted_time"])))
-                                            objroute_stop.posted_time = Convert.ToString(dt.Rows[0]["posted_time"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_time"])))
+                                            objroute_stop.posted_time = Convert.ToString(dtCustomerMapping.Rows[0]["posted_time"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["pricing_zone"])))
-                                            objroute_stop.pricing_zone = Convert.ToInt32(dt.Rows[0]["pricing_zone"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["pricing_zone"])))
+                                            objroute_stop.pricing_zone = Convert.ToInt32(dtCustomerMapping.Rows[0]["pricing_zone"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["progress"])))   
-                                        //    objroute_stop.progress = Convert.ToString(dt.Rows[0]["progress"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["progress"])))   
+                                        //    objroute_stop.progress = Convert.ToString(dtCustomerMapping.Rows[0]["progress"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_branch"])))
-                                        //    objroute_stop.received_branch = Convert.ToString(dt.Rows[0]["received_branch"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_branch"])))
+                                        //    objroute_stop.received_branch = Convert.ToString(dtCustomerMapping.Rows[0]["received_branch"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_company"])))
-                                        //    objroute_stop.received_company = Convert.ToInt32(dt.Rows[0]["received_company"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_company"])))
+                                        //    objroute_stop.received_company = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_company"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_pieces"])))
-                                            objroute_stop.received_pieces = Convert.ToInt32(dt.Rows[0]["received_pieces"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_pieces"])))
+                                            objroute_stop.received_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_pieces"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_route"])))
-                                        //    objroute_stop.received_route = Convert.ToString(dt.Rows[0]["received_route"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_route"])))
+                                        //    objroute_stop.received_route = Convert.ToString(dtCustomerMapping.Rows[0]["received_route"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_sequence"])))
-                                        //    objroute_stop.received_sequence = Convert.ToString(dt.Rows[0]["received_sequence"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_sequence"])))
+                                        //    objroute_stop.received_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["received_sequence"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_shift"])))
-                                        //    objroute_stop.received_shift = Convert.ToString(dt.Rows[0]["received_shift"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_shift"])))
+                                        //    objroute_stop.received_shift = Convert.ToString(dtCustomerMapping.Rows[0]["received_shift"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["received_unique_id"])))
-                                        //    objroute_stop.received_unique_id = Convert.ToInt32(dt.Rows[0]["received_unique_id"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_unique_id"])))
+                                        //    objroute_stop.received_unique_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_unique_id"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["redelivery"])))
-                                        //    objroute_stop.redelivery = Convert.ToString(dt.Rows[0]["redelivery"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["redelivery"])))
+                                        //    objroute_stop.redelivery = Convert.ToString(dtCustomerMapping.Rows[0]["redelivery"]);
 
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["return"])))
-                                        //    objroute_stop.@return= Convert.ToString(dt.Rows[0]["return"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return"])))
+                                        //    objroute_stop.@return= Convert.ToString(dtCustomerMapping.Rows[0]["return"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["return_redel_id"])))
-                                            objroute_stop.return_redel_id = Convert.ToInt32(dt.Rows[0]["return_redel_id"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redel_id"])))
+                                            objroute_stop.return_redel_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["return_redel_id"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["return_redelivery_date"])))
-                                            objroute_stop.return_redelivery_date = Convert.ToString(dt.Rows[0]["return_redelivery_date"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_date"])))
+                                            objroute_stop.return_redelivery_date = Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_date"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["return_redelivery_flag"])))
-                                            objroute_stop.return_redelivery_flag = Convert.ToString(dt.Rows[0]["return_redelivery_flag"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_flag"])))
+                                            objroute_stop.return_redelivery_flag = Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_flag"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["room"])))
-                                            objroute_stop.room = Convert.ToString(dt.Rows[0]["room"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["room"])))
+                                            objroute_stop.room = Convert.ToString(dtCustomerMapping.Rows[0]["room"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["schedule_stop_id"])))
-                                            objroute_stop.schedule_stop_id = Convert.ToInt32(dt.Rows[0]["schedule_stop_id"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["schedule_stop_id"])))
+                                            objroute_stop.schedule_stop_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["schedule_stop_id"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["service_time"])))
-                                            objroute_stop.service_time = Convert.ToInt32(dt.Rows[0]["service_time"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["service_time"])))
+                                            objroute_stop.service_time = Convert.ToInt32(dtCustomerMapping.Rows[0]["service_time"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["settlement_override_amt"])))
-                                            objroute_stop.settlement_override_amt = Convert.ToDouble(dt.Rows[0]["settlement_override_amt"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["settlement_override_amt"])))
+                                            objroute_stop.settlement_override_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["settlement_override_amt"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["shift_id"])))
-                                            objroute_stop.shift_id = Convert.ToString(dt.Rows[0]["shift_id"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["shift_id"])))
+                                            objroute_stop.shift_id = Convert.ToString(dtCustomerMapping.Rows[0]["shift_id"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["signature"])))
-                                            objroute_stop.signature = Convert.ToString(dt.Rows[0]["signature"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature"])))
+                                            objroute_stop.signature = Convert.ToString(dtCustomerMapping.Rows[0]["signature"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["signature_filename"])))
-                                            objroute_stop.signature_filename = Convert.ToString(dt.Rows[0]["signature_filename"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature_filename"])))
+                                            objroute_stop.signature_filename = Convert.ToString(dtCustomerMapping.Rows[0]["signature_filename"]);
 
 
-                                        //  objroute_stop.signature_images = Convert.ToString(dt.Rows[0]["signature_images"]);
+                                        //  objroute_stop.signature_images = Convert.ToString(dtCustomerMapping.Rows[0]["signature_images"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["signature_required"])))
-                                            objroute_stop.signature_required = Convert.ToString(dt.Rows[0]["signature_required"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature_required"])))
+                                            objroute_stop.signature_required = Convert.ToString(dtCustomerMapping.Rows[0]["signature_required"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["special_instructions1"])))
-                                            objroute_stop.special_instructions1 = Convert.ToString(dt.Rows[0]["special_instructions1"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions1"])))
+                                            objroute_stop.special_instructions1 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions1"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["special_instructions2"])))
-                                            objroute_stop.special_instructions2 = Convert.ToString(dt.Rows[0]["special_instructions2"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions2"])))
+                                            objroute_stop.special_instructions2 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions2"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["special_instructions3"])))
-                                            objroute_stop.special_instructions3 = Convert.ToString(dt.Rows[0]["special_instructions3"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions3"])))
+                                            objroute_stop.special_instructions3 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions3"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["special_instructions4"])))
-                                            objroute_stop.special_instructions4 = Convert.ToString(dt.Rows[0]["special_instructions4"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions4"])))
+                                            objroute_stop.special_instructions4 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions4"]);
 
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["stop_sequence"])))
-                                            objroute_stop.stop_sequence = Convert.ToString(dt.Rows[0]["stop_sequence"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["stop_sequence"])))
+                                            objroute_stop.stop_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["stop_sequence"]);
 
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["times_sent"])))
-                                            objroute_stop.times_sent = Convert.ToInt32(dt.Rows[0]["times_sent"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["times_sent"])))
+                                            objroute_stop.times_sent = Convert.ToInt32(dtCustomerMapping.Rows[0]["times_sent"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["totes"])))
-                                            objroute_stop.totes = Convert.ToInt32(dt.Rows[0]["totes"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["totes"])))
+                                            objroute_stop.totes = Convert.ToInt32(dtCustomerMapping.Rows[0]["totes"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["transfer_to_route"])))
-                                            objroute_stop.transfer_to_route = Convert.ToString(dt.Rows[0]["transfer_to_route"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_route"])))
+                                            objroute_stop.transfer_to_route = Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_route"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["transfer_to_sequence"])))
-                                            objroute_stop.transfer_to_sequence = Convert.ToString(dt.Rows[0]["transfer_to_sequence"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_sequence"])))
+                                            objroute_stop.transfer_to_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_sequence"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["updated_by"])))
-                                        //    objroute_stop.updated_by = Convert.ToString(dt.Rows[0]["updated_by"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_by"])))
+                                        //    objroute_stop.updated_by = Convert.ToString(dtCustomerMapping.Rows[0]["updated_by"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["updated_by_scanner"])))
-                                            objroute_stop.updated_by_scanner = Convert.ToString(dt.Rows[0]["updated_by_scanner"]);
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_by_scanner"])))
+                                            objroute_stop.updated_by_scanner = Convert.ToString(dtCustomerMapping.Rows[0]["updated_by_scanner"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["updated_date"])))
-                                        //    objroute_stop.updated_date = Convert.ToString(dt.Rows[0]["updated_date"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_date"])))
+                                        //    objroute_stop.updated_date = Convert.ToString(dtCustomerMapping.Rows[0]["updated_date"]);
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["updated_time"])))
-                                        //    objroute_stop.updated_time = Convert.ToString(dt.Rows[0]["updated_time"]);
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_time"])))
+                                        //    objroute_stop.updated_time = Convert.ToString(dtCustomerMapping.Rows[0]["updated_time"]);
+
+                                        //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["upload_time"])))
+                                        //    objroute_stop.upload_time = Convert.ToString(dtCustomerMapping.Rows[0]["upload_time"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["vehicle"])))
+                                            objroute_stop.vehicle = Convert.ToString(dtCustomerMapping.Rows[0]["vehicle"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_details"])))
+                                            objroute_stop.verification_id_details = Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_details"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["width"])))
+                                            objroute_stop.width = Convert.ToInt32(dtCustomerMapping.Rows[0]["width"]);
+
+                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["zip_code"])))
+                                            objroute_stop.zip_code = Convert.ToString(dtCustomerMapping.Rows[0]["zip_code"]);
+
+
+                                        objroute_stopdetails.route_stop = objroute_stop;
+
+                                        clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
+                                        string request = JsonConvert.SerializeObject(objroute_stopdetails);
+                                        objresponse = objclsRoute.CallDataTracRouteStopPostAPI(request);
+                                       // objresponse.ResponseVal = true;
+                                        //objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
+                                       // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
+                                        if (objresponse.ResponseVal)
+                                        {
+                                            strExecutionLogMessage = "RouteStopPostAPI Success " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // DataSet dsOrderResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPostAPI");
+                                            DataSet dsResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPostAPI");
+                                            var UniqueId = Convert.ToString(dsResponse.Tables[0].Rows[0]["id"]);
+                                            try
+                                            {
+                                                if (dsResponse.Tables.Contains(UniqueId))
+                                                {
+                                                    List<ResponseRouteStop> idList = new List<ResponseRouteStop>();
+                                                    for (int i = 0; i < dsResponse.Tables[0].Rows.Count; i++)
+                                                    {
+                                                        DataTable dt = new DataTable();
+                                                        dt = dsResponse.Tables[0];
+                                                        ResponseRouteStop objIds = new ResponseRouteStop();
+
+                                                        objIds.room = dt.Rows[i]["room"];
+                                                        objIds.unique_id = dt.Rows[i]["unique_id"];
+
+                                                        objIds.c2_paperwork = dt.Rows[i]["c2_paperwork"];
+                                                        objIds.company_number_text = dt.Rows[i]["company_number_text"];
+                                                        objIds.company_number = dt.Rows[i]["company_number"];
+                                                        objIds.addl_charge_code11 = dt.Rows[i]["addl_charge_code11"];
+                                                        objIds.billing_override_amt = dt.Rows[i]["billing_override_amt"];
+                                                        objIds.addl_charge_occur1 = dt.Rows[i]["addl_charge_occur1"];
+                                                        objIds.updated_time = dt.Rows[i]["updated_time"];
+                                                        objIds.stop_sequence = dt.Rows[i]["stop_sequence"];
+
+                                                        objIds.phone = dt.Rows[i]["phone"];
+                                                        objIds.city = dt.Rows[i]["city"];
+                                                        objIds.created_by = dt.Rows[i]["created_by"];
+                                                        objIds.pricing_zone = dt.Rows[i]["pricing_zone"];
+                                                        objIds.signature_filename = dt.Rows[i]["signature_filename"];
+                                                        objIds.addl_charge_code10 = dt.Rows[i]["addl_charge_code10"];
+                                                        objIds.cod_check_no = dt.Rows[i]["cod_check_no"];
+                                                        objIds.length = dt.Rows[i]["length"];
+
+                                                        objIds.expected_weight = dt.Rows[i]["expected_weight"];
+                                                        objIds.actual_settlement_amt = dt.Rows[i]["actual_settlement_amt"];
+                                                        objIds.actual_pieces = dt.Rows[i]["actual_pieces"];
+                                                        objIds.updated_date = dt.Rows[i]["updated_date"];
+                                                        objIds.schedule_stop_id = dt.Rows[i]["schedule_stop_id"];
+                                                        objIds.photos_exist = dt.Rows[i]["photos_exist"];
+                                                        objIds.stop_type_text = dt.Rows[i]["stop_type_text"];
+                                                        objIds.stop_type = dt.Rows[i]["stop_type"];
+                                                        objIds.@return = dt.Rows[i]["return"];
+                                                        objIds.addl_charge_code6 = dt.Rows[i]["addl_charge_code6"];
+                                                        objIds.dispatch_zone = dt.Rows[i]["dispatch_zone"];
+                                                        objIds.upload_time = dt.Rows[i]["upload_time"];
+                                                        objIds.actual_cod_amt = dt.Rows[i]["actual_cod_amt"];
+                                                        objIds.location_accuracy = dt.Rows[i]["location_accuracy"];
+                                                        objIds.received_route = dt.Rows[i]["received_route"];
+                                                        objIds.override_settle_percent = dt.Rows[i]["override_settle_percent"];
+                                                        objIds.cod_amount = dt.Rows[i]["cod_amount"];
+                                                        objIds.addl_charge_code9 = dt.Rows[i]["addl_charge_code9"];
+                                                        objIds.eta_date = dt.Rows[i]["eta_date"];
+                                                        objIds.cod_type_text = dt.Rows[i]["cod_type_text"];
+                                                        objIds.cod_type = dt.Rows[i]["cod_type"];
+                                                        objIds.addl_charge_occur3 = dt.Rows[i]["addl_charge_occur3"];
+                                                        objIds.reference = dt.Rows[i]["reference"];
+                                                        objIds.sent_to_phone = dt.Rows[i]["sent_to_phone"];
+                                                        objIds.addl_charge_occur12 = dt.Rows[i]["addl_charge_occur12"];
+                                                        objIds.callback_required_text = dt.Rows[i]["callback_required_text"];
+                                                        objIds.callback_required = dt.Rows[i]["callback_required"];
+                                                        objIds.service_level_text = dt.Rows[i]["service_level_text"];
+                                                        objIds.service_level = dt.Rows[i]["service_level"];
+                                                        objIds.original_id = dt.Rows[i]["original_id"];
+                                                        objIds.width = dt.Rows[i]["width"];
+                                                        objIds.received_sequence = dt.Rows[i]["received_sequence"];
+                                                        objIds.transfer_to_sequence = dt.Rows[i]["transfer_to_sequence"];
+                                                        objIds.cases = dt.Rows[i]["cases"];
+                                                        objIds.times_sent = dt.Rows[i]["times_sent"];
+                                                        objIds.transfer_to_route = dt.Rows[i]["transfer_to_route"];
+                                                        objIds.zip_code = dt.Rows[i]["zip_code"];
+                                                        objIds.settlement_override_amt = dt.Rows[i]["settlement_override_amt"];
+                                                        objIds.driver_app_status_text = dt.Rows[i]["driver_app_status_text"];
+                                                        objIds.driver_app_status = dt.Rows[i]["driver_app_status"];
+                                                        objIds.route_code_text = dt.Rows[i]["route_code_text"];
+                                                        objIds.route_code = dt.Rows[i]["route_code"];
+                                                        objIds.received_shift = dt.Rows[i]["received_shift"];
+                                                        objIds.addl_charge_occur6 = dt.Rows[i]["addl_charge_occur6"];
+                                                        objIds.addl_charge_occur11 = dt.Rows[i]["addl_charge_occur11"];
+                                                        objIds.vehicle = dt.Rows[i]["vehicle"];
+                                                        objIds.addl_charge_code5 = dt.Rows[i]["addl_charge_code5"];
+                                                        objIds.addl_charge_occur9 = dt.Rows[i]["addl_charge_occur9"];
+
+                                                        objIds.eta = dt.Rows[i]["eta"];
+                                                        objIds.departure_time = dt.Rows[i]["departure_time"];
+                                                        objIds.combine_data = dt.Rows[i]["combine_data"];
+                                                        objIds.actual_latitude = dt.Rows[i]["actual_latitude"];
+                                                        objIds.posted_by = dt.Rows[i]["posted_by"];
+                                                        objIds.insurance_value = dt.Rows[i]["insurance_value"];
+                                                        objIds.return_redel_id = dt.Rows[i]["return_redel_id"];
+                                                        objIds.addl_charge_code1 = dt.Rows[i]["addl_charge_code1"];
+                                                        objIds.origin_code_text = dt.Rows[i]["origin_code_text"];
+                                                        objIds.origin_code = dt.Rows[i]["origin_code"];
+                                                        objIds.ordered_by = dt.Rows[i]["ordered_by"];
+                                                        objIds.posted_date = dt.Rows[i]["posted_date"];
+                                                        objIds.actual_billing_amt = dt.Rows[i]["actual_billing_amt"];
+                                                        objIds.created_date = dt.Rows[i]["created_date"];
+                                                        objIds.latitude = dt.Rows[i]["latitude"];
+                                                        objIds.received_pieces = dt.Rows[i]["received_pieces"];
+                                                        objIds.addl_charge_code7 = dt.Rows[i]["addl_charge_code7"];
+                                                        objIds.totes = dt.Rows[i]["totes"];
+                                                        objIds.asn_sent = dt.Rows[i]["asn_sent"];
+                                                        objIds.comments = dt.Rows[i]["comments"];
+                                                        objIds.verification_id_type_text = dt.Rows[i]["verification_id_type_text"];
+                                                        objIds.verification_id_type = dt.Rows[i]["verification_id_type"];
+                                                        objIds.posted_time = dt.Rows[i]["posted_time"];
+                                                        objIds.item_scans_required = dt.Rows[i]["item_scans_required"];
+                                                        objIds.shift_id = dt.Rows[i]["shift_id"];
+                                                        objIds.addon_billing_amt = dt.Rows[i]["addon_billing_amt"];
+                                                        objIds.actual_delivery_date = dt.Rows[i]["actual_delivery_date"];
+                                                        objIds.id = dt.Rows[i]["id"];
+                                                        objIds.actual_arrival_time = dt.Rows[i]["actual_arrival_time"];
+                                                        objIds.signature_required = dt.Rows[i]["signature_required"];
+                                                        objIds.longitude = dt.Rows[i]["longitude"];
+                                                        objIds.expected_pieces = dt.Rows[i]["expected_pieces"];
+                                                        objIds.loaded_pieces = dt.Rows[i]["loaded_pieces"];
+                                                        objIds.alt_lookup = dt.Rows[i]["alt_lookup"];
+                                                        objIds.customer_number_text = dt.Rows[i]["customer_number_text"];
+                                                        objIds.customer_number = dt.Rows[i]["customer_number"];
+                                                        objIds.created_time = dt.Rows[i]["created_time"];
+                                                        objIds.addl_charge_code8 = dt.Rows[i]["addl_charge_code8"];
+                                                        objIds.signature = dt.Rows[i]["signature"];
+                                                        objIds.actual_depart_time = dt.Rows[i]["actual_depart_time"];
+                                                        objIds.bol_number = dt.Rows[i]["bol_number"];
+                                                        objIds.actual_cod_type_text = dt.Rows[i]["actual_cod_type_text"];
+                                                        objIds.actual_cod_type = dt.Rows[i]["actual_cod_type"];
+                                                        objIds.invoice_number = dt.Rows[i]["invoice_number"];
+                                                        objIds.branch_id = dt.Rows[i]["branch_id"];
+                                                        objIds.special_instructions2 = dt.Rows[i]["special_instructions2"];
+                                                        objIds.updated_by = dt.Rows[i]["updated_by"];
+                                                        objIds.verification_id_details = dt.Rows[i]["verification_id_details"];
+                                                        objIds.required_signature_type_text = dt.Rows[i]["required_signature_type_text"];
+                                                        objIds.required_signature_type = dt.Rows[i]["required_signature_type"];
+                                                        objIds.addl_charge_occur7 = dt.Rows[i]["addl_charge_occur7"];
+                                                        objIds.orig_order_number = dt.Rows[i]["orig_order_number"];
+                                                        objIds.special_instructions1 = dt.Rows[i]["special_instructions1"];
+                                                        objIds.image_sign_req = dt.Rows[i]["image_sign_req"];
+                                                        objIds.attention = dt.Rows[i]["attention"];
+                                                        objIds.minutes_late = dt.Rows[i]["minutes_late"];
+                                                        objIds.late_notice_time = dt.Rows[i]["late_notice_time"];
+                                                        objIds.received_unique_id = dt.Rows[i]["received_unique_id"];
+                                                        objIds.exception_code = dt.Rows[i]["exception_code"];
+                                                        objIds.addl_charge_code4 = dt.Rows[i]["addl_charge_code4"];
+                                                        objIds.addl_charge_occur4 = dt.Rows[i]["addl_charge_occur4"];
+                                                        objIds.redelivery = dt.Rows[i]["redelivery"];
+                                                        objIds.addl_charge_occur10 = dt.Rows[i]["addl_charge_occur10"];
+                                                        objIds.upload_date = dt.Rows[i]["upload_date"];
+                                                        objIds.special_instructions4 = dt.Rows[i]["special_instructions4"];
+                                                        objIds.address_name = dt.Rows[i]["address_name"];
+                                                        objIds.addl_charge_occur8 = dt.Rows[i]["addl_charge_occur8"];
+                                                        objIds.address_point_customer = dt.Rows[i]["address_point_customer"];
+                                                        objIds.received_branch = dt.Rows[i]["received_branch"];
+                                                        objIds.return_redelivery_date = dt.Rows[i]["return_redelivery_date"];
+                                                        objIds.height = dt.Rows[i]["height"];
+                                                        objIds.actual_longitude = dt.Rows[i]["actual_longitude"];
+                                                        objIds.service_time = dt.Rows[i]["service_time"];
+                                                        objIds.phone_ext = dt.Rows[i]["phone_ext"];
+                                                        objIds.addl_charge_occur2 = dt.Rows[i]["addl_charge_occur2"];
+                                                        objIds.late_notice_date = dt.Rows[i]["late_notice_date"];
+                                                        objIds.address = dt.Rows[i]["address"];
+                                                        objIds.arrival_time = dt.Rows[i]["arrival_time"];
+                                                        objIds.posted_status = dt.Rows[i]["posted_status"];
+                                                        objIds.route_date = dt.Rows[i]["route_date"];
+                                                        objIds.addl_charge_code12 = dt.Rows[i]["addl_charge_code12"];
+                                                        objIds.addl_charge_code3 = dt.Rows[i]["addl_charge_code3"];
+                                                        objIds.return_redelivery_flag_text = dt.Rows[i]["return_redelivery_flag_text"];
+                                                        objIds.return_redelivery_flag = dt.Rows[i]["return_redelivery_flag"];
+                                                        objIds.additional_instructions = dt.Rows[i]["additional_instructions"];
+                                                        objIds.updated_by_scanner = dt.Rows[i]["updated_by_scanner"];
+                                                        objIds.special_instructions3 = dt.Rows[i]["special_instructions3"];
+                                                        objIds.addl_charge_occur5 = dt.Rows[i]["addl_charge_occur5"];
+                                                        objIds.address_point = dt.Rows[i]["address_point"];
+                                                        objIds.actual_weight = dt.Rows[i]["actual_weight"];
+                                                        objIds.received_company = dt.Rows[i]["received_company"];
+                                                        objIds.addl_charge_code2 = dt.Rows[i]["addl_charge_code2"];
+                                                        objIds.state = dt.Rows[i]["state"];
+
+
+                                                        // public object @return { get; set; }
+
+
+
+
+                                                        idList.Add(objIds);
+                                                    }
+                                                    objCommon.SaveOutputDataToCsvFile(idList, "RouteStop-Create",
+                                       strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                                }
+
+                                                if (dsResponse.Tables.Contains("progress"))
+                                                {
+
+                                                    List<RouteStopResponseProgress> progressList = new List<RouteStopResponseProgress>();
+                                                    for (int i = 0; i < dsResponse.Tables["progress"].Rows.Count; i++)
+                                                    {
+                                                        RouteStopResponseProgress progress = new RouteStopResponseProgress();
+                                                        DataTable dt = new DataTable();
+                                                        dt = dsResponse.Tables["progress"];
+
+                                                        progress.status_date = (dt.Rows[i]["status_date"]);
+                                                        progress.status_text = (dt.Rows[i]["status_text"]);
+                                                        progress.status_time = (dt.Rows[i]["status_time"]);
+                                                        progress.id = (dt.Rows[i]["id"]);
+                                                        progressList.Add(progress);
+                                                    }
+
+                                                    objCommon.SaveOutputDataToCsvFile(progressList, "RouteStop-Progress",
+                                                         strInputFilePath, UniqueId, strFileName, strDatetime);
+                                                }
+
+                                                //  public List<object> signature_images { get; set; }
+                                                // public List<Progress> progress { get; set; }
+                                                // public List<object> notes { get; set; }
+                                                // public List<object> items { get; set; }
+
+                                                if (dsResponse.Tables.Contains("notes"))
+                                                {
+
+                                                    List<RouteStopResponseNote> noteList = new List<RouteStopResponseNote>();
+                                                    for (int i = 0; i < dsResponse.Tables["notes"].Rows.Count; i++)
+                                                    {
+                                                        RouteStopResponseNote note = new RouteStopResponseNote();
+                                                        DataTable dt = new DataTable();
+                                                        dt = dsResponse.Tables["notes"];
+                                                        note.entry_time = (dt.Rows[i]["entry_time"]);
+                                                        note.note_text = (dt.Rows[i]["note_text"]);
+                                                        note.company_number_text = (dt.Rows[i]["company_number_text"]);
+                                                        note.company_number = (dt.Rows[i]["company_number"]);
+                                                        note.item_sequence = (dt.Rows[i]["item_sequence"]);
+                                                        note.user_id = (dt.Rows[i]["user_id"]);
+                                                        note.entry_date = (dt.Rows[i]["entry_date"]);
+                                                        note.user_entered = (dt.Rows[i]["user_entered"]);
+                                                        note.show_to_cust = (dt.Rows[i]["show_to_cust"]);
+                                                        note.note_type_text = (dt.Rows[i]["note_type_text"]);
+                                                        note.note_type = (dt.Rows[i]["note_type"]);
+                                                        note.unique_id = (dt.Rows[i]["unique_id"]);
+                                                        note.id = (dt.Rows[i]["id"]);
+                                                        noteList.Add(note);
+                                                    }
+
+                                                    objCommon.SaveOutputDataToCsvFile(noteList, "RouteStop-Note",
+                                                       strInputFilePath, UniqueId, strFileName, strDatetime);
+
+                                                }
+
+                                                if (dsResponse.Tables.Contains("items"))
+                                                {
+
+                                                    List<RouteStopResponseItem> itemList = new List<RouteStopResponseItem>();
+                                                    for (int i = 0; i < dsResponse.Tables["items"].Rows.Count; i++)
+                                                    {
+                                                        RouteStopResponseItem item = new RouteStopResponseItem();
+                                                        DataTable dt = new DataTable();
+                                                        dt = dsResponse.Tables["items"];
+
+                                                        item.item_number = (dt.Rows[i]["item_number"]);
+                                                        item.item_description = (dt.Rows[i]["item_description"]);
+                                                        item.reference = (dt.Rows[i]["reference"]);
+                                                        item.rma_route = (dt.Rows[i]["rma_route"]);
+                                                        item.upload_time = (dt.Rows[i]["upload_time"]);
+                                                        item.rma_stop_id = (dt.Rows[i]["rma_stop_id"]);
+                                                        item.width = (dt.Rows[i]["width"]);
+                                                        item.redelivery = (dt.Rows[i]["redelivery"]);
+                                                        item.received_pieces = (dt.Rows[i]["received_pieces"]);
+                                                        item.cod_amount = (dt.Rows[i]["cod_amount"]);
+                                                        item.height = (dt.Rows[i]["height"]);
+                                                        item.comments = (dt.Rows[i]["comments"]);
+                                                        item.actual_pieces = (dt.Rows[i]["actual_pieces"]);
+                                                        item.actual_cod_amount = (dt.Rows[i]["actual_cod_amount"]);
+                                                        item.rma_number = (dt.Rows[i]["rma_number"]);
+                                                        item.manually_updated = (dt.Rows[i]["manually_updated"]);
+                                                        item.unique_id = (dt.Rows[i]["unique_id"]);
+                                                        item.cod_type_text = (dt.Rows[i]["cod_type_text"]);
+                                                        item.cod_type = (dt.Rows[i]["cod_type"]);
+                                                        item.barcodes_unique = (dt.Rows[i]["barcodes_unique"]);
+                                                        item.actual_cod_type = (dt.Rows[i]["actual_cod_type"]);
+                                                        item.return_redel_seq = (dt.Rows[i]["return_redel_seq"]);
+                                                        item.expected_pieces = (dt.Rows[i]["expected_pieces"]);
+                                                        item.signature = (dt.Rows[i]["signature"]);
+                                                        item.exception_code = (dt.Rows[i]["exception_code"]);
+                                                        item.company_number_text = (dt.Rows[i]["company_number_text"]);
+                                                        item.company_number = (dt.Rows[i]["company_number"]);
+                                                        item.updated_date = (dt.Rows[i]["updated_date"]);
+                                                        item.expected_weight = (dt.Rows[i]["expected_weight"]);
+                                                        item.created_date = (dt.Rows[i]["created_date"]);
+                                                        item.rma_origin = (dt.Rows[i]["rma_origin"]);
+                                                        item.created_by = (dt.Rows[i]["created_by"]);
+                                                        item.loaded_pieces = (dt.Rows[i]["loaded_pieces"]);
+                                                        item.return_redelivery_flag_text = (dt.Rows[i]["return_redelivery_flag_text"]);
+                                                        item.return_redelivery_flag = (dt.Rows[i]["return_redelivery_flag"]);
+                                                        item.original_id = (dt.Rows[i]["original_id"]);
+                                                        item.container_id = (dt.Rows[i]["container_id"]);
+                                                        item.@return = (dt.Rows[i]["return"]);
+                                                        item.length = (dt.Rows[i]["length"]);
+                                                        item.actual_weight = (dt.Rows[i]["actual_weight"]);
+                                                        item.updated_by = (dt.Rows[i]["updated_by"]);
+                                                        item.photos_exist = (dt.Rows[i]["photos_exist"]);
+                                                        item.second_container_id = (dt.Rows[i]["second_container_id"]);
+                                                        item.return_redel_id = (dt.Rows[i]["return_redel_id"]);
+                                                        item.asn_sent = (dt.Rows[i]["asn_sent"]);
+                                                        item.actual_departure_time = (dt.Rows[i]["actual_departure_time"]);
+                                                        item.updated_time = (dt.Rows[i]["updated_time"]);
+                                                        item.return_redelivery_date = (dt.Rows[i]["return_redelivery_date"]);
+                                                        item.actual_arrival_time = (dt.Rows[i]["actual_arrival_time"]);
+                                                        item.item_sequence = (dt.Rows[i]["item_sequence"]);
+                                                        item.pallet_number = (dt.Rows[i]["pallet_number"]);
+                                                        item.actual_date = (dt.Rows[i]["actual_date"]);
+                                                        item.insurance_value = (dt.Rows[i]["insurance_value"]);
+                                                        item.created_time = (dt.Rows[i]["created_time"]);
+                                                        item.upload_date = (dt.Rows[i]["upload_date"]);
+                                                        item.id = (dt.Rows[i]["id"]);
+                                                        item.truck_id = (dt.Rows[i]["truck_id"]);
+
+                                                        // public List<object> notes { get; set; }
+                                                        // public List<object> scans { get; set; }
+                                                        itemList.Add(item);
+                                                    }
+
+                                                    objCommon.SaveOutputDataToCsvFile(itemList, "RouteStop-Item",
+                                                       strInputFilePath, UniqueId, strFileName, strDatetime);
+
+                                                }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                strExecutionLogMessage = "RouteStopPostFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                                strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
+                                                //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteHeaderPostAPI Failed " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                                            DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                            dsOrderFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
+                                            dsOrderFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
+                                            foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
+                                            {
+                                                row["Reference"] = ReferenceId;
+                                            }
+                                            objCommon.WriteDataToCsvFile(dsOrderFailureResponse.Tables[0],
+                                        strInputFilePath, ReferenceId, strFileName, strDatetime);
+
+                                        }
 
-                                        //if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["upload_time"])))
-                                        //    objroute_stop.upload_time = Convert.ToString(dt.Rows[0]["upload_time"]);
-
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["vehicle"])))
-                                            objroute_stop.vehicle = Convert.ToString(dt.Rows[0]["vehicle"]);
-
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["verification_id_details"])))
-                                            objroute_stop.verification_id_details = Convert.ToString(dt.Rows[0]["verification_id_details"]);
-
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["width"])))
-                                            objroute_stop.width = Convert.ToInt32(dt.Rows[0]["width"]);
-
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dt.Rows[0]["zip_code"])))
-                                            objroute_stop.zip_code = Convert.ToString(dt.Rows[0]["zip_code"]);
 
                                     }
-
-
-                                    objroute_stopdetails.route_stop = objroute_stop;
-
-                                    clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
-                                    string request = JsonConvert.SerializeObject(objroute_stopdetails);
-                                    objresponse = objclsRoute.CallDataTracRouteStopPostAPI(request);
-                                   // objresponse.ResponseVal = true;
-                                    //objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
-                                   // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
-
-                                    if (objresponse.ResponseVal)
+                                    catch (Exception ex)
                                     {
-                                        strExecutionLogMessage = "RouteStopPostAPI Success " + System.Environment.NewLine;
-                                        strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
-                                        strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
-                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                        // DataSet dsOrderResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPostAPI");
-                                        DataSet dsResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPostAPI");
-                                        var UniqueId = Convert.ToString(dsResponse.Tables[0].Rows[0]["id"]);
-                                        try
-                                        {
-                                            if (dsResponse.Tables.Contains(UniqueId))
-                                            {
-                                                List<ResponseRouteStop> idList = new List<ResponseRouteStop>();
-                                                for (int i = 0; i < dsResponse.Tables[0].Rows.Count; i++)
-                                                {
-                                                    DataTable dt = dsResponse.Tables[0];
-                                                    ResponseRouteStop objIds = new ResponseRouteStop();
-
-                                                    objIds.room = dt.Rows[i]["room"];
-                                                    objIds.unique_id = dt.Rows[i]["unique_id"];
-
-                                                    objIds.c2_paperwork = dt.Rows[i]["c2_paperwork"];
-                                                    objIds.company_number_text = dt.Rows[i]["company_number_text"];
-                                                    objIds.company_number = dt.Rows[i]["company_number"];
-                                                    objIds.addl_charge_code11 = dt.Rows[i]["addl_charge_code11"];
-                                                    objIds.billing_override_amt = dt.Rows[i]["billing_override_amt"];
-                                                    objIds.addl_charge_occur1 = dt.Rows[i]["addl_charge_occur1"];
-                                                    objIds.updated_time = dt.Rows[i]["updated_time"];
-                                                    objIds.stop_sequence = dt.Rows[i]["stop_sequence"];
-
-                                                    objIds.phone = dt.Rows[i]["phone"];
-                                                    objIds.city = dt.Rows[i]["city"];
-                                                    objIds.created_by = dt.Rows[i]["created_by"];
-                                                    objIds.pricing_zone = dt.Rows[i]["pricing_zone"];
-                                                    objIds.signature_filename = dt.Rows[i]["signature_filename"];
-                                                    objIds.addl_charge_code10 = dt.Rows[i]["addl_charge_code10"];
-                                                    objIds.cod_check_no = dt.Rows[i]["cod_check_no"];
-                                                    objIds.length = dt.Rows[i]["length"];
-
-                                                    objIds.expected_weight = dt.Rows[i]["expected_weight"];
-                                                    objIds.actual_settlement_amt = dt.Rows[i]["actual_settlement_amt"];
-                                                    objIds.actual_pieces = dt.Rows[i]["actual_pieces"];
-                                                    objIds.updated_date = dt.Rows[i]["updated_date"];
-                                                    objIds.schedule_stop_id = dt.Rows[i]["schedule_stop_id"];
-                                                    objIds.photos_exist = dt.Rows[i]["photos_exist"];
-                                                    objIds.stop_type_text = dt.Rows[i]["stop_type_text"];
-                                                    objIds.stop_type = dt.Rows[i]["stop_type"];
-                                                    objIds.@return = dt.Rows[i]["return"];
-                                                    objIds.addl_charge_code6 = dt.Rows[i]["addl_charge_code6"];
-                                                    objIds.dispatch_zone = dt.Rows[i]["dispatch_zone"];
-                                                    objIds.upload_time = dt.Rows[i]["upload_time"];
-                                                    objIds.actual_cod_amt = dt.Rows[i]["actual_cod_amt"];
-                                                    objIds.location_accuracy = dt.Rows[i]["location_accuracy"];
-                                                    objIds.received_route = dt.Rows[i]["received_route"];
-                                                    objIds.override_settle_percent = dt.Rows[i]["override_settle_percent"];
-                                                    objIds.cod_amount = dt.Rows[i]["cod_amount"];
-                                                    objIds.addl_charge_code9 = dt.Rows[i]["addl_charge_code9"];
-                                                    objIds.eta_date = dt.Rows[i]["eta_date"];
-                                                    objIds.cod_type_text = dt.Rows[i]["cod_type_text"];
-                                                    objIds.cod_type = dt.Rows[i]["cod_type"];
-                                                    objIds.addl_charge_occur3 = dt.Rows[i]["addl_charge_occur3"];
-                                                    objIds.reference = dt.Rows[i]["reference"];
-                                                    objIds.sent_to_phone = dt.Rows[i]["sent_to_phone"];
-                                                    objIds.addl_charge_occur12 = dt.Rows[i]["addl_charge_occur12"];
-                                                    objIds.callback_required_text = dt.Rows[i]["callback_required_text"];
-                                                    objIds.callback_required = dt.Rows[i]["callback_required"];
-                                                    objIds.service_level_text = dt.Rows[i]["service_level_text"];
-                                                    objIds.service_level = dt.Rows[i]["service_level"];
-                                                    objIds.original_id = dt.Rows[i]["original_id"];
-                                                    objIds.width = dt.Rows[i]["width"];
-                                                    objIds.received_sequence = dt.Rows[i]["received_sequence"];
-                                                    objIds.transfer_to_sequence = dt.Rows[i]["transfer_to_sequence"];
-                                                    objIds.cases = dt.Rows[i]["cases"];
-                                                    objIds.times_sent = dt.Rows[i]["times_sent"];
-                                                    objIds.transfer_to_route = dt.Rows[i]["transfer_to_route"];
-                                                    objIds.zip_code = dt.Rows[i]["zip_code"];
-                                                    objIds.settlement_override_amt = dt.Rows[i]["settlement_override_amt"];
-                                                    objIds.driver_app_status_text = dt.Rows[i]["driver_app_status_text"];
-                                                    objIds.driver_app_status = dt.Rows[i]["driver_app_status"];
-                                                    objIds.route_code_text = dt.Rows[i]["route_code_text"];
-                                                    objIds.route_code = dt.Rows[i]["route_code"];
-                                                    objIds.received_shift = dt.Rows[i]["received_shift"];
-                                                    objIds.addl_charge_occur6 = dt.Rows[i]["addl_charge_occur6"];
-                                                    objIds.addl_charge_occur11 = dt.Rows[i]["addl_charge_occur11"];
-                                                    objIds.vehicle = dt.Rows[i]["vehicle"];
-                                                    objIds.addl_charge_code5 = dt.Rows[i]["addl_charge_code5"];
-                                                    objIds.addl_charge_occur9 = dt.Rows[i]["addl_charge_occur9"];
-
-                                                    objIds.eta = dt.Rows[i]["eta"];
-                                                    objIds.departure_time = dt.Rows[i]["departure_time"];
-                                                    objIds.combine_data = dt.Rows[i]["combine_data"];
-                                                    objIds.actual_latitude = dt.Rows[i]["actual_latitude"];
-                                                    objIds.posted_by = dt.Rows[i]["posted_by"];
-                                                    objIds.insurance_value = dt.Rows[i]["insurance_value"];
-                                                    objIds.return_redel_id = dt.Rows[i]["return_redel_id"];
-                                                    objIds.addl_charge_code1 = dt.Rows[i]["addl_charge_code1"];
-                                                    objIds.origin_code_text = dt.Rows[i]["origin_code_text"];
-                                                    objIds.origin_code = dt.Rows[i]["origin_code"];
-                                                    objIds.ordered_by = dt.Rows[i]["ordered_by"];
-                                                    objIds.posted_date = dt.Rows[i]["posted_date"];
-                                                    objIds.actual_billing_amt = dt.Rows[i]["actual_billing_amt"];
-                                                    objIds.created_date = dt.Rows[i]["created_date"];
-                                                    objIds.latitude = dt.Rows[i]["latitude"];
-                                                    objIds.received_pieces = dt.Rows[i]["received_pieces"];
-                                                    objIds.addl_charge_code7 = dt.Rows[i]["addl_charge_code7"];
-                                                    objIds.totes = dt.Rows[i]["totes"];
-                                                    objIds.asn_sent = dt.Rows[i]["asn_sent"];
-                                                    objIds.comments = dt.Rows[i]["comments"];
-                                                    objIds.verification_id_type_text = dt.Rows[i]["verification_id_type_text"];
-                                                    objIds.verification_id_type = dt.Rows[i]["verification_id_type"];
-                                                    objIds.posted_time = dt.Rows[i]["posted_time"];
-                                                    objIds.item_scans_required = dt.Rows[i]["item_scans_required"];
-                                                    objIds.shift_id = dt.Rows[i]["shift_id"];
-                                                    objIds.addon_billing_amt = dt.Rows[i]["addon_billing_amt"];
-                                                    objIds.actual_delivery_date = dt.Rows[i]["actual_delivery_date"];
-                                                    objIds.id = dt.Rows[i]["id"];
-                                                    objIds.actual_arrival_time = dt.Rows[i]["actual_arrival_time"];
-                                                    objIds.signature_required = dt.Rows[i]["signature_required"];
-                                                    objIds.longitude = dt.Rows[i]["longitude"];
-                                                    objIds.expected_pieces = dt.Rows[i]["expected_pieces"];
-                                                    objIds.loaded_pieces = dt.Rows[i]["loaded_pieces"];
-                                                    objIds.alt_lookup = dt.Rows[i]["alt_lookup"];
-                                                    objIds.customer_number_text = dt.Rows[i]["customer_number_text"];
-                                                    objIds.customer_number = dt.Rows[i]["customer_number"];
-                                                    objIds.created_time = dt.Rows[i]["created_time"];
-                                                    objIds.addl_charge_code8 = dt.Rows[i]["addl_charge_code8"];
-                                                    objIds.signature = dt.Rows[i]["signature"];
-                                                    objIds.actual_depart_time = dt.Rows[i]["actual_depart_time"];
-                                                    objIds.bol_number = dt.Rows[i]["bol_number"];
-                                                    objIds.actual_cod_type_text = dt.Rows[i]["actual_cod_type_text"];
-                                                    objIds.actual_cod_type = dt.Rows[i]["actual_cod_type"];
-                                                    objIds.invoice_number = dt.Rows[i]["invoice_number"];
-                                                    objIds.branch_id = dt.Rows[i]["branch_id"];
-                                                    objIds.special_instructions2 = dt.Rows[i]["special_instructions2"];
-                                                    objIds.updated_by = dt.Rows[i]["updated_by"];
-                                                    objIds.verification_id_details = dt.Rows[i]["verification_id_details"];
-                                                    objIds.required_signature_type_text = dt.Rows[i]["required_signature_type_text"];
-                                                    objIds.required_signature_type = dt.Rows[i]["required_signature_type"];
-                                                    objIds.addl_charge_occur7 = dt.Rows[i]["addl_charge_occur7"];
-                                                    objIds.orig_order_number = dt.Rows[i]["orig_order_number"];
-                                                    objIds.special_instructions1 = dt.Rows[i]["special_instructions1"];
-                                                    objIds.image_sign_req = dt.Rows[i]["image_sign_req"];
-                                                    objIds.attention = dt.Rows[i]["attention"];
-                                                    objIds.minutes_late = dt.Rows[i]["minutes_late"];
-                                                    objIds.late_notice_time = dt.Rows[i]["late_notice_time"];
-                                                    objIds.received_unique_id = dt.Rows[i]["received_unique_id"];
-                                                    objIds.exception_code = dt.Rows[i]["exception_code"];
-                                                    objIds.addl_charge_code4 = dt.Rows[i]["addl_charge_code4"];
-                                                    objIds.addl_charge_occur4 = dt.Rows[i]["addl_charge_occur4"];
-                                                    objIds.redelivery = dt.Rows[i]["redelivery"];
-                                                    objIds.addl_charge_occur10 = dt.Rows[i]["addl_charge_occur10"];
-                                                    objIds.upload_date = dt.Rows[i]["upload_date"];
-                                                    objIds.special_instructions4 = dt.Rows[i]["special_instructions4"];
-                                                    objIds.address_name = dt.Rows[i]["address_name"];
-                                                    objIds.addl_charge_occur8 = dt.Rows[i]["addl_charge_occur8"];
-                                                    objIds.address_point_customer = dt.Rows[i]["address_point_customer"];
-                                                    objIds.received_branch = dt.Rows[i]["received_branch"];
-                                                    objIds.return_redelivery_date = dt.Rows[i]["return_redelivery_date"];
-                                                    objIds.height = dt.Rows[i]["height"];
-                                                    objIds.actual_longitude = dt.Rows[i]["actual_longitude"];
-                                                    objIds.service_time = dt.Rows[i]["service_time"];
-                                                    objIds.phone_ext = dt.Rows[i]["phone_ext"];
-                                                    objIds.addl_charge_occur2 = dt.Rows[i]["addl_charge_occur2"];
-                                                    objIds.late_notice_date = dt.Rows[i]["late_notice_date"];
-                                                    objIds.address = dt.Rows[i]["address"];
-                                                    objIds.arrival_time = dt.Rows[i]["arrival_time"];
-                                                    objIds.posted_status = dt.Rows[i]["posted_status"];
-                                                    objIds.route_date = dt.Rows[i]["route_date"];
-                                                    objIds.addl_charge_code12 = dt.Rows[i]["addl_charge_code12"];
-                                                    objIds.addl_charge_code3 = dt.Rows[i]["addl_charge_code3"];
-                                                    objIds.return_redelivery_flag_text = dt.Rows[i]["return_redelivery_flag_text"];
-                                                    objIds.return_redelivery_flag = dt.Rows[i]["return_redelivery_flag"];
-                                                    objIds.additional_instructions = dt.Rows[i]["additional_instructions"];
-                                                    objIds.updated_by_scanner = dt.Rows[i]["updated_by_scanner"];
-                                                    objIds.special_instructions3 = dt.Rows[i]["special_instructions3"];
-                                                    objIds.addl_charge_occur5 = dt.Rows[i]["addl_charge_occur5"];
-                                                    objIds.address_point = dt.Rows[i]["address_point"];
-                                                    objIds.actual_weight = dt.Rows[i]["actual_weight"];
-                                                    objIds.received_company = dt.Rows[i]["received_company"];
-                                                    objIds.addl_charge_code2 = dt.Rows[i]["addl_charge_code2"];
-                                                    objIds.state = dt.Rows[i]["state"];
-
-
-                                                    // public object @return { get; set; }
-
-
-
-
-                                                    idList.Add(objIds);
-                                                }
-                                                objCommon.SaveOutputDataToCsvFile(idList, "RouteStop-Create",
-                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
-                                            }
-
-                                            if (dsResponse.Tables.Contains("progress"))
-                                            {
-
-                                                List<RouteStopResponseProgress> progressList = new List<RouteStopResponseProgress>();
-                                                for (int i = 0; i < dsResponse.Tables["progress"].Rows.Count; i++)
-                                                {
-                                                    RouteStopResponseProgress progress = new RouteStopResponseProgress();
-                                                    DataTable dt = dsResponse.Tables["progress"];
-
-                                                    progress.status_date = (dt.Rows[i]["status_date"]);
-                                                    progress.status_text = (dt.Rows[i]["status_text"]);
-                                                    progress.status_time = (dt.Rows[i]["status_time"]);
-                                                    progress.id = (dt.Rows[i]["id"]);
-                                                    progressList.Add(progress);
-                                                }
-
-                                                objCommon.SaveOutputDataToCsvFile(progressList, "RouteStop-Progress",
-                                                     strInputFilePath, UniqueId, strFileName, strDatetime);
-                                            }
-
-                                            //  public List<object> signature_images { get; set; }
-                                            // public List<Progress> progress { get; set; }
-                                            // public List<object> notes { get; set; }
-                                            // public List<object> items { get; set; }
-
-                                            if (dsResponse.Tables.Contains("notes"))
-                                            {
-
-                                                List<RouteStopResponseNote> noteList = new List<RouteStopResponseNote>();
-                                                for (int i = 0; i < dsResponse.Tables["notes"].Rows.Count; i++)
-                                                {
-                                                    RouteStopResponseNote note = new RouteStopResponseNote();
-                                                    DataTable dt = dsResponse.Tables["notes"];
-                                                    note.entry_time = (dt.Rows[i]["entry_time"]);
-                                                    note.note_text = (dt.Rows[i]["note_text"]);
-                                                    note.company_number_text = (dt.Rows[i]["company_number_text"]);
-                                                    note.company_number = (dt.Rows[i]["company_number"]);
-                                                    note.item_sequence = (dt.Rows[i]["item_sequence"]);
-                                                    note.user_id = (dt.Rows[i]["user_id"]);
-                                                    note.entry_date = (dt.Rows[i]["entry_date"]);
-                                                    note.user_entered = (dt.Rows[i]["user_entered"]);
-                                                    note.show_to_cust = (dt.Rows[i]["show_to_cust"]);
-                                                    note.note_type_text = (dt.Rows[i]["note_type_text"]);
-                                                    note.note_type = (dt.Rows[i]["note_type"]);
-                                                    note.unique_id = (dt.Rows[i]["unique_id"]);
-                                                    note.id = (dt.Rows[i]["id"]);
-                                                    noteList.Add(note);
-                                                }
-
-                                                objCommon.SaveOutputDataToCsvFile(noteList, "RouteStop-Note",
-                                                   strInputFilePath, UniqueId, strFileName, strDatetime);
-
-                                            }
-
-                                            if (dsResponse.Tables.Contains("items"))
-                                            {
-
-                                                List<RouteStopResponseItem> itemList = new List<RouteStopResponseItem>();
-                                                for (int i = 0; i < dsResponse.Tables["items"].Rows.Count; i++)
-                                                {
-                                                    RouteStopResponseItem item = new RouteStopResponseItem();
-                                                    DataTable dt = dsResponse.Tables["items"];
-
-                                                    item.item_number = (dt.Rows[i]["item_number"]);
-                                                    item.item_description = (dt.Rows[i]["item_description"]);
-                                                    item.reference = (dt.Rows[i]["reference"]);
-                                                    item.rma_route = (dt.Rows[i]["rma_route"]);
-                                                    item.upload_time = (dt.Rows[i]["upload_time"]);
-                                                    item.rma_stop_id = (dt.Rows[i]["rma_stop_id"]);
-                                                    item.width = (dt.Rows[i]["width"]);
-                                                    item.redelivery = (dt.Rows[i]["redelivery"]);
-                                                    item.received_pieces = (dt.Rows[i]["received_pieces"]);
-                                                    item.cod_amount = (dt.Rows[i]["cod_amount"]);
-                                                    item.height = (dt.Rows[i]["height"]);
-                                                    item.comments = (dt.Rows[i]["comments"]);
-                                                    item.actual_pieces = (dt.Rows[i]["actual_pieces"]);
-                                                    item.actual_cod_amount = (dt.Rows[i]["actual_cod_amount"]);
-                                                    item.rma_number = (dt.Rows[i]["rma_number"]);
-                                                    item.manually_updated = (dt.Rows[i]["manually_updated"]);
-                                                    item.unique_id = (dt.Rows[i]["unique_id"]);
-                                                    item.cod_type_text = (dt.Rows[i]["cod_type_text"]);
-                                                    item.cod_type = (dt.Rows[i]["cod_type"]);
-                                                    item.barcodes_unique = (dt.Rows[i]["barcodes_unique"]);
-                                                    item.actual_cod_type = (dt.Rows[i]["actual_cod_type"]);
-                                                    item.return_redel_seq = (dt.Rows[i]["return_redel_seq"]);
-                                                    item.expected_pieces = (dt.Rows[i]["expected_pieces"]);
-                                                    item.signature = (dt.Rows[i]["signature"]);
-                                                    item.exception_code = (dt.Rows[i]["exception_code"]);
-                                                    item.company_number_text = (dt.Rows[i]["company_number_text"]);
-                                                    item.company_number = (dt.Rows[i]["company_number"]);
-                                                    item.updated_date = (dt.Rows[i]["updated_date"]);
-                                                    item.expected_weight = (dt.Rows[i]["expected_weight"]);
-                                                    item.created_date = (dt.Rows[i]["created_date"]);
-                                                    item.rma_origin = (dt.Rows[i]["rma_origin"]);
-                                                    item.created_by = (dt.Rows[i]["created_by"]);
-                                                    item.loaded_pieces = (dt.Rows[i]["loaded_pieces"]);
-                                                    item.return_redelivery_flag_text = (dt.Rows[i]["return_redelivery_flag_text"]);
-                                                    item.return_redelivery_flag = (dt.Rows[i]["return_redelivery_flag"]);
-                                                    item.original_id = (dt.Rows[i]["original_id"]);
-                                                    item.container_id = (dt.Rows[i]["container_id"]);
-                                                    item.@return = (dt.Rows[i]["return"]);
-                                                    item.length = (dt.Rows[i]["length"]);
-                                                    item.actual_weight = (dt.Rows[i]["actual_weight"]);
-                                                    item.updated_by = (dt.Rows[i]["updated_by"]);
-                                                    item.photos_exist = (dt.Rows[i]["photos_exist"]);
-                                                    item.second_container_id = (dt.Rows[i]["second_container_id"]);
-                                                    item.return_redel_id = (dt.Rows[i]["return_redel_id"]);
-                                                    item.asn_sent = (dt.Rows[i]["asn_sent"]);
-                                                    item.actual_departure_time = (dt.Rows[i]["actual_departure_time"]);
-                                                    item.updated_time = (dt.Rows[i]["updated_time"]);
-                                                    item.return_redelivery_date = (dt.Rows[i]["return_redelivery_date"]);
-                                                    item.actual_arrival_time = (dt.Rows[i]["actual_arrival_time"]);
-                                                    item.item_sequence = (dt.Rows[i]["item_sequence"]);
-                                                    item.pallet_number = (dt.Rows[i]["pallet_number"]);
-                                                    item.actual_date = (dt.Rows[i]["actual_date"]);
-                                                    item.insurance_value = (dt.Rows[i]["insurance_value"]);
-                                                    item.created_time = (dt.Rows[i]["created_time"]);
-                                                    item.upload_date = (dt.Rows[i]["upload_date"]);
-                                                    item.id = (dt.Rows[i]["id"]);
-                                                    item.truck_id = (dt.Rows[i]["truck_id"]);
-
-                                                    // public List<object> notes { get; set; }
-                                                    // public List<object> scans { get; set; }
-                                                    itemList.Add(item);
-                                                }
-
-                                                objCommon.SaveOutputDataToCsvFile(itemList, "RouteStop-Item",
-                                                   strInputFilePath, UniqueId, strFileName, strDatetime);
-
-                                            }
-
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            strExecutionLogMessage = "RouteStopPostFiles Exception -" + ex.Message + System.Environment.NewLine;
-                                            strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
-                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
-                                            strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
-                                            //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                            objCommon.WriteErrorLog(ex, strExecutionLogMessage);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        strExecutionLogMessage = "RouteHeaderPostAPI Failed " + System.Environment.NewLine;
-                                        strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
-                                        strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
-                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-
-                                        DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
-                                        dsOrderFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
-                                        dsOrderFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
-                                        foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
-                                        {
-                                            row["Reference"] = ReferenceId;
-                                        }
-                                        objCommon.WriteDataToCsvFile(dsOrderFailureResponse.Tables[0],
-                                    strInputFilePath, ReferenceId, strFileName, strDatetime);
-
+                                        strExecutionLogMessage = "ProcessAddRouteStopFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                        strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
+                                        //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                     }
                                 }
-                                catch (Exception ex)
-                                {
-                                    strExecutionLogMessage = "ProcessAddRouteStopFiles Exception -" + ex.Message + System.Environment.NewLine;
-                                    strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
-                                    strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
-                                    strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
-                                    //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                    objCommon.WriteErrorLog(ex, strExecutionLogMessage);
-                                }
+                            }
+                            else
+                            {
+                                strExecutionLogMessage = "RouteHeaderPostAPI RouteStop Customer Mapping Not Found " + System.Environment.NewLine;
+                                strExecutionLogMessage += "CustomerName -" + CustomerName + System.Environment.NewLine;
+                                strExecutionLogMessage += "LocationCode -" + LocationCode + System.Environment.NewLine;
+                                strExecutionLogMessage += "Please Put entry for this customer in Route Stop Customer mapping" + System.Environment.NewLine;
+                                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                break;
+
                             }
 
 
