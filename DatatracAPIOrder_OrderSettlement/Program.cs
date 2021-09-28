@@ -265,10 +265,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                             //strExecutionLogMessage = "Processing File Move to History  : " + strFileName + "." + System.Environment.NewLine;
                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-
-
                             objCommon.MoveTheFileToHistoryFolder(strBillingHistoryFileLocation, file);
-
                             //strExecutionLogMessage = "Processing File Moved to History completed  : " + strFileName + "." + System.Environment.NewLine;
                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
@@ -782,6 +779,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                                 //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                 objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = ex.Message;
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Exception while writing the response into csv";
+                                                objErrorResponse.reference = ReferenceId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+
                                             }
                                             //  if (driver1 != null) 
                                             if (objOrder.driver1 != null)
@@ -835,21 +844,44 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         else
                                                         {
                                                             strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "Carrier Base Pay Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "Carrier Base Pay Not found in the file -" + strFileName + System.Environment.NewLine;
                                                             strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
                                                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            break;
+
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = "Carrier Base Pay Value Missing for this record";
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Carrier Base Pay Value Missing";
+                                                            objErrorResponse.reference = ReferenceId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                            continue;
                                                         }
                                                     }
                                                     else
                                                     {
                                                         strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                        strExecutionLogMessage += "Carrier Base Pay Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                        strExecutionLogMessage += "Carrier Base Pay Not found in the file -" + strFileName + System.Environment.NewLine;
                                                         strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
                                                         objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                         // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                        break;
+
+                                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        objErrorResponse.error = "Carrier Base Pay column not found for this record";
+                                                        objErrorResponse.status = "Error";
+                                                        objErrorResponse.code = "Carrier Base Pay column Missing";
+                                                        objErrorResponse.reference = ReferenceId;
+                                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                    strInputFilePath, processingFileName, strDatetime);
+                                                        continue;
+
                                                     }
                                                     if (dr.Table.Columns.Contains("Carrier ACC"))
                                                     {
@@ -864,7 +896,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
                                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                             // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                            break;
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Carrier ACC value Missing";
+                                                            objErrorResponse.reference = ReferenceId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                            continue;
                                                         }
                                                     }
                                                     else
@@ -874,7 +916,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
                                                         objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                         // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                        break;
+                                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        objErrorResponse.error = "Carrier ACC column not found for this record";
+                                                        objErrorResponse.status = "Error";
+                                                        objErrorResponse.code = "Carrier ACC column Missing";
+                                                        objErrorResponse.reference = ReferenceId;
+                                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                    strInputFilePath, processingFileName, strDatetime);
+                                                        continue;
                                                     }
                                                     ordersettlementputrequest = @"{" + ordersettlementputrequest + "}";
                                                     string order_settlementObject = @"{'order_settlement': " + ordersettlementputrequest + "}";
@@ -882,7 +934,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     request = jsonobj.ToString();
 
                                                     clsCommon.ReturnResponse objresponseOrdersettlement = new clsCommon.ReturnResponse();
-                                                    objresponseOrdersettlement = objclsDatatrac.CallDataTracOrderSettlementPutAPI(UniqueId, order_settlementObject);
+                                                    objresponseOrdersettlement = objclsDatatrac.CallDataTracOrderSettlementPutAPI(UniqueId, order_settlementObject, objorderdetails.order.csr);
                                                     // objresponseOrdersettlement.Reason = "{\"002018724450D1\": {\"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"time_last_updated\": \"05:10\", \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"order_date\": \"2021-06-28\", \"agent_etrac_transaction_number\": null, \"settlement_bucket1_pct\": null, \"settlement_bucket2_pct\": null, \"vendor_employee_numer\": null, \"fuel_price_zone\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"charge1\": 35.91, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"adjustment_type\": null, \"agents_etrac_partner_id\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"vendor_invoice_number\": null, \"charge6\": null, \"settlement_bucket4_pct\": null, \"fuel_plan\": null, \"record_type\": 0, \"voucher_amount\": null, \"id\": \"002018724450D1\", \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"voucher_number\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"settlement_bucket6_pct\": null, \"settlement_pct\": 100.00, \"charge3\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"voucher_date\": null, \"fuel_price_source\": null, \"pay_chart_used\": null, \"settlement_bucket5_pct\": null, \"charge2\": null, \"control_number\": 1872445, \"settlement_bucket3_pct\": null, \"charge5\": null, \"pre_book_percentage\": true, \"settlement_period_end_date\": null}}";
                                                     // objresponseOrdersettlement.ResponseVal = true;
                                                     if (objresponseOrdersettlement.ResponseVal)
@@ -895,68 +947,91 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                         DataSet dsOrderSettlementResponse = objCommon.jsonToDataSet(objresponseOrdersettlement.Reason);
                                                         dsOrderSettlementResponse.Tables[0].TableName = "OrderSettlement";
-
-                                                        List<ResponseOrderSettlements> orderSettlementstList = new List<ResponseOrderSettlements>();
-                                                        for (int i = 0; i < dsOrderSettlementResponse.Tables["OrderSettlement"].Rows.Count; i++)
+                                                        try
                                                         {
-                                                            DataTable dt = dsOrderSettlementResponse.Tables["OrderSettlement"];
-                                                            ResponseOrderSettlements objsettlements = new ResponseOrderSettlements();
-                                                            objsettlements.company_number_text = dt.Rows[i]["company_number_text"];
-                                                            objsettlements.company_number = (dt.Rows[i]["company_number"]);
-                                                            objsettlements.charge4 = dt.Rows[i]["charge4"];
-                                                            objsettlements.posting_status_text = (dt.Rows[i]["posting_status_text"]);
-                                                            objsettlements.posting_status = (dt.Rows[i]["posting_status"]);
-                                                            objsettlements.time_last_updated = (dt.Rows[i]["time_last_updated"]);
-                                                            objsettlements.fuel_update_freq_text = (dt.Rows[i]["fuel_update_freq_text"]);
-                                                            objsettlements.fuel_update_freq = (dt.Rows[i]["fuel_update_freq"]);
-                                                            objsettlements.order_date = (dt.Rows[i]["order_date"]);
-                                                            objsettlements.agent_etrac_transaction_number = (dt.Rows[i]["agent_etrac_transaction_number"]);
-                                                            objsettlements.settlement_bucket1_pct = (dt.Rows[i]["settlement_bucket1_pct"]);
-                                                            objsettlements.settlement_bucket2_pct = (dt.Rows[i]["settlement_bucket2_pct"]);
-                                                            objsettlements.vendor_employee_numer = (dt.Rows[i]["vendor_employee_numer"]);
-                                                            objsettlements.fuel_price_zone = (dt.Rows[i]["fuel_price_zone"]);
-                                                            objsettlements.agent_accepted_or_rejected_text = (dt.Rows[i]["agent_accepted_or_rejected_text"]);
-                                                            objsettlements.agent_accepted_or_rejected = (dt.Rows[i]["agent_accepted_or_rejected"]);
-                                                            objsettlements.charge1 = (dt.Rows[i]["charge1"]);
-                                                            objsettlements.file_status_text = (dt.Rows[i]["file_status_text"]);
-                                                            objsettlements.file_status = (dt.Rows[i]["file_status"]);
-                                                            objsettlements.adjustment_type = (dt.Rows[i]["adjustment_type"]);
-                                                            objsettlements.agents_etrac_partner_id = (dt.Rows[i]["agents_etrac_partner_id"]);
-                                                            objsettlements.driver_company_number_text = (dt.Rows[i]["driver_company_number_text"]);
-                                                            objsettlements.driver_company_number = (dt.Rows[i]["driver_company_number"]);
-                                                            objsettlements.vendor_invoice_number = (dt.Rows[i]["vendor_invoice_number"]);
-                                                            objsettlements.charge6 = (dt.Rows[i]["charge6"]);
-                                                            objsettlements.settlement_bucket4_pct = (dt.Rows[i]["settlement_bucket4_pct"]);
-                                                            objsettlements.fuel_plan = (dt.Rows[i]["fuel_plan"]);
-                                                            objsettlements.record_type = (dt.Rows[i]["record_type"]);
-                                                            objsettlements.voucher_amount = (dt.Rows[i]["voucher_amount"]);
-                                                            objsettlements.id = (dt.Rows[i]["id"]);
-                                                            objsettlements.date_last_updated = (dt.Rows[i]["date_last_updated"]);
-                                                            objsettlements.driver_sequence_text = (dt.Rows[i]["driver_sequence_text"]);
-                                                            objsettlements.driver_sequence = (dt.Rows[i]["driver_sequence"]);
-                                                            objsettlements.voucher_number = (dt.Rows[i]["voucher_number"]);
-                                                            objsettlements.driver_number_text = (dt.Rows[i]["driver_number_text"]);
-                                                            objsettlements.driver_number = (dt.Rows[i]["driver_number"]);
-                                                            objsettlements.settlement_bucket6_pct = (dt.Rows[i]["settlement_bucket6_pct"]);
-                                                            objsettlements.settlement_pct = (dt.Rows[i]["settlement_pct"]);
-                                                            objsettlements.charge3 = (dt.Rows[i]["charge3"]);
-                                                            objsettlements.transaction_type_text = (dt.Rows[i]["transaction_type_text"]);
-                                                            objsettlements.transaction_type = (dt.Rows[i]["transaction_type"]);
-                                                            objsettlements.voucher_date = (dt.Rows[i]["voucher_date"]);
-                                                            objsettlements.fuel_price_source = (dt.Rows[i]["fuel_price_source"]);
-                                                            objsettlements.pay_chart_used = (dt.Rows[i]["pay_chart_used"]);
-                                                            objsettlements.settlement_bucket5_pct = (dt.Rows[i]["settlement_bucket5_pct"]);
-                                                            objsettlements.charge2 = (dt.Rows[i]["charge2"]);
-                                                            objsettlements.control_number = (dt.Rows[i]["control_number"]);
-                                                            objsettlements.settlement_bucket3_pct = (dt.Rows[i]["settlement_bucket3_pct"]);
-                                                            objsettlements.charge5 = (dt.Rows[i]["charge5"]);
-                                                            objsettlements.pre_book_percentage = (dt.Rows[i]["pre_book_percentage"]);
-                                                            objsettlements.settlement_period_end_date = (dt.Rows[i]["settlement_period_end_date"]);
-                                                            orderSettlementstList.Add(objsettlements);
-                                                        }
+                                                            List<ResponseOrderSettlements> orderSettlementstList = new List<ResponseOrderSettlements>();
+                                                            for (int i = 0; i < dsOrderSettlementResponse.Tables["OrderSettlement"].Rows.Count; i++)
+                                                            {
+                                                                DataTable dt = dsOrderSettlementResponse.Tables["OrderSettlement"];
+                                                                ResponseOrderSettlements objsettlements = new ResponseOrderSettlements();
+                                                                objsettlements.company_number_text = dt.Rows[i]["company_number_text"];
+                                                                objsettlements.company_number = (dt.Rows[i]["company_number"]);
+                                                                objsettlements.charge4 = dt.Rows[i]["charge4"];
+                                                                objsettlements.posting_status_text = (dt.Rows[i]["posting_status_text"]);
+                                                                objsettlements.posting_status = (dt.Rows[i]["posting_status"]);
+                                                                objsettlements.time_last_updated = (dt.Rows[i]["time_last_updated"]);
+                                                                objsettlements.fuel_update_freq_text = (dt.Rows[i]["fuel_update_freq_text"]);
+                                                                objsettlements.fuel_update_freq = (dt.Rows[i]["fuel_update_freq"]);
+                                                                objsettlements.order_date = (dt.Rows[i]["order_date"]);
+                                                                objsettlements.agent_etrac_transaction_number = (dt.Rows[i]["agent_etrac_transaction_number"]);
+                                                                objsettlements.settlement_bucket1_pct = (dt.Rows[i]["settlement_bucket1_pct"]);
+                                                                objsettlements.settlement_bucket2_pct = (dt.Rows[i]["settlement_bucket2_pct"]);
+                                                                objsettlements.vendor_employee_numer = (dt.Rows[i]["vendor_employee_numer"]);
+                                                                objsettlements.fuel_price_zone = (dt.Rows[i]["fuel_price_zone"]);
+                                                                objsettlements.agent_accepted_or_rejected_text = (dt.Rows[i]["agent_accepted_or_rejected_text"]);
+                                                                objsettlements.agent_accepted_or_rejected = (dt.Rows[i]["agent_accepted_or_rejected"]);
+                                                                objsettlements.charge1 = (dt.Rows[i]["charge1"]);
+                                                                objsettlements.file_status_text = (dt.Rows[i]["file_status_text"]);
+                                                                objsettlements.file_status = (dt.Rows[i]["file_status"]);
+                                                                objsettlements.adjustment_type = (dt.Rows[i]["adjustment_type"]);
+                                                                objsettlements.agents_etrac_partner_id = (dt.Rows[i]["agents_etrac_partner_id"]);
+                                                                objsettlements.driver_company_number_text = (dt.Rows[i]["driver_company_number_text"]);
+                                                                objsettlements.driver_company_number = (dt.Rows[i]["driver_company_number"]);
+                                                                objsettlements.vendor_invoice_number = (dt.Rows[i]["vendor_invoice_number"]);
+                                                                objsettlements.charge6 = (dt.Rows[i]["charge6"]);
+                                                                objsettlements.settlement_bucket4_pct = (dt.Rows[i]["settlement_bucket4_pct"]);
+                                                                objsettlements.fuel_plan = (dt.Rows[i]["fuel_plan"]);
+                                                                objsettlements.record_type = (dt.Rows[i]["record_type"]);
+                                                                objsettlements.voucher_amount = (dt.Rows[i]["voucher_amount"]);
+                                                                objsettlements.id = (dt.Rows[i]["id"]);
+                                                                objsettlements.date_last_updated = (dt.Rows[i]["date_last_updated"]);
+                                                                objsettlements.driver_sequence_text = (dt.Rows[i]["driver_sequence_text"]);
+                                                                objsettlements.driver_sequence = (dt.Rows[i]["driver_sequence"]);
+                                                                objsettlements.voucher_number = (dt.Rows[i]["voucher_number"]);
+                                                                objsettlements.driver_number_text = (dt.Rows[i]["driver_number_text"]);
+                                                                objsettlements.driver_number = (dt.Rows[i]["driver_number"]);
+                                                                objsettlements.settlement_bucket6_pct = (dt.Rows[i]["settlement_bucket6_pct"]);
+                                                                objsettlements.settlement_pct = (dt.Rows[i]["settlement_pct"]);
+                                                                objsettlements.charge3 = (dt.Rows[i]["charge3"]);
+                                                                objsettlements.transaction_type_text = (dt.Rows[i]["transaction_type_text"]);
+                                                                objsettlements.transaction_type = (dt.Rows[i]["transaction_type"]);
+                                                                objsettlements.voucher_date = (dt.Rows[i]["voucher_date"]);
+                                                                objsettlements.fuel_price_source = (dt.Rows[i]["fuel_price_source"]);
+                                                                objsettlements.pay_chart_used = (dt.Rows[i]["pay_chart_used"]);
+                                                                objsettlements.settlement_bucket5_pct = (dt.Rows[i]["settlement_bucket5_pct"]);
+                                                                objsettlements.charge2 = (dt.Rows[i]["charge2"]);
+                                                                objsettlements.control_number = (dt.Rows[i]["control_number"]);
+                                                                objsettlements.settlement_bucket3_pct = (dt.Rows[i]["settlement_bucket3_pct"]);
+                                                                objsettlements.charge5 = (dt.Rows[i]["charge5"]);
+                                                                objsettlements.pre_book_percentage = (dt.Rows[i]["pre_book_percentage"]);
+                                                                objsettlements.settlement_period_end_date = (dt.Rows[i]["settlement_period_end_date"]);
+                                                                orderSettlementstList.Add(objsettlements);
+                                                            }
 
-                                                        objCommon.SaveOutputDataToCsvFileParallely(orderSettlementstList, "OrderSettlements-UpdatedRecord",
-                                                            processingFileName, strDatetime);
+                                                            objCommon.SaveOutputDataToCsvFileParallely(orderSettlementstList, "OrderSettlements-UpdatedRecord",
+                                                                processingFileName, strDatetime);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            strExecutionLogMessage = "OrderPost-OrderSettlementPutAPI Success Exception -" + ex.Message + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                            //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+                                                            //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                            objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = ex.Message;
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Exception while writing OrderPost-OrderSettlementPutAPI Success response into csv";
+                                                            objErrorResponse.reference = ReferenceId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -986,14 +1061,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
                                             // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
-                                            dsOrderFailureResponse.Tables[0].TableName = "OrderFailure";
-                                            dsOrderFailureResponse.Tables[0].Columns.Add("Customer Reference", typeof(System.String));
-                                            foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                            dsFailureResponse.Tables[0].TableName = "OrderFailure";
+                                            dsFailureResponse.Tables[0].Columns.Add("Customer Reference", typeof(System.String));
+                                            foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                             {
                                                 row["Customer Reference"] = objOrder.reference;
                                             }
-                                            objCommon.WriteDataToCsvFileParallely(dsOrderFailureResponse.Tables[0],
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
                                         strInputFilePath, processingFileName, strDatetime);
 
                                         }
@@ -1007,6 +1082,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                         //  objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                         //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                         objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = ex.Message;
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Exception while generating the Order Post Request";
+                                        objErrorResponse.reference = ReferenceId;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "OrderFailure";
+                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                    strInputFilePath, processingFileName, strDatetime);
                                     }
                                 }
 
@@ -1017,6 +1103,7 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.MergeSplittedOutputFiles(strFileName, "Order-Settlements-AddRecord", strDatetime);
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlements-UpdatedRecord", strDatetime);
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderFailure", strDatetime);
+                            objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlementFailure", strDatetime);
                             objCommon.MoveMergedOutputFilesToOutputLocation(strInputFilePath);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
 
@@ -1151,8 +1238,20 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "Company Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
                                                 strExecutionLogMessage += "For row  number -" + rowindex + System.Environment.NewLine;
                                                 // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Company Number not found for this record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Company Value Missing";
+                                                objErrorResponse.reference = "For row  number -" + rowindex;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -1162,7 +1261,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                             //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            break;
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Company column not found for this file record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Company column Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
                                         if (dr.Table.Columns.Contains("Control Number"))
                                         {
@@ -1177,7 +1288,20 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                                 //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Control Number value not found for this  record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Control Number Value Missing";
+                                                objErrorResponse.reference = "For row  number -" + rowindex;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -1187,7 +1311,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            break;
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Control Number column not found for this record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Control Number column Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
 
 
@@ -1577,8 +1713,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                         objresponse = objclsDatatrac.CallDataTracOrderPutAPI(UniqueId, orderObject);
                                         //objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                         //objresponse.ResponseVal = false;
-                                        //objresponse.Reason = "{\"002018716980\": {\"csr\": \"DX*\", \"cod_text\": \"No\", \"cod\": \"N\", \"edi_acknowledgement_required\": false, \"control_number\": 1871698, \"deliver_requested_arr_time\": \"08:00\", \"return_svc_level\": null, \"pickup_phone_ext\": null, \"customers_etrac_partner_id\": \"96609250\", \"distribution_unique_id\": 0, \"custom_special_instr_long\": null, \"exception_sign_required\": false, \"po_number\": null, \"exception_code\": null, \"add_charge_occur4\": null, \"frequent_caller_id\": null, \"push_services\": null, \"pickup_omw_longitude\": null, \"deliver_special_instructions2\": null, \"deliver_actual_dep_time\": \"08:15\", \"house_airway_bill_number\": null, \"invoice_period_end_date\": null, \"line_items\": [], \"pickup_eta_date\": null, \"dl_arrive_notification_sent\": false, \"hist_inv_date\": null, \"add_charge_occur6\": null, \"add_charge_code12\": null, \"add_charge_occur5\": null, \"pickup_route_seq\": null, \"add_charge_code9\": null, \"callback_time\": null, \"add_charge_amt12\": null, \"add_charge_occur3\": null, \"deliver_eta_date\": null, \"ordered_by\": \"RYDER\", \"deliver_actual_latitude\": null, \"pickup_airport_code\": null, \"rate_buck_amt9\": null, \"deliver_pricing_zone\": 1, \"add_charge_code4\": null, \"rate_buck_amt5\": null, \"total_pages\": 1, \"roundtrip_actual_arrival_time\": null, \"pickup_requested_date\": \"2021-05-10\", \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"pickup_wait_time\": null, \"pickup_special_instructions4\": null, \"deliver_special_instructions1\": null, \"deliver_room\": null, \"roundtrip_actual_date\": null, \"rescheduled_ctrl_number\": null, \"insurance_amount\": null, \"deliver_city\": \"STAFFORD\", \"progress\": [{\"status_text\": \"Entered in carrier's system\", \"status_time\": \"12:27:00\", \"status_date\": \"2021-07-05\"}, {\"status_text\": \"Picked up\", \"status_time\": \"08:30:00\", \"status_date\": \"2021-05-10\"}, {\"status_text\": \"Delivered\", \"status_time\": \"08:15:00\", \"status_date\": \"2021-05-10\"}], \"deliver_eta_time\": null, \"rate_buck_amt2\": null, \"previous_ctrl_number\": null, \"pickup_city\": \"SANDSTON\", \"pickup_special_instructions1\": null, \"deliver_route_sequence\": null, \"pickup_actual_pieces\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"signature_required\": true, \"deliver_actual_date\": \"2021-05-10\", \"callback_userid\": null, \"pickup_requested_dep_time\": \"09:00\", \"cod_accept_cashiers_check\": false, \"signature_images\": [], \"add_charge_amt8\": null, \"add_charge_amt3\": null, \"pickup_zip\": \"23150\", \"original_ctrl_number\": null, \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": \"08:30\", \"pickup_special_instructions3\": null, \"etrac_number\": \"026-1k19-1h0-q08-z93\", \"fuel_plan\": null, \"pickup_address_point_number_text\": \"HUMAN TOUCH\", \"pickup_address_point_number\": 19891, \"pickup_latitude\": 37.53250820, \"add_charge_amt5\": null, \"verified_weight\": null, \"pickup_sign_req\": true, \"exception_timestamp\": null, \"add_charge_occur10\": null, \"deliver_special_instructions3\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"add_charge_code1\": null, \"deliver_name\": \"MICHAEL BROWN\", \"az_equip2\": null, \"rate_buck_amt3\": null, \"bringg_send_sms\": false, \"pickup_actual_date\": \"2021-05-10\", \"page_number\": 1, \"pickup_signature\": \"SOF\", \"bringg_order_id\": null, \"pu_arrive_notification_sent\": false, \"roundtrip_actual_pieces\": null, \"pickup_actual_latitude\": null, \"manual_notepad\": false, \"roundtrip_sign_req\": false, \"deliver_zip\": \"22554\", \"rate_buck_amt8\": null, \"add_charge_occur11\": null, \"holiday_groups\": null, \"delivery_latitude\": 38.37859180, \"rate_buck_amt4\": null, \"pickup_point_customer\": 31025, \"rate_miles\": null, \"pickup_special_instructions2\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"bol_number\": null, \"rate_chart_used\": 0, \"rate_buck_amt6\": null, \"add_charge_occur1\": null, \"deliver_phone\": null, \"rate_buck_amt11\": null, \"deliver_actual_pieces\": null, \"deliver_attention\": null, \"driver1_text\": \"LAVERT KENDALL MORRIS\", \"driver1\": 3001, \"zone_set_used\": 1, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"add_charge_amt4\": null, \"pickup_pricing_zone\": 1, \"pickup_country\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_omw_timestamp\": null, \"weight\": null, \"fuel_price_source\": null, \"pickup_omw_timestamp\": null, \"add_charge_code6\": null, \"photos_exist\": false, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_room\": null, \"deliver_omw_latitude\": null, \"callback_date\": null, \"actual_miles\": null, \"delivery_longitude\": -77.31366340, \"image_sign_req\": false, \"additional_drivers\": false, \"pickup_attention\": null, \"reference_text\": \"DAYA1\", \"reference\": \"DAYA1\", \"roundtrip_wait_time\": null, \"add_charge_code11\": null, \"pickup_special_instr_long\": null, \"add_charge_code3\": null, \"add_charge_amt1\": null, \"callback_to\": null, \"date_order_entered\": \"2021-07-05\", \"rate_special_instructions\": null, \"hist_inv_number\": 0, \"roundtrip_signature\": null, \"bringg_last_loc_sent\": null, \"pickup_route_code\": null, \"pickup_requested_arr_time\": \"07:00\", \"deliver_address\": \"134 CANTERBURY DR\", \"roundtrip_actual_longitude\": null, \"add_charge_occur8\": null, \"delivery_airport_code\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code10\": null, \"customer_name\": \"MXD/RYDER\", \"rate_buck_amt1\": 80.00, \"delivery_address_point_number_text\": \"MICHAEL BROWN\", \"delivery_address_point_number\": 25113, \"cod_amount\": null, \"roundtrip_actual_depart_time\": null, \"pickup_dispatch_zone\": null, \"service_level_text\": \"White Glove Delivery\", \"service_level\": 58, \"deliver_actual_longitude\": null, \"pickup_actual_arr_time\": \"08:00\", \"add_charge_amt6\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_longitude\": -77.33035820, \"driver2\": null, \"distribution_branch_id\": null, \"add_charge_amt9\": null, \"add_charge_code8\": null, \"blocks\": null, \"hazmat\": false, \"add_charge_code7\": null, \"deliver_requested_dep_time\": \"17:00\", \"signature\": \"SOF\", \"master_airway_bill_number\": null, \"cod_accept_company_check\": false, \"delivery_point_customer\": 31025, \"add_charge_occur2\": null, \"quote_amount\": null, \"add_charge_code2\": null, \"deliver_requested_date\": \"2021-05-10\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"record_type\": 0, \"deliver_special_instr_long\": null, \"push_partner_order_id\": null, \"pickup_address\": \"540 EASTPARK CT\", \"add_charge_occur9\": null, \"distribution_shift_id\": null, \"settlements\": [{\"voucher_amount\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket6_pct\": null, \"fuel_price_zone\": null, \"settlement_period_end_date\": null, \"driver_number_text\": \"LAVERT KENDALL MORRIS\", \"driver_number\": 3001, \"fuel_price_source\": null, \"settlement_bucket3_pct\": null, \"agent_etrac_transaction_number\": null, \"voucher_date\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"charge4\": null, \"pay_chart_used\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"adjustment_type\": null, \"voucher_number\": null, \"charge5\": null, \"charge2\": null, \"time_last_updated\": \"11:52\", \"settlement_bucket1_pct\": null, \"settlement_bucket5_pct\": null, \"settlement_bucket4_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"pre_book_percentage\": true, \"date_last_updated\": \"2021-07-05\", \"vendor_invoice_number\": null, \"control_number\": 1871698, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"fuel_plan\": null, \"charge3\": null, \"vendor_employee_numer\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge1\": null, \"order_date\": \"2021-05-10\", \"id\": \"002018716980D1\", \"agents_etrac_partner_id\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"record_type\": 0}], \"hours\": \"15\", \"pu_actual_location_accuracy\": null, \"fuel_price_zone\": null, \"rt_actual_location_accuracy\": null, \"deliver_phone_ext\": null, \"vehicle_type\": null, \"del_actual_location_accuracy\": null, \"ordered_by_phone_number\": null, \"deliver_country\": null, \"az_equip3\": null, \"add_charge_amt7\": null, \"add_charge_amt10\": null, \"notes\": [{\"user_id\": \"DX*\", \"note_line\": \"** Driver #1: 0 -> 3001\", \"control_number\": 1871698, \"note_code\": \"11\", \"id\": \"00201871698020210705125237DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:37\"}, {\"user_id\": \"DX*\", \"note_line\": \"** Driver #1 setl%: .00% -> 100.00%\", \"control_number\": 1871698, \"note_code\": \" 6\", \"id\": \"00201871698020210705125238DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:38\"}], \"pickup_eta_time\": null, \"deliver_state\": \"VA\", \"add_charge_code5\": null, \"deliver_wait_time\": null, \"pickup_omw_latitude\": null, \"fuel_miles\": null, \"add_charge_occur12\": null, \"deliver_dispatch_zone\": null, \"rate_buck_amt10\": 2.16, \"order_automatically_quoted\": false, \"deliver_actual_arr_time\": \"08:00\", \"deliver_special_instructions4\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"az_equip1\": null, \"time_order_entered\": \"12:27\", \"rate_buck_amt7\": null, \"roundtrip_actual_latitude\": null, \"add_charge_amt2\": null, \"add_charge_occur7\": null, \"pickup_email_notification_sent\": false, \"dispatch_time\": null, \"pickup_actual_longitude\": null, \"add_charge_amt11\": null, \"pickup_name\": \"HUMAN TOUCH\", \"dispatch_id\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"send_new_order_alert\": false, \"id\": \"002018716980\", \"deliver_omw_longitude\": null, \"pickup_state\": \"VA\", \"deliver_route_code\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"pickup_phone\": null, \"number_of_pieces\": 1}}";
-                                        // objresponse.ResponseVal = true;
+                                        // objresponse.Reason = "{\"002018716980\": {\"csr\": \"DX*\", \"cod_text\": \"No\", \"cod\": \"N\", \"edi_acknowledgement_required\": false, \"control_number\": 1871698, \"deliver_requested_arr_time\": \"08:00\", \"return_svc_level\": null, \"pickup_phone_ext\": null, \"customers_etrac_partner_id\": \"96609250\", \"distribution_unique_id\": 0, \"custom_special_instr_long\": null, \"exception_sign_required\": false, \"po_number\": null, \"exception_code\": null, \"add_charge_occur4\": null, \"frequent_caller_id\": null, \"push_services\": null, \"pickup_omw_longitude\": null, \"deliver_special_instructions2\": null, \"deliver_actual_dep_time\": \"08:15\", \"house_airway_bill_number\": null, \"invoice_period_end_date\": null, \"line_items\": [], \"pickup_eta_date\": null, \"dl_arrive_notification_sent\": false, \"hist_inv_date\": null, \"add_charge_occur6\": null, \"add_charge_code12\": null, \"add_charge_occur5\": null, \"pickup_route_seq\": null, \"add_charge_code9\": null, \"callback_time\": null, \"add_charge_amt12\": null, \"add_charge_occur3\": null, \"deliver_eta_date\": null, \"ordered_by\": \"RYDER\", \"deliver_actual_latitude\": null, \"pickup_airport_code\": null, \"rate_buck_amt9\": null, \"deliver_pricing_zone\": 1, \"add_charge_code4\": null, \"rate_buck_amt5\": null, \"total_pages\": 1, \"roundtrip_actual_arrival_time\": null, \"pickup_requested_date\": \"2021-05-10\", \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"pickup_wait_time\": null, \"pickup_special_instructions4\": null, \"deliver_special_instructions1\": null, \"deliver_room\": null, \"roundtrip_actual_date\": null, \"rescheduled_ctrl_number\": null, \"insurance_amount\": null, \"deliver_city\": \"STAFFORD\", \"progress\": [{\"status_text\": \"Entered in carrier's system\", \"status_time\": \"12:27:00\", \"status_date\": \"2021-07-05\"}, {\"status_text\": \"Picked up\", \"status_time\": \"08:30:00\", \"status_date\": \"2021-05-10\"}, {\"status_text\": \"Delivered\", \"status_time\": \"08:15:00\", \"status_date\": \"2021-05-10\"}], \"deliver_eta_time\": null, \"rate_buck_amt2\": null, \"previous_ctrl_number\": null, \"pickup_city\": \"SANDSTON\", \"pickup_special_instructions1\": null, \"deliver_route_sequence\": null, \"pickup_actual_pieces\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"signature_required\": true, \"deliver_actual_date\": \"2021-05-10\", \"callback_userid\": null, \"pickup_requested_dep_time\": \"09:00\", \"cod_accept_cashiers_check\": false, \"signature_images\": [], \"add_charge_amt8\": null, \"add_charge_amt3\": null, \"pickup_zip\": \"23150\", \"original_ctrl_number\": null, \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": \"08:30\", \"pickup_special_instructions3\": null, \"etrac_number\": \"026-1k19-1h0-q08-z93\", \"fuel_plan\": null, \"pickup_address_point_number_text\": \"HUMAN TOUCH\", \"pickup_address_point_number\": 19891, \"pickup_latitude\": 37.53250820, \"add_charge_amt5\": null, \"verified_weight\": null, \"pickup_sign_req\": true, \"exception_timestamp\": null, \"add_charge_occur10\": null, \"deliver_special_instructions3\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"add_charge_code1\": null, \"deliver_name\": \"MICHAEL BROWN\", \"az_equip2\": null, \"rate_buck_amt3\": null, \"bringg_send_sms\": false, \"pickup_actual_date\": \"2021-05-10\", \"page_number\": 1, \"pickup_signature\": \"SOF\", \"bringg_order_id\": null, \"pu_arrive_notification_sent\": false, \"roundtrip_actual_pieces\": null, \"pickup_actual_latitude\": null, \"manual_notepad\": false, \"roundtrip_sign_req\": false, \"deliver_zip\": \"22554\", \"rate_buck_amt8\": null, \"add_charge_occur11\": null, \"holiday_groups\": null, \"delivery_latitude\": 38.37859180, \"rate_buck_amt4\": null, \"pickup_point_customer\": 31025, \"rate_miles\": null, \"pickup_special_instructions2\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"bol_number\": null, \"rate_chart_used\": 0, \"rate_buck_amt6\": null, \"add_charge_occur1\": null, \"deliver_phone\": null, \"rate_buck_amt11\": null, \"deliver_actual_pieces\": null, \"deliver_attention\": null, \"driver1_text\": \"LAVERT KENDALL MORRIS\", \"driver1\": 3001, \"zone_set_used\": 1, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"add_charge_amt4\": null, \"pickup_pricing_zone\": 1, \"pickup_country\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_omw_timestamp\": null, \"weight\": null, \"fuel_price_source\": null, \"pickup_omw_timestamp\": null, \"add_charge_code6\": null, \"photos_exist\": false, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_room\": null, \"deliver_omw_latitude\": null, \"callback_date\": null, \"actual_miles\": null, \"delivery_longitude\": -77.31366340, \"image_sign_req\": false, \"additional_drivers\": false, \"pickup_attention\": null, \"reference_text\": \"DAYA1\", \"reference\": \"DAYA1\", \"roundtrip_wait_time\": null, \"add_charge_code11\": null, \"pickup_special_instr_long\": null, \"add_charge_code3\": null, \"add_charge_amt1\": null, \"callback_to\": null, \"date_order_entered\": \"2021-07-05\", \"rate_special_instructions\": null, \"hist_inv_number\": 0, \"roundtrip_signature\": null, \"bringg_last_loc_sent\": null, \"pickup_route_code\": null, \"pickup_requested_arr_time\": \"07:00\", \"deliver_address\": \"134 CANTERBURY DR\", \"roundtrip_actual_longitude\": null, \"add_charge_occur8\": null, \"delivery_airport_code\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code10\": null, \"customer_name\": \"MXD/RYDER\", \"rate_buck_amt1\": 80.00, \"delivery_address_point_number_text\": \"MICHAEL BROWN\", \"delivery_address_point_number\": 25113, \"cod_amount\": null, \"roundtrip_actual_depart_time\": null, \"pickup_dispatch_zone\": null, \"service_level_text\": \"White Glove Delivery\", \"service_level\": 58, \"deliver_actual_longitude\": null, \"pickup_actual_arr_time\": \"08:00\", \"add_charge_amt6\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_longitude\": -77.33035820, \"driver2\": null, \"distribution_branch_id\": null, \"add_charge_amt9\": null, \"add_charge_code8\": null, \"blocks\": null, \"hazmat\": false, \"add_charge_code7\": null, \"deliver_requested_dep_time\": \"17:00\", \"signature\": \"SOF\", \"master_airway_bill_number\": null, \"cod_accept_company_check\": false, \"delivery_point_customer\": 31025, \"add_charge_occur2\": null, \"quote_amount\": null, \"add_charge_code2\": null, \"deliver_requested_date\": \"2021-05-10\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"record_type\": 0, \"deliver_special_instr_long\": null, \"push_partner_order_id\": null, \"pickup_address\": \"540 EASTPARK CT\", \"add_charge_occur9\": null, \"distribution_shift_id\": null, \"settlements\": [{\"voucher_amount\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket6_pct\": null, \"fuel_price_zone\": null, \"settlement_period_end_date\": null, \"driver_number_text\": \"LAVERT KENDALL MORRIS\", \"driver_number\": 3001, \"fuel_price_source\": null, \"settlement_bucket3_pct\": null, \"agent_etrac_transaction_number\": null, \"voucher_date\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"charge4\": null, \"pay_chart_used\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"adjustment_type\": null, \"voucher_number\": null, \"charge5\": null, \"charge2\": null, \"time_last_updated\": \"11:52\", \"settlement_bucket1_pct\": null, \"settlement_bucket5_pct\": null, \"settlement_bucket4_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"pre_book_percentage\": true, \"date_last_updated\": \"2021-07-05\", \"vendor_invoice_number\": null, \"control_number\": 1871698, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"fuel_plan\": null, \"charge3\": null, \"vendor_employee_numer\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge1\": null, \"order_date\": \"2021-05-10\", \"id\": \"002018716980D1\", \"agents_etrac_partner_id\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"record_type\": 0}], \"hours\": \"15\", \"pu_actual_location_accuracy\": null, \"fuel_price_zone\": null, \"rt_actual_location_accuracy\": null, \"deliver_phone_ext\": null, \"vehicle_type\": null, \"del_actual_location_accuracy\": null, \"ordered_by_phone_number\": null, \"deliver_country\": null, \"az_equip3\": null, \"add_charge_amt7\": null, \"add_charge_amt10\": null, \"notes\": [{\"user_id\": \"DX*\", \"note_line\": \"** Driver #1: 0 -> 3001\", \"control_number\": 1871698, \"note_code\": \"11\", \"id\": \"00201871698020210705125237DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:37\"}, {\"user_id\": \"DX*\", \"note_line\": \"** Driver #1 setl%: .00% -> 100.00%\", \"control_number\": 1871698, \"note_code\": \" 6\", \"id\": \"00201871698020210705125238DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:38\"}], \"pickup_eta_time\": null, \"deliver_state\": \"VA\", \"add_charge_code5\": null, \"deliver_wait_time\": null, \"pickup_omw_latitude\": null, \"fuel_miles\": null, \"add_charge_occur12\": null, \"deliver_dispatch_zone\": null, \"rate_buck_amt10\": 2.16, \"order_automatically_quoted\": false, \"deliver_actual_arr_time\": \"08:00\", \"deliver_special_instructions4\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"az_equip1\": null, \"time_order_entered\": \"12:27\", \"rate_buck_amt7\": null, \"roundtrip_actual_latitude\": null, \"add_charge_amt2\": null, \"add_charge_occur7\": null, \"pickup_email_notification_sent\": false, \"dispatch_time\": null, \"pickup_actual_longitude\": null, \"add_charge_amt11\": null, \"pickup_name\": \"HUMAN TOUCH\", \"dispatch_id\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"send_new_order_alert\": false, \"id\": \"002018716980\", \"deliver_omw_longitude\": null, \"pickup_state\": \"VA\", \"deliver_route_code\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"pickup_phone\": null, \"number_of_pieces\": 1}}";
+                                        //  objresponse.ResponseVal = true;
                                         if (objresponse.ResponseVal)
                                         {
                                             strExecutionLogMessage = "OrderPut API Success " + System.Environment.NewLine;
@@ -2006,6 +2142,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                                 objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = ex.Message;
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Exception while writing Order-Put response into csv";
+                                                objErrorResponse.reference = UniqueId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+
                                             }
                                             if (driver1 != null)
                                             {
@@ -2065,7 +2213,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
                                                             //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            break;
+
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = "Carrier Base Pay value not found for this record";
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Carrier Base Pay values Missing";
+                                                            objErrorResponse.reference = UniqueId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                            rowindex++;
+                                                            continue;
                                                         }
                                                     }
                                                     else
@@ -2076,7 +2236,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
                                                         //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                         objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                        break;
+
+                                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        objErrorResponse.error = "Carrier Base Pay column not found for this record";
+                                                        objErrorResponse.status = "Error";
+                                                        objErrorResponse.code = "Carrier Base Pay column Missing";
+                                                        objErrorResponse.reference = UniqueId;
+                                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                    strInputFilePath, processingFileName, strDatetime);
+                                                        rowindex++;
+                                                        continue;
                                                     }
                                                     if (dr.Table.Columns.Contains("Carrier ACC"))
                                                     {
@@ -2092,7 +2264,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
                                                             // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            break;
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Carrier ACC column Missing";
+                                                            objErrorResponse.reference = UniqueId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                            rowindex++;
+                                                            continue;
 
                                                         }
                                                     }
@@ -2104,7 +2287,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
                                                         // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                         objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                        break;
+                                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                        objErrorResponse.status = "Error";
+                                                        objErrorResponse.code = "Carrier ACC Value  Missing";
+                                                        objErrorResponse.reference = UniqueId;
+                                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                    strInputFilePath, processingFileName, strDatetime);
+                                                        rowindex++;
+                                                        continue;
                                                     }
 
                                                     ordersettlementputrequest = @"{" + ordersettlementputrequest + "}";
@@ -2114,7 +2308,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                     clsCommon.ReturnResponse objresponseOrdersettlement = new clsCommon.ReturnResponse();
                                                     objresponseOrdersettlement = objclsDatatrac.CallDataTracOrderSettlementPutAPI(UniqueId, order_settlementObject);
-                                                    // objresponseOrdersettlement.Reason = "{\"002018724450D1\": {\"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"time_last_updated\": \"05:10\", \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"order_date\": \"2021-06-28\", \"agent_etrac_transaction_number\": null, \"settlement_bucket1_pct\": null, \"settlement_bucket2_pct\": null, \"vendor_employee_numer\": null, \"fuel_price_zone\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"charge1\": 35.91, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"adjustment_type\": null, \"agents_etrac_partner_id\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"vendor_invoice_number\": null, \"charge6\": null, \"settlement_bucket4_pct\": null, \"fuel_plan\": null, \"record_type\": 0, \"voucher_amount\": null, \"id\": \"002018724450D1\", \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"voucher_number\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"settlement_bucket6_pct\": null, \"settlement_pct\": 100.00, \"charge3\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"voucher_date\": null, \"fuel_price_source\": null, \"pay_chart_used\": null, \"settlement_bucket5_pct\": null, \"charge2\": null, \"control_number\": 1872445, \"settlement_bucket3_pct\": null, \"charge5\": null, \"pre_book_percentage\": true, \"settlement_period_end_date\": null}}";
+                                                    //objresponseOrdersettlement.Reason = "{\"002018724450D1\": {\"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"time_last_updated\": \"05:10\", \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"order_date\": \"2021-06-28\", \"agent_etrac_transaction_number\": null, \"settlement_bucket1_pct\": null, \"settlement_bucket2_pct\": null, \"vendor_employee_numer\": null, \"fuel_price_zone\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"charge1\": 35.91, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"adjustment_type\": null, \"agents_etrac_partner_id\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"vendor_invoice_number\": null, \"charge6\": null, \"settlement_bucket4_pct\": null, \"fuel_plan\": null, \"record_type\": 0, \"voucher_amount\": null, \"id\": \"002018724450D1\", \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"voucher_number\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"settlement_bucket6_pct\": null, \"settlement_pct\": 100.00, \"charge3\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"voucher_date\": null, \"fuel_price_source\": null, \"pay_chart_used\": null, \"settlement_bucket5_pct\": null, \"charge2\": null, \"control_number\": 1872445, \"settlement_bucket3_pct\": null, \"charge5\": null, \"pre_book_percentage\": true, \"settlement_period_end_date\": null}}";
                                                     //objresponseOrdersettlement.ResponseVal = true;
                                                     if (objresponseOrdersettlement.ResponseVal)
                                                     {
@@ -2127,71 +2321,86 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         DataSet dsOrderSettlementResponse = objCommon.jsonToDataSet(objresponseOrdersettlement.Reason);
                                                         dsOrderSettlementResponse.Tables[0].TableName = "OrderSettlement";
 
-
-                                                        List<ResponseOrderSettlements> orderSettlementstList = new List<ResponseOrderSettlements>();
-                                                        for (int i = 0; i < dsOrderSettlementResponse.Tables["OrderSettlement"].Rows.Count; i++)
+                                                        try
                                                         {
-                                                            DataTable dt = dsOrderSettlementResponse.Tables["OrderSettlement"];
-                                                            ResponseOrderSettlements objsettlements = new ResponseOrderSettlements();
-                                                            objsettlements.company_number_text = (dt.Rows[i]["company_number_text"]);
-                                                            objsettlements.company_number = (dt.Rows[i]["company_number"]);
-                                                            objsettlements.charge4 = dt.Rows[i]["charge4"];
-                                                            objsettlements.posting_status_text = (dt.Rows[i]["posting_status_text"]);
-                                                            objsettlements.posting_status = (dt.Rows[i]["posting_status"]);
-                                                            objsettlements.time_last_updated = (dt.Rows[i]["time_last_updated"]);
-                                                            objsettlements.fuel_update_freq_text = (dt.Rows[i]["fuel_update_freq_text"]);
-                                                            objsettlements.fuel_update_freq = (dt.Rows[i]["fuel_update_freq"]);
-                                                            objsettlements.order_date = (dt.Rows[i]["order_date"]);
-                                                            objsettlements.agent_etrac_transaction_number = (dt.Rows[i]["agent_etrac_transaction_number"]);
-                                                            objsettlements.settlement_bucket1_pct = (dt.Rows[i]["settlement_bucket1_pct"]);
-                                                            objsettlements.settlement_bucket2_pct = (dt.Rows[i]["settlement_bucket2_pct"]);
-                                                            objsettlements.vendor_employee_numer = (dt.Rows[i]["vendor_employee_numer"]);
-                                                            objsettlements.fuel_price_zone = (dt.Rows[i]["fuel_price_zone"]);
-                                                            objsettlements.agent_accepted_or_rejected_text = (dt.Rows[i]["agent_accepted_or_rejected_text"]);
-                                                            objsettlements.agent_accepted_or_rejected = (dt.Rows[i]["agent_accepted_or_rejected"]);
-                                                            objsettlements.charge1 = (dt.Rows[i]["charge1"]);
-                                                            objsettlements.file_status_text = (dt.Rows[i]["file_status_text"]);
-                                                            objsettlements.file_status = (dt.Rows[i]["file_status"]);
-                                                            objsettlements.adjustment_type = (dt.Rows[i]["adjustment_type"]);
-                                                            objsettlements.agents_etrac_partner_id = (dt.Rows[i]["agents_etrac_partner_id"]);
-                                                            objsettlements.driver_company_number_text = (dt.Rows[i]["driver_company_number_text"]);
-                                                            objsettlements.driver_company_number = (dt.Rows[i]["driver_company_number"]);
-                                                            objsettlements.vendor_invoice_number = (dt.Rows[i]["vendor_invoice_number"]);
-                                                            objsettlements.charge6 = (dt.Rows[i]["charge6"]);
-                                                            objsettlements.settlement_bucket4_pct = (dt.Rows[i]["settlement_bucket4_pct"]);
-                                                            objsettlements.fuel_plan = (dt.Rows[i]["fuel_plan"]);
-                                                            objsettlements.record_type = (dt.Rows[i]["record_type"]);
-                                                            objsettlements.voucher_amount = (dt.Rows[i]["voucher_amount"]);
-                                                            objsettlements.id = (dt.Rows[i]["id"]);
-                                                            objsettlements.date_last_updated = (dt.Rows[i]["date_last_updated"]);
-                                                            objsettlements.driver_sequence_text = (dt.Rows[i]["driver_sequence_text"]);
-                                                            objsettlements.driver_sequence = (dt.Rows[i]["driver_sequence"]);
-                                                            objsettlements.voucher_number = (dt.Rows[i]["voucher_number"]);
-                                                            objsettlements.driver_number_text = (dt.Rows[i]["driver_number_text"]);
-                                                            objsettlements.driver_number = (dt.Rows[i]["driver_number"]);
-                                                            objsettlements.settlement_bucket6_pct = (dt.Rows[i]["settlement_bucket6_pct"]);
-                                                            objsettlements.settlement_pct = (dt.Rows[i]["settlement_pct"]);
-                                                            objsettlements.charge3 = (dt.Rows[i]["charge3"]);
-                                                            objsettlements.transaction_type_text = (dt.Rows[i]["transaction_type_text"]);
-                                                            objsettlements.transaction_type = (dt.Rows[i]["transaction_type"]);
-                                                            objsettlements.voucher_date = (dt.Rows[i]["voucher_date"]);
-                                                            objsettlements.fuel_price_source = (dt.Rows[i]["fuel_price_source"]);
-                                                            objsettlements.pay_chart_used = (dt.Rows[i]["pay_chart_used"]);
-                                                            objsettlements.settlement_bucket5_pct = (dt.Rows[i]["settlement_bucket5_pct"]);
-                                                            objsettlements.charge2 = (dt.Rows[i]["charge2"]);
-                                                            objsettlements.control_number = (dt.Rows[i]["control_number"]);
-                                                            objsettlements.settlement_bucket3_pct = (dt.Rows[i]["settlement_bucket3_pct"]);
-                                                            objsettlements.charge5 = (dt.Rows[i]["charge5"]);
-                                                            objsettlements.pre_book_percentage = (dt.Rows[i]["pre_book_percentage"]);
-                                                            objsettlements.settlement_period_end_date = (dt.Rows[i]["settlement_period_end_date"]);
-                                                            orderSettlementstList.Add(objsettlements);
+                                                            List<ResponseOrderSettlements> orderSettlementstList = new List<ResponseOrderSettlements>();
+                                                            for (int i = 0; i < dsOrderSettlementResponse.Tables["OrderSettlement"].Rows.Count; i++)
+                                                            {
+                                                                DataTable dt = dsOrderSettlementResponse.Tables["OrderSettlement"];
+                                                                ResponseOrderSettlements objsettlements = new ResponseOrderSettlements();
+                                                                objsettlements.company_number_text = (dt.Rows[i]["company_number_text"]);
+                                                                objsettlements.company_number = (dt.Rows[i]["company_number"]);
+                                                                objsettlements.charge4 = dt.Rows[i]["charge4"];
+                                                                objsettlements.posting_status_text = (dt.Rows[i]["posting_status_text"]);
+                                                                objsettlements.posting_status = (dt.Rows[i]["posting_status"]);
+                                                                objsettlements.time_last_updated = (dt.Rows[i]["time_last_updated"]);
+                                                                objsettlements.fuel_update_freq_text = (dt.Rows[i]["fuel_update_freq_text"]);
+                                                                objsettlements.fuel_update_freq = (dt.Rows[i]["fuel_update_freq"]);
+                                                                objsettlements.order_date = (dt.Rows[i]["order_date"]);
+                                                                objsettlements.agent_etrac_transaction_number = (dt.Rows[i]["agent_etrac_transaction_number"]);
+                                                                objsettlements.settlement_bucket1_pct = (dt.Rows[i]["settlement_bucket1_pct"]);
+                                                                objsettlements.settlement_bucket2_pct = (dt.Rows[i]["settlement_bucket2_pct"]);
+                                                                objsettlements.vendor_employee_numer = (dt.Rows[i]["vendor_employee_numer"]);
+                                                                objsettlements.fuel_price_zone = (dt.Rows[i]["fuel_price_zone"]);
+                                                                objsettlements.agent_accepted_or_rejected_text = (dt.Rows[i]["agent_accepted_or_rejected_text"]);
+                                                                objsettlements.agent_accepted_or_rejected = (dt.Rows[i]["agent_accepted_or_rejected"]);
+                                                                objsettlements.charge1 = (dt.Rows[i]["charge1"]);
+                                                                objsettlements.file_status_text = (dt.Rows[i]["file_status_text"]);
+                                                                objsettlements.file_status = (dt.Rows[i]["file_status"]);
+                                                                objsettlements.adjustment_type = (dt.Rows[i]["adjustment_type"]);
+                                                                objsettlements.agents_etrac_partner_id = (dt.Rows[i]["agents_etrac_partner_id"]);
+                                                                objsettlements.driver_company_number_text = (dt.Rows[i]["driver_company_number_text"]);
+                                                                objsettlements.driver_company_number = (dt.Rows[i]["driver_company_number"]);
+                                                                objsettlements.vendor_invoice_number = (dt.Rows[i]["vendor_invoice_number"]);
+                                                                objsettlements.charge6 = (dt.Rows[i]["charge6"]);
+                                                                objsettlements.settlement_bucket4_pct = (dt.Rows[i]["settlement_bucket4_pct"]);
+                                                                objsettlements.fuel_plan = (dt.Rows[i]["fuel_plan"]);
+                                                                objsettlements.record_type = (dt.Rows[i]["record_type"]);
+                                                                objsettlements.voucher_amount = (dt.Rows[i]["voucher_amount"]);
+                                                                objsettlements.id = (dt.Rows[i]["id"]);
+                                                                objsettlements.date_last_updated = (dt.Rows[i]["date_last_updated"]);
+                                                                objsettlements.driver_sequence_text = (dt.Rows[i]["driver_sequence_text"]);
+                                                                objsettlements.driver_sequence = (dt.Rows[i]["driver_sequence"]);
+                                                                objsettlements.voucher_number = (dt.Rows[i]["voucher_number"]);
+                                                                objsettlements.driver_number_text = (dt.Rows[i]["driver_number_text"]);
+                                                                objsettlements.driver_number = (dt.Rows[i]["driver_number"]);
+                                                                objsettlements.settlement_bucket6_pct = (dt.Rows[i]["settlement_bucket6_pct"]);
+                                                                objsettlements.settlement_pct = (dt.Rows[i]["settlement_pct"]);
+                                                                objsettlements.charge3 = (dt.Rows[i]["charge3"]);
+                                                                objsettlements.transaction_type_text = (dt.Rows[i]["transaction_type_text"]);
+                                                                objsettlements.transaction_type = (dt.Rows[i]["transaction_type"]);
+                                                                objsettlements.voucher_date = (dt.Rows[i]["voucher_date"]);
+                                                                objsettlements.fuel_price_source = (dt.Rows[i]["fuel_price_source"]);
+                                                                objsettlements.pay_chart_used = (dt.Rows[i]["pay_chart_used"]);
+                                                                objsettlements.settlement_bucket5_pct = (dt.Rows[i]["settlement_bucket5_pct"]);
+                                                                objsettlements.charge2 = (dt.Rows[i]["charge2"]);
+                                                                objsettlements.control_number = (dt.Rows[i]["control_number"]);
+                                                                objsettlements.settlement_bucket3_pct = (dt.Rows[i]["settlement_bucket3_pct"]);
+                                                                objsettlements.charge5 = (dt.Rows[i]["charge5"]);
+                                                                objsettlements.pre_book_percentage = (dt.Rows[i]["pre_book_percentage"]);
+                                                                objsettlements.settlement_period_end_date = (dt.Rows[i]["settlement_period_end_date"]);
+                                                                orderSettlementstList.Add(objsettlements);
+                                                            }
+
+                                                            //objCommon.SaveOutputDataToCsvFile(orderSettlementstList, "OrderSettlement",
+                                                            //   strInputFilePath, UniqueId, strFileName, strDatetime);
+
+                                                            objCommon.SaveOutputDataToCsvFileParallely(orderSettlementstList, "OrderSettlement",
+                                                         processingFileName, strDatetime);
                                                         }
-
-                                                        //objCommon.SaveOutputDataToCsvFile(orderSettlementstList, "OrderSettlement",
-                                                        //   strInputFilePath, UniqueId, strFileName, strDatetime);
-
-                                                        objCommon.SaveOutputDataToCsvFileParallely(orderSettlementstList, "OrderSettlement",
-                                                     processingFileName, strDatetime);
+                                                        catch (Exception ex)
+                                                        {
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = ex.Message;
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Exception while writing the response into csv";
+                                                            objErrorResponse.reference = UniqueId;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -2226,17 +2435,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
                                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
-                                            DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
-                                            dsOrderFailureResponse.Tables[0].TableName = "OrderPutFailure";
-                                            dsOrderFailureResponse.Tables[0].Columns.Add("UniqueId", typeof(System.String));
-                                            foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                            dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                            dsFailureResponse.Tables[0].Columns.Add("UniqueId", typeof(System.String));
+                                            foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                             {
                                                 row["UniqueId"] = UniqueId;
                                             }
-                                            //    objCommon.WriteDataToCsvFile(dsOrderFailureResponse.Tables[0],
-                                            //strInputFilePath, UniqueId, strFileName, strDatetime);
-
-                                            objCommon.WriteDataToCsvFileParallely(dsOrderFailureResponse.Tables[0],
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
                                                         strInputFilePath, processingFileName, strDatetime);
 
                                         }
@@ -2253,6 +2459,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                         // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                         // objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                         objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = ex.Message;
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Exception while generating the request";
+                                        objErrorResponse.reference = UniqueId;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
+                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                    strInputFilePath, processingFileName, strDatetime);
                                     }
                                 }
                             });
@@ -2263,8 +2480,8 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderPut-Progress", strDatetime);
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderPut-Note", strDatetime);
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlement", strDatetime);
-                            objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlementFailure", strDatetime);
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderPutFailure", strDatetime);
+                            objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlementFailure", strDatetime);
                             objCommon.MoveMergedOutputFilesToOutputLocation(strInputFilePath);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
 
@@ -2401,7 +2618,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                                 // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Company value not found for this record ";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Company Value  Missing";
+                                                objErrorResponse.reference = "For row number -" + rowindex;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -2411,7 +2640,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            break;
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Company column not found for this record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Company column  Missing";
+                                            objErrorResponse.reference = "For row number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
                                         if (dr.Table.Columns.Contains("Control Number"))
                                         {
@@ -2426,7 +2667,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                                 // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Control Number column not found for this record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Control Number column Missing";
+                                                objErrorResponse.reference = "For row number -" + rowindex;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -2436,7 +2689,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                             //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                            break;
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Control Number value not found for this record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Control Number  Value  Missing";
+                                            objErrorResponse.reference = "For row number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
 
                                         string OrderSettlement_UniqueIdSuffix = Convert.ToString(dr["OrderSettlement_UniqueIdSuffix"]);
@@ -2484,7 +2748,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For Unique  Reference -" + UniqueId + System.Environment.NewLine;
                                                 // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Carrier Base Pay value not found for this record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Carrier Base Pay Value  Missing";
+                                                objErrorResponse.reference = UniqueId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -2495,7 +2771,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
                                             //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            break;
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Carrier Base Pay column not found for this record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Carrier Base Pay column  Missing";
+                                            objErrorResponse.reference = UniqueId;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
                                         if (dr.Table.Columns.Contains("Carrier ACC"))
                                         {
@@ -2511,7 +2799,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
                                                 //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                break;
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Carrier ACC value not found for this  record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Carrier ACC Value Missing";
+                                                objErrorResponse.reference = UniqueId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                rowindex++;
+                                                continue;
                                             }
                                         }
                                         else
@@ -2522,7 +2822,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
                                             // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                            break;
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Carrier ACC column not found for this file record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Carrier ACC column Missing";
+                                            objErrorResponse.reference = UniqueId;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        strInputFilePath, processingFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
                                         }
 
                                         ordersettlementputrequest = @"{" + ordersettlementputrequest + "}";
@@ -2533,8 +2845,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                         clsCommon.ReturnResponse objresponseOrdersettlement = new clsCommon.ReturnResponse();
                                         objresponseOrdersettlement = objclsDatatrac.CallDataTracOrderSettlementPutAPI(UniqueId, order_settlementObject);
 
-                                        // objresponseOrdersettlement.Reason = "{\"002018724450D1\": {\"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"time_last_updated\": \"05:10\", \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"order_date\": \"2021-06-28\", \"agent_etrac_transaction_number\": null, \"settlement_bucket1_pct\": null, \"settlement_bucket2_pct\": null, \"vendor_employee_numer\": null, \"fuel_price_zone\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"charge1\": 35.91, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"adjustment_type\": null, \"agents_etrac_partner_id\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"vendor_invoice_number\": null, \"charge6\": null, \"settlement_bucket4_pct\": null, \"fuel_plan\": null, \"record_type\": 0, \"voucher_amount\": null, \"id\": \"002018724450D1\", \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"voucher_number\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"settlement_bucket6_pct\": null, \"settlement_pct\": 100.00, \"charge3\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"voucher_date\": null, \"fuel_price_source\": null, \"pay_chart_used\": null, \"settlement_bucket5_pct\": null, \"charge2\": null, \"control_number\": 1872445, \"settlement_bucket3_pct\": null, \"charge5\": null, \"pre_book_percentage\": true, \"settlement_period_end_date\": null}}";
-                                        // objresponseOrdersettlement.ResponseVal = true;
+                                        //objresponseOrdersettlement.Reason = "{\"002018724450D1\": {\"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"time_last_updated\": \"05:10\", \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"order_date\": \"2021-06-28\", \"agent_etrac_transaction_number\": null, \"settlement_bucket1_pct\": null, \"settlement_bucket2_pct\": null, \"vendor_employee_numer\": null, \"fuel_price_zone\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"charge1\": 35.91, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"adjustment_type\": null, \"agents_etrac_partner_id\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"vendor_invoice_number\": null, \"charge6\": null, \"settlement_bucket4_pct\": null, \"fuel_plan\": null, \"record_type\": 0, \"voucher_amount\": null, \"id\": \"002018724450D1\", \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"voucher_number\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"settlement_bucket6_pct\": null, \"settlement_pct\": 100.00, \"charge3\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"voucher_date\": null, \"fuel_price_source\": null, \"pay_chart_used\": null, \"settlement_bucket5_pct\": null, \"charge2\": null, \"control_number\": 1872445, \"settlement_bucket3_pct\": null, \"charge5\": null, \"pre_book_percentage\": true, \"settlement_period_end_date\": null}}";
+                                        //objresponseOrdersettlement.ResponseVal = true;
 
                                         //objresponseOrdersettlement.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                         //objresponseOrdersettlement.ResponseVal = false;
@@ -2647,6 +2959,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                         //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                         //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
                                         objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = ex.Message;
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Exception while generating the request";
+                                        objErrorResponse.reference = UniqueId;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                    strInputFilePath, processingFileName, strDatetime);
                                     }
                                 }
 
@@ -2874,9 +3198,9 @@ namespace DatatracAPIOrder_OrderSettlement
                                         clsRoute objclsRoute = new clsRoute();
                                         clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
                                         string request = JsonConvert.SerializeObject(objroute_headerdetails);
-                                        // objresponse = objclsRoute.CallDataTracRouteHeaderPostAPI(request);
-                                        objresponse.ResponseVal = true;
-                                        objresponse.Reason = "{\"999      20200101UNROUT\": {\"end_date\": null, \"start_location\": null, \"scan_expire_days\": 0, \"shipper_facility\": null, \"route_late_start_code\": null, \"actual_settlement_amount\": 0, \"az_equip1\": null, \"posted_by\": null, \"per_stop_billing_amount\": 0, \"open_time\": null, \"assigned_vehicle\": null, \"actual_billing_amount\": 0, \"settlement_level_text\": \"None\", \"settlement_level\": \"0\", \"actual_cost_allocation\": 0, \"branch_id\": null, \"route_date\": \"2020-01-01\", \"total_route_minutes\": 0, \"total_break_time\": null, \"last_updated_by\": null, \"actual_miles\": 0, \"start_time\": null, \"actual_total_pieces\": 0, \"hours\": null, \"push_services\": null, \"end_location\": null, \"total_break_minutes\": 0, \"updated_date\": null, \"total_billing_amount\": 0, \"time_to_reseq\": null, \"route_closed\": 0, \"created_date\": \"2021-08-17\", \"last_updated_time\": null, \"overhead_allocation_method_text\": \"None\", \"overhead_allocation_method\": \"0\", \"vehicle_allocation_method_text\": \"None\", \"vehicle_allocation_method\": \"0\", \"expire_time\": null, \"shift_id\": null, \"rtn_trans_route\": null, \"id\": \"999      20200101UNROUT\", \"created_time\": \"09:56:28\", \"az_equip2\": null, \"actual_total_weight\": 0, \"route_code\": \"UNROUT\", \"actual_vehicle\": null, \"starting_location\": null, \"route_type_text\": \"Delivery\", \"route_type\": \"DEL\", \"overhead_cost\": 0, \"last_updated_date\": null, \"calc_eta\": false, \"labor_allocation_method_text\": \"None\", \"labor_allocation_method\": \"0\", \"route_addon_amount\": 0, \"posted_time\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"close_time\": null, \"billing_level_text\": \"None\", \"billing_level\": \"0\", \"notes\": [], \"service_level\": 0, \"service_time\": 0, \"route_service_method_text\": \"Default\", \"route_service_method\": \"0\", \"stops\": 0, \"route_stops\": [], \"created_by\": \"DX*\", \"assigned_driver_agent\": null, \"transfer_to_shift\": null, \"break_time\": null, \"total_settlement_amount\": 0, \"ending_location\": null, \"unique_control_id\": 1010056, \"shipper_type_text\": \"Default\", \"shipper_type\": \"0\", \"posted_date\": null, \"dispatcher_id\": null, \"shipper_route\": null, \"total_route_time\": null, \"send_to_pt\": false, \"updated_time\": null, \"posted_status\": 0, \"start_date\": null, \"amazon_order_number\": null, \"route_comments\": null, \"updated_by\": null, \"vehicle_cost\": 0, \"miles\": 0, \"billing_method_text\": \"None\", \"billing_method\": \"0\", \"actual_driver_agent\": null, \"labor_cost\": 0, \"az_equip3\": null, \"per_stop_settlement_amount\": 0, \"transfer_to_branch\": null, \"actual_stops\": 0, \"end_time\": null, \"transfer_to_company\": 0}}";
+                                        objresponse = objclsRoute.CallDataTracRouteHeaderPostAPI(request);
+                                        // objresponse.ResponseVal = true;
+                                        //objresponse.Reason = "{\"999      20200101UNROUT\": {\"end_date\": null, \"start_location\": null, \"scan_expire_days\": 0, \"shipper_facility\": null, \"route_late_start_code\": null, \"actual_settlement_amount\": 0, \"az_equip1\": null, \"posted_by\": null, \"per_stop_billing_amount\": 0, \"open_time\": null, \"assigned_vehicle\": null, \"actual_billing_amount\": 0, \"settlement_level_text\": \"None\", \"settlement_level\": \"0\", \"actual_cost_allocation\": 0, \"branch_id\": null, \"route_date\": \"2020-01-01\", \"total_route_minutes\": 0, \"total_break_time\": null, \"last_updated_by\": null, \"actual_miles\": 0, \"start_time\": null, \"actual_total_pieces\": 0, \"hours\": null, \"push_services\": null, \"end_location\": null, \"total_break_minutes\": 0, \"updated_date\": null, \"total_billing_amount\": 0, \"time_to_reseq\": null, \"route_closed\": 0, \"created_date\": \"2021-08-17\", \"last_updated_time\": null, \"overhead_allocation_method_text\": \"None\", \"overhead_allocation_method\": \"0\", \"vehicle_allocation_method_text\": \"None\", \"vehicle_allocation_method\": \"0\", \"expire_time\": null, \"shift_id\": null, \"rtn_trans_route\": null, \"id\": \"999      20200101UNROUT\", \"created_time\": \"09:56:28\", \"az_equip2\": null, \"actual_total_weight\": 0, \"route_code\": \"UNROUT\", \"actual_vehicle\": null, \"starting_location\": null, \"route_type_text\": \"Delivery\", \"route_type\": \"DEL\", \"overhead_cost\": 0, \"last_updated_date\": null, \"calc_eta\": false, \"labor_allocation_method_text\": \"None\", \"labor_allocation_method\": \"0\", \"route_addon_amount\": 0, \"posted_time\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"close_time\": null, \"billing_level_text\": \"None\", \"billing_level\": \"0\", \"notes\": [], \"service_level\": 0, \"service_time\": 0, \"route_service_method_text\": \"Default\", \"route_service_method\": \"0\", \"stops\": 0, \"route_stops\": [], \"created_by\": \"DX*\", \"assigned_driver_agent\": null, \"transfer_to_shift\": null, \"break_time\": null, \"total_settlement_amount\": 0, \"ending_location\": null, \"unique_control_id\": 1010056, \"shipper_type_text\": \"Default\", \"shipper_type\": \"0\", \"posted_date\": null, \"dispatcher_id\": null, \"shipper_route\": null, \"total_route_time\": null, \"send_to_pt\": false, \"updated_time\": null, \"posted_status\": 0, \"start_date\": null, \"amazon_order_number\": null, \"route_comments\": null, \"updated_by\": null, \"vehicle_cost\": 0, \"miles\": 0, \"billing_method_text\": \"None\", \"billing_method\": \"0\", \"actual_driver_agent\": null, \"labor_cost\": 0, \"az_equip3\": null, \"per_stop_settlement_amount\": 0, \"transfer_to_branch\": null, \"actual_stops\": 0, \"end_time\": null, \"transfer_to_company\": 0}}";
                                         if (objresponse.ResponseVal)
                                         {
                                             strExecutionLogMessage = "RouteHeaderPostAPI Success " + System.Environment.NewLine;
@@ -3111,6 +3435,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
                                                 //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Found exception while processing the record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Exception while processing this record";
+                                                objErrorResponse.reference = UniqueId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
+                                                objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                       strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                                continue;
                                             }
                                         }
                                         else
@@ -3120,14 +3456,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
                                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
-                                            DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
-                                            dsOrderFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
-                                            dsOrderFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
-                                            foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                            dsFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
+                                            dsFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
+                                            foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                             {
                                                 row["Reference"] = ReferenceId;
                                             }
-                                            objCommon.WriteDataToCsvFile(dsOrderFailureResponse.Tables[0],
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
                                         strInputFilePath, ReferenceId, strFileName, strDatetime);
 
                                         }
@@ -3271,7 +3607,19 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                     strExecutionLogMessage += "Please Put entry for this service type in Service Type mapping" + System.Environment.NewLine;
                                     objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                                    ErrorResponse objErrorResponse = new ErrorResponse();
+                                    objErrorResponse.error = " Service Type Mapping Missing";
+                                    objErrorResponse.status = "Error";
+                                    objErrorResponse.code = "Service Type Mapping Missing";
+                                    objErrorResponse.reference = ReferenceId;
+                                    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                    dsFailureResponse.Tables[0].TableName = "RouteStopFailure";
+                                    objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                   strInputFilePath, ReferenceId, strFileName, strDatetime);
                                     continue;
+
                                 }
 
                                 foreach (DataRow dr in dtdistinctValues.Rows)
@@ -3293,7 +3641,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                         DataRow[] drservice_level = dtServiceTypes.Select("CustomerServiceLevelCode= '" + drresult[0]["Service Type"] + "'");
 
-                                        if (drservice_level.Length>0)
+                                        if (drservice_level.Length > 0)
                                         {
                                             //service_level
                                             service_level = Convert.ToInt32(drservice_level[0]["Service_Type"]);
@@ -3308,6 +3656,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                             strExecutionLogMessage += "Service Type -" + Convert.ToString(drresult[0]["Service Type"]) + System.Environment.NewLine;
                                             strExecutionLogMessage += "Please Put entry for this service type in Service Type mapping" + System.Environment.NewLine;
                                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Service Type Mapping not done for service type - :" + Convert.ToString(drresult[0]["Service Type"]);
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Service Type Mapping Entry Missing";
+                                            objErrorResponse.reference = ReferenceId;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopFailure";
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                           strInputFilePath, ReferenceId, strFileName, strDatetime);
                                             continue;
 
                                         }
@@ -3826,9 +4185,9 @@ namespace DatatracAPIOrder_OrderSettlement
                                         clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
                                         string request = JsonConvert.SerializeObject(objroute_stopdetails);
                                         objresponse = objclsRoute.CallDataTracRouteStopPostAPI(request);
-                                       // objresponse.ResponseVal = true;
+                                        // objresponse.ResponseVal = true;
                                         //objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
-                                       // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
+                                        // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
                                         if (objresponse.ResponseVal)
                                         {
                                             strExecutionLogMessage = "RouteStopPostAPI Success " + System.Environment.NewLine;
@@ -4012,13 +4371,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         objIds.received_company = dt.Rows[i]["received_company"];
                                                         objIds.addl_charge_code2 = dt.Rows[i]["addl_charge_code2"];
                                                         objIds.state = dt.Rows[i]["state"];
-
-
                                                         // public object @return { get; set; }
-
-
-
-
                                                         idList.Add(objIds);
                                                     }
                                                     objCommon.SaveOutputDataToCsvFile(idList, "RouteStop-Create",
@@ -4168,23 +4521,35 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
                                                 //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = "Found exception while processing the record";
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Excception while procesing the record.";
+                                                objErrorResponse.reference = ReferenceId;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "RouteStopFailure";
+                                                objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                               strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                                continue;
                                             }
                                         }
                                         else
                                         {
-                                            strExecutionLogMessage = "RouteHeaderPostAPI Failed " + System.Environment.NewLine;
+                                            strExecutionLogMessage = "RouteStopPostAPI Failed " + System.Environment.NewLine;
                                             strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
                                             strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
                                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
-                                            DataSet dsOrderFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
-                                            dsOrderFailureResponse.Tables[0].TableName = "RouteHeaderFailure";
-                                            dsOrderFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
-                                            foreach (DataRow row in dsOrderFailureResponse.Tables[0].Rows)
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopFailure";
+                                            dsFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
+                                            foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                             {
                                                 row["Reference"] = ReferenceId;
                                             }
-                                            objCommon.WriteDataToCsvFile(dsOrderFailureResponse.Tables[0],
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
                                         strInputFilePath, ReferenceId, strFileName, strDatetime);
 
                                         }
@@ -4256,8 +4621,5 @@ namespace DatatracAPIOrder_OrderSettlement
                 itemsReturned += currentChunkSize;
             }
         }
-
-
-
     }
 }

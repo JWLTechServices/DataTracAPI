@@ -25,7 +25,9 @@ namespace DatatracAPIOrder_OrderSettlement
                 {
                     client.Timeout = TimeSpan.FromMinutes(5);
                     //    string url = objCommon.GetConfigValue("DatatracURL");//"https://login.datatrac.com/rest/order";
-                    string url = objCommon.GetConfigValue("DatatracURL") + "/order";
+                    string url = objCommon.GetConfigValue("DatatracURL") + "/order?user=" + objorderdetails.order.csr + "";
+                    //  objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), "OrderPostAPI url :" + url);
+
                     client.DefaultRequestHeaders
                       .Accept
                       .Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -85,7 +87,7 @@ namespace DatatracAPIOrder_OrderSettlement
         }
 
 
-        public ReturnResponse CallDataTracOrderSettlementPutAPI(string UniqueId, string jsonreq)
+        public ReturnResponse CallDataTracOrderSettlementPutAPI(string UniqueId, string jsonreq, string enteredby = "")
         {
             ReturnResponse objresponse = new ReturnResponse();
 
@@ -96,7 +98,15 @@ namespace DatatracAPIOrder_OrderSettlement
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromMinutes(5);
+                    //  string url = objCommon.GetConfigValue("DatatracURL") + "/order_settlement/" + UniqueId;
                     string url = objCommon.GetConfigValue("DatatracURL") + "/order_settlement/" + UniqueId;
+                    if (!string.IsNullOrEmpty(enteredby))
+                    {
+                        url = objCommon.GetConfigValue("DatatracURL") + "/order_settlement/" + UniqueId +"?user=" + enteredby + "";
+                    }
+
+                    objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), "OrderSettlementPutAPI url :" + url);
+
 
                     client.DefaultRequestHeaders
                       .Accept
@@ -554,7 +564,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object powerpage_status_text { get; set; }
         public object powerpage_status { get; set; }
         public object add_charge_occur4 { get; set; }
-       
+
         public object quote_amount { get; set; }
         public object cod_text { get; set; }
         public object cod { get; set; }
@@ -574,7 +584,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object add_charge_occur11 { get; set; }
         public object deliver_omw_latitude { get; set; }
         public object callback_userid { get; set; }
-      
+
         public object pickup_point_customer { get; set; }
         public object pickup_eta_time { get; set; }
         public object add_charge_occur8 { get; set; }
@@ -588,7 +598,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object ordered_by_phone_number { get; set; }
         public object add_charge_amt12 { get; set; }
         public object delivery_point_customer { get; set; }
-       
+
         public object email_addresses { get; set; }
 
         public object driver2 { get; set; }
@@ -600,7 +610,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object vehicle_type { get; set; }
         public object add_charge_amt9 { get; set; }
         public object pickup_phone { get; set; }
-       
+
         public object customers_etrac_partner_id { get; set; }
         public object order_type_text { get; set; }
         public object order_type { get; set; }
@@ -608,12 +618,12 @@ namespace DatatracAPIOrder_OrderSettlement
         public object add_charge_code3 { get; set; }
         public object etrac_number { get; set; }
 
-      
+
 
         public List<object> line_items { get; set; }
         public object pickup_sign_req { get; set; }
         public object add_charge_code10 { get; set; }
-     
+
         public object fuel_plan { get; set; }
         public object add_charge_amt10 { get; set; }
         public object roundtrip_actual_depart_time { get; set; }
@@ -693,21 +703,21 @@ namespace DatatracAPIOrder_OrderSettlement
         public object pickup_special_instructions2 { get; set; }
         public object order_automatically_quoted { get; set; }
 
-       
+
         public object callback_time { get; set; }
         public object hazmat { get; set; }
         public object distribution_shift_id { get; set; }
         public object pickup_latitude { get; set; }
-       
+
         public object insurance_amount { get; set; }
         public object cod_accept_cashiers_check { get; set; }
         public object add_charge_amt4 { get; set; }
         public object add_charge_code7 { get; set; }
-       
+
         public object cod_accept_company_check { get; set; }
-        
+
         public object previous_ctrl_number { get; set; }
-       
+
         public object deliver_special_instructions3 { get; set; }
         public object rate_buck_amt7 { get; set; }
         public object hist_inv_number { get; set; }
@@ -716,7 +726,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object po_number { get; set; }
 
 
-      
+
         public object dispatch_id { get; set; }
         public object photos_exist { get; set; }
         public object pickup_actual_latitude { get; set; }
@@ -745,7 +755,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object rt_actual_location_accuracy { get; set; }
         public object rate_chart_used { get; set; }
         public object pickup_longitude { get; set; }
-      
+
         public object add_charge_amt5 { get; set; }
         public object pu_arrive_notification_sent { get; set; }
 
@@ -754,7 +764,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public object push_services { get; set; }
         public object deliver_eta_date { get; set; }
         public object driver1_text { get; set; }
-      
+
         public object deliver_omw_longitude { get; set; }
         public object deliver_wait_time { get; set; }
         public object pickup_room { get; set; }
@@ -787,17 +797,17 @@ namespace DatatracAPIOrder_OrderSettlement
         public object add_charge_occur3 { get; set; }
         public object blocks { get; set; }
         public object add_charge_code9 { get; set; }
-       
+
         public object add_charge_occur10 { get; set; }
         public object add_charge_code11 { get; set; }
         public object pickup_address_point_number_text { get; set; }
         public object pickup_address_point_number { get; set; }
         public object customer_name { get; set; }
         public object pu_actual_location_accuracy { get; set; }
-       
+
         public object add_charge_amt6 { get; set; }
         public object signature_required { get; set; }
-       
+
         public object add_charge_amt8 { get; set; }
         public object callback_to { get; set; }
         public object fuel_price_source { get; set; }

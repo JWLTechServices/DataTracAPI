@@ -1177,7 +1177,7 @@ namespace DatatracAPIOrder_OrderSettlement
             }
             catch (Exception ex)
             {
-                string strExecutionLogMessage = "Exception in MoveOutputFilesToOutputLocation" + System.Environment.NewLine;
+                string strExecutionLogMessage = "Exception in CleanSplittedOutputFilesWorkingFolder" + System.Environment.NewLine;
                 WriteErrorLog(ex, strExecutionLogMessage);
             }
         }
