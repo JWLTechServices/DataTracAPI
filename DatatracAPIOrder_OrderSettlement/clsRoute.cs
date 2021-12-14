@@ -141,6 +141,71 @@ namespace DatatracAPIOrder_OrderSettlement
             return objresponse;
         }
 
+
+        public ReturnResponse CallDataTracRouteStopPutAPI(string UniqueId, string jsonreq)
+        {
+            ReturnResponse objresponse = new ReturnResponse();
+
+            string json = string.Empty;
+            clsCommon objCommon = new clsCommon();
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                   // string url = objCommon.GetConfigValue("DatatracURL") + "/route_stop";
+                    string url = objCommon.GetConfigValue("DatatracURL") + "/route_stop/" + UniqueId;
+                    client.DefaultRequestHeaders
+                      .Accept
+                      .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var Username = objCommon.GetConfigValue("DatatracUserName");
+                    var Password = objCommon.GetConfigValue("DatatracPassword");
+
+                    UTF8Encoding utf8 = new UTF8Encoding();
+
+                    byte[] encodedBytes = utf8.GetBytes(Username + ":" + Password);
+                    string userCredentialsEncoding = Convert.ToBase64String(encodedBytes);
+                    client.DefaultRequestHeaders.Add("Authorization", "Basic " + userCredentialsEncoding);
+                    JObject jsonobj = JObject.Parse(jsonreq);
+                    string payload = jsonobj.ToString();
+                    //string payload = JsonConvert.SerializeObject(objheaderdetails);
+                    using (var content = new StringContent(payload, Encoding.UTF8, "application/json"))
+                    {
+                        content.Headers.ContentType.CharSet = "UTF-8";
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                        var response = client.PutAsync(url, content).Result;
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            objresponse.Reason = response.Content.ReadAsStringAsync().Result;
+                            objresponse.ResponseVal = true;
+                        }
+                        else
+                        {
+                            objresponse.ResponseVal = false;
+                            objresponse.Reason = response.Content.ReadAsStringAsync().Result;
+                            string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
+                            strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
+                            strExecutionLogMessage += "Response:" + objresponse.Reason;
+                            objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string strExecutionLogMessage = "exception in CallDataTracRouteStopPutAPI " + ex;
+                objresponse.Reason = strExecutionLogMessage;
+                objresponse.ResponseVal = false;
+                objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+            }
+            return objresponse;
+        }
+
         public DSResponse GetRouteStopDetails(string CustomerName, string LocationCode, string ProductCode)
         {
             DSResponse objResponse = new DSResponse();

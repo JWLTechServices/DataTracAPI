@@ -162,30 +162,46 @@ namespace DatatracAPIOrder_OrderSettlement
                             else if (subDirFolder.ToUpper() == "ROUTESTOP")
                             {
 
-                                string OrderfilePath = strInputFilePath + @"\" + Location + @"\" + subDirFolder;
-                                subDirectories = Directory.GetDirectories(OrderfilePath, "*", SearchOption.TopDirectoryOnly);
+                                string filePath = strInputFilePath + @"\" + Location + @"\" + subDirFolder;
+                                subDirectories = Directory.GetDirectories(filePath, "*", SearchOption.TopDirectoryOnly);
                                 foreach (var subDirectoryOrder in subDirectories)
                                 {
                                     // break;
-                                    string OrderSubdir = Right(subDirectoryOrder, (subDirectoryOrder.Length - (OrderfilePath.Length + 1)));
-                                    if (OrderSubdir.ToUpper() == "ADD")
+                                    string Subdir = Right(subDirectoryOrder, (subDirectoryOrder.Length - (filePath.Length + 1)));
+                                    if (Subdir.ToUpper() == "ADD")
                                     {
-                                        string OrderAddfilePath = OrderfilePath + @"\" + OrderSubdir;
-                                        dir = new DirectoryInfo(OrderAddfilePath);
+                                        string AddfilePath = filePath + @"\" + Subdir;
+                                        dir = new DirectoryInfo(AddfilePath);
                                         XLSfiles = dir.GetFiles("*.xlsx");
                                         if (XLSfiles.Count() > 0)
                                         {
-                                            ProcessAddRouteStopFiles(OrderAddfilePath, Location);
+                                            ProcessAddRouteStopFiles(AddfilePath, Location);
                                         }
                                         else
                                         {
-                                            strExecutionLogMessage = "No Excel Files found for this location: " + Location + ", Path is :" + OrderAddfilePath;
+                                            strExecutionLogMessage = "No Excel Files found for this location: " + Location + ", Path is :" + AddfilePath;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        }
+                                    }
+                                    else if (Subdir.ToUpper() == "MODIFY")
+                                    {
+                                        string UpdatefilePath = filePath + @"\" + Subdir;
+                                        dir = new DirectoryInfo(UpdatefilePath);
+                                        XLSfiles = dir.GetFiles("*.xlsx");
+                                        if (XLSfiles.Count() > 0)
+                                        {
+                                            ProcessUpdateRouteStopFiles(UpdatefilePath, Location);
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "No Excel Files found for this location: " + Location + ", Path is :" + UpdatefilePath;
                                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                         }
                                     }
 
                                 }
                             }
+
                         }
                     }
                     catch (Exception ex)
@@ -3668,9 +3684,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                             objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
                            strInputFilePath, ReferenceId, strFileName, strDatetime);
                                             continue;
-
                                         }
-
 
                                         List<items> objitemsList = new List<items>();
                                         foreach (DataRow drItems in drresult)
@@ -3694,6 +3708,40 @@ namespace DatatracAPIOrder_OrderSettlement
                                             objitems.item_number = Convert.ToString(drItems["Item Number"]);
                                             //  objitems.container_id = Convert.ToString(drItems["Container Id"]);
                                             objitems.reference = Convert.ToString(drItems["Customer_Reference"]);
+
+                                            if (drItems.Table.Columns.Contains("Return"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drItems["Return"])))
+                                                {
+                                                    string str = Convert.ToString(drItems["Return"]);
+                                                    if (Convert.ToString(drItems["Return"]).ToLower() == "yes")
+                                                    {
+                                                        str = "Y";
+                                                    }
+                                                    else if (Convert.ToString(drItems["Return"]).ToLower() == "Y")
+                                                    {
+                                                        str = "Y";
+                                                    }
+                                                    else if (Convert.ToString(drItems["Return"]).ToLower() == "1")
+                                                    {
+                                                        str = "Y";
+                                                    }
+                                                    else
+                                                    {
+                                                        str = "N";
+                                                    }
+                                                    objitems.@return = Convert.ToString(drItems["Return"]);
+                                                }
+                                            }
+
+                                            if (drItems.Table.Columns.Contains("Bol Number"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Bol Number"])))
+                                                {
+                                                    objroute_stop.bol_number = Convert.ToString(drresult[0]["Bol Number"]);
+                                                }
+                                            }
+
                                             objitemsList.Add(objitems);
                                         }
 
@@ -3736,11 +3784,13 @@ namespace DatatracAPIOrder_OrderSettlement
                                         if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
                                             objroute_stop.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
 
-                                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"])))
+                                        if (String.IsNullOrEmpty(objroute_stop.bol_number))
                                         {
-                                            objroute_stop.bol_number = Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"]);
+                                            if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"])))
+                                            {
+                                                objroute_stop.bol_number = Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"]);
+                                            }
                                         }
-
 
                                         if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_arrival_time"])))
                                         {
@@ -4184,9 +4234,8 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                         clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
                                         string request = JsonConvert.SerializeObject(objroute_stopdetails);
-                                        objresponse = objclsRoute.CallDataTracRouteStopPostAPI(request);
-                                        // objresponse.ResponseVal = true;
-                                        //objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
+                                       // objresponse.ResponseVal = true;
+                                       // objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
                                         // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
                                         if (objresponse.ResponseVal)
                                         {
@@ -4619,6 +4668,865 @@ namespace DatatracAPIOrder_OrderSettlement
                 int currentChunkSize = Math.Min(chunkSize, count - itemsReturned);
                 yield return list.GetRange(itemsReturned, currentChunkSize);
                 itemsReturned += currentChunkSize;
+            }
+        }
+
+        private static void ProcessUpdateRouteStopFiles(string strInputFilePath, string strLocationFolder)
+        {
+            clsCommon objCommon = new clsCommon();
+
+            try
+            {
+                //System.Configuration.AppSettingsReader reader = new System.Configuration.AppSettingsReader();
+                DirectoryInfo dir;
+                FileInfo[] XLSfiles;
+                string strFileName;
+                // string strInputFilePath;
+                string strBillingHistoryFileLocation;
+                string strExecutionLogMessage;
+                string strExecutionLogFileLocation;
+                string strDatetime;
+                DataTable dtDataTable;
+                //  string strSheetName;
+                string ReferenceId = null;
+                strExecutionLogFileLocation = objCommon.GetConfigValue("ExecutionLogFileLocation");
+                string GeneratedUniqueId = null;
+                strExecutionLogMessage = "Processing the Add Route Stop data for " + strInputFilePath;
+                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                //strInputFilePath = objCommon.GetConfigValue("AutomationFileLocation") + @"\Order\Add";
+                // strInputFilePath = strInputFilePath + @"\" + strLocationFolder;
+                strBillingHistoryFileLocation = strInputFilePath + @"\HistoricalFiles";
+
+                strExecutionLogMessage = "The input file Path is: " + strInputFilePath + "." + System.Environment.NewLine + "The Historical File Path is:" + strBillingHistoryFileLocation;
+                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                dir = new DirectoryInfo(strInputFilePath);
+                XLSfiles = dir.GetFiles("*.xlsx");
+
+                strExecutionLogMessage = "Found # of Excel Files: " + XLSfiles.Count();
+                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                foreach (var file in XLSfiles)
+                {
+                    strFileName = file.ToString();
+                    dtDataTable = new System.Data.DataTable();
+
+                    try
+                    {
+
+                        DataSet dsExcel = new DataSet();
+                        dsExcel = clsExcelHelper.ImportExcelXLSX(strInputFilePath + @"\" + strFileName, false);
+                        if (dsExcel.Tables.Count > 0)
+                        {
+
+                            objCommon.MoveTheFileToHistoryFolder(strBillingHistoryFileLocation, file);
+
+                            strDatetime = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+                            for (int i = dsExcel.Tables[0].Rows.Count - 1; i >= 0; i--)
+                            {
+                                DataRow dr = dsExcel.Tables[0].Rows[i];
+                                if (dr["company_number"] == DBNull.Value && dr["unique_id"] == DBNull.Value
+                                    && dr["route_code"] == DBNull.Value
+                                    && dr["route_date"] == DBNull.Value
+                                    && dr["signature"] == DBNull.Value)
+                                    dr.Delete();
+                            }
+                            dsExcel.Tables[0].AcceptChanges();
+
+                            dtDataTable = dsExcel.Tables[0];
+                            // DataView view = new DataView(dtDataTable);
+                            // DataTable dtdistinctValues = view.ToTable(true, "Customer_Reference");
+                            clsRoute objclsRoute = new clsRoute();
+                            int rowindex = 1;
+                            foreach (DataRow dr in dtDataTable.Rows)
+                            {
+
+                                //object value = dr["company_number"];
+                                //if (value == DBNull.Value)
+                                //    break;
+                                ReferenceId = Convert.ToString(dr["company_number"]) + "-" + Convert.ToString(dr["unique_id"]);
+                                try
+                                {
+
+                                    //  DataRow[] drresult = dtDataTable.Select("Customer_Reference= '" + dr["Customer_Reference"] + "'");
+
+                                    // route_stopdetails objroute_stopdetails = new route_stopdetails();
+                                    //  route_stop objroute_stop = new route_stop();
+
+                                    string routeStopPutrequest = null;
+                                    if (dr.Table.Columns.Contains("company_number"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["company_number"])))
+                                        {
+                                            routeStopPutrequest = @"'company_number': " + dr["company_number"] + ",";
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Company Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row  number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                                            //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Company Number not found for this record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Company Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Company Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Company column not found for this file record";
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Company column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        //strInputFilePath, processingFileName, strDatetime);
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+
+                                    string unique_id;
+                                    if (dr.Table.Columns.Contains("unique_id"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["unique_id"])))
+                                        {
+                                            routeStopPutrequest = routeStopPutrequest + @"'unique_id': " + dr["unique_id"] + ",";
+                                            unique_id = Convert.ToString(dr["unique_id"]);
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Uniqie Id Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Uniqie Id value not found for this  record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Uniqie Id Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Uniqie Id Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Uniqie Id column not found for this record";
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Uniqie Id column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        //strInputFilePath, processingFileName, strDatetime);
+
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+
+                                    if (dr.Table.Columns.Contains("route_code"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["route_code"])))
+                                        {
+                                            routeStopPutrequest = routeStopPutrequest + @"'route_code': '" + dr["route_code"] + "',";
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Route Code Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Route Code value not found for this  record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Route Code Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Route Code Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Route Code column not found for this record";
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Route Code column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        //strInputFilePath, processingFileName, strDatetime);
+
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+
+                                    //if (dr.Table.Columns.Contains("route_date"))
+                                    //{
+                                    //    if (!string.IsNullOrEmpty(Convert.ToString(dr["route_date"])))
+                                    //    {
+                                    //        routeStopPutrequest = routeStopPutrequest + @"'route_date': " + dr["route_date"] + ", ";
+                                    //    }
+                                    //}
+
+
+                                    if (dr.Table.Columns.Contains("route_date"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["route_date"])))
+                                        {
+                                            DateTime dtValue = Convert.ToDateTime(dr["route_date"]);
+                                            routeStopPutrequest = routeStopPutrequest + @"'route_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Route Date Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Route Date value not found for this  record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Route Date Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Route Date Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Route Date column not found for this record";
+                                        objErrorResponse.status = "Error";
+                                        objErrorResponse.code = "Route Date column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        //strInputFilePath, processingFileName, strDatetime);
+
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+                                    if (dr.Table.Columns.Contains("signature"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["signature"])))
+                                        {
+                                            routeStopPutrequest = routeStopPutrequest + @"'signature': '" + dr["signature"] + "',";
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Signature Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Signature value not found for this  record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Signature Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Signature Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Signature column not found for this record";
+                                        objErrorResponse.status = "Signature";
+                                        objErrorResponse.code = "signature column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //strInputFilePath, processingFileName, strDatetime);
+
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+
+
+
+                                    if (dr.Table.Columns.Contains("customer_number"))
+                                    {
+                                        if (!string.IsNullOrEmpty(Convert.ToString(dr["customer_number"])))
+                                        {
+                                            routeStopPutrequest = routeStopPutrequest + @"'customer_number': " + dr["customer_number"] + ",";
+                                        }
+                                        else
+                                        {
+                                            strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Customer Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            // objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Customer Number value not found for this  record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Customer Number Value Missing";
+                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                 strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            rowindex++;
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPut Error " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Customer Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        ErrorResponse objErrorResponse = new ErrorResponse();
+                                        objErrorResponse.error = "Customer Number column not found for this record";
+                                        objErrorResponse.status = "Customer Number";
+                                        objErrorResponse.code = "Customer Number column Missing";
+                                        objErrorResponse.reference = "For row  number -" + rowindex;
+                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        //strInputFilePath, processingFileName, strDatetime);
+
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                        rowindex++;
+                                        continue;
+                                    }
+
+
+                                    // objroute_stop.service_level = Convert.ToInt32(objDsServviceTypeResponse.DS.Tables[0].Rows[0]["service_type"]);
+
+                                    routeStopPutrequest = @"{" + routeStopPutrequest + "}";
+                                    string routeStopPutrequestObject = @"{'route_stop': " + routeStopPutrequest + "}";
+                                    JObject jsonobj = JObject.Parse(routeStopPutrequestObject);
+                                    string request = jsonobj.ToString();
+
+                                    clsDatatrac objclsDatatrac = new clsDatatrac();
+
+                                    GeneratedUniqueId = objclsDatatrac.GenerateUniqueNumber(Convert.ToInt32(dr["company_number"]), Convert.ToInt32(dr["unique_id"]));
+
+
+                                    clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
+                                    // string request = JsonConvert.SerializeObject(routeStopPutrequest);
+                                    objresponse = objclsRoute.CallDataTracRouteStopPutAPI(GeneratedUniqueId, routeStopPutrequestObject);
+                                    // objresponse.ResponseVal = true;
+                                    //objresponse.Reason = "{\"00100035009\":{\"room\":null,\"unique_id\":35009,\"c2_paperwork\":false,\"company_number_text\":\"EASTRN TIME ON CENTRAL SERVER\",\"company_number\":1,\"addl_charge_code11\":null,\"billing_override_amt\":null,\"addl_charge_occur1\":null,\"updated_time\":null,\"stop_sequence\":\"0010\",\"phone\":null,\"city\":\"Alpharetta\",\"created_by\":\"DX*\",\"signature_images\":[],\"pricing_zone\":null,\"signature_filename\":null,\"addl_charge_code10\":null,\"cod_check_no\":null,\"length\":null,\"expected_weight\":null,\"actual_settlement_amt\":null,\"actual_pieces\":null,\"updated_date\":null,\"schedule_stop_id\":null,\"photos_exist\":false,\"stop_type_text\":\"Delivery\",\"stop_type\":\"D\",\"return\":false,\"addl_charge_code6\":null,\"dispatch_zone\":null,\"upload_time\":null,\"actual_cod_amt\":null,\"location_accuracy\":null,\"progress\":[{\"status_time\":\"10:22:02\",\"status_text\":\"Entered in carrier's system\",\"status_date\":\"2021-08-04\"}],\"received_route\":null,\"override_settle_percent\":null,\"cod_amount\":null,\"addl_charge_code9\":null,\"eta_date\":null,\"cod_type_text\":\"None\",\"cod_type\":\"0\",\"addl_charge_occur3\":null,\"reference\":null,\"sent_to_phone\":false,\"addl_charge_occur12\":null,\"callback_required_text\":\"No\",\"callback_required\":\"N\",\"service_level_text\":\"1HR RUSH SERVICE\",\"service_level\":6,\"original_id\":null,\"width\":null,\"received_sequence\":null,\"transfer_to_sequence\":null,\"cases\":null,\"times_sent\":0,\"transfer_to_route\":null,\"zip_code\":null,\"settlement_override_amt\":null,\"driver_app_status_text\":\"\",\"driver_app_status\":\"0\",\"route_code_text\":\"NAPA\",\"route_code\":\"NAPA\",\"received_shift\":null,\"addl_charge_occur6\":null,\"addl_charge_occur11\":null,\"vehicle\":null,\"addl_charge_code5\":null,\"addl_charge_occur9\":null,\"eta\":null,\"departure_time\":null,\"combine_data\":null,\"actual_latitude\":null,\"posted_by\":null,\"insurance_value\":null,\"return_redel_id\":null,\"addl_charge_code1\":null,\"origin_code_text\":\"Added using API\",\"origin_code\":\"A\",\"ordered_by\":null,\"posted_date\":null,\"actual_billing_amt\":null,\"created_date\":\"2021-08-04\",\"latitude\":null,\"received_pieces\":null,\"addl_charge_code7\":null,\"totes\":null,\"asn_sent\":0,\"comments\":null,\"verification_id_type_text\":\"None\",\"verification_id_type\":\"0\",\"posted_time\":null,\"item_scans_required\":true,\"shift_id\":null,\"addon_billing_amt\":null,\"actual_delivery_date\":null,\"id\":\"00100035009\",\"actual_arrival_time\":null,\"signature_required\":true,\"longitude\":null,\"expected_pieces\":null,\"loaded_pieces\":null,\"alt_lookup\":null,\"customer_number_text\":\"Routing Customer\",\"customer_number\":4999,\"created_time\":\"10:22:02\",\"addl_charge_code8\":null,\"signature\":null,\"actual_depart_time\":null,\"bol_number\":null,\"actual_cod_type_text\":\"None\",\"actual_cod_type\":\"0\",\"invoice_number\":null,\"branch_id\":null,\"special_instructions2\":null,\"updated_by\":null,\"verification_id_details\":null,\"required_signature_type_text\":\"Any signature\",\"required_signature_type\":\"0\",\"addl_charge_occur7\":null,\"orig_order_number\":null,\"special_instructions1\":null,\"notes\":[],\"image_sign_req\":true,\"attention\":null,\"minutes_late\":0,\"late_notice_time\":null,\"received_unique_id\":null,\"exception_code\":null,\"addl_charge_code4\":null,\"addl_charge_occur4\":null,\"redelivery\":false,\"addl_charge_occur10\":null,\"upload_date\":null,\"special_instructions4\":null,\"address_name\":null,\"addl_charge_occur8\":null,\"address_point_customer\":null,\"received_branch\":null,\"items\":[],\"return_redelivery_date\":null,\"height\":null,\"actual_longitude\":null,\"service_time\":null,\"phone_ext\":null,\"addl_charge_occur2\":null,\"late_notice_date\":null,\"address\":\"123 Stop Address Street\",\"arrival_time\":null,\"posted_status\":false,\"route_date\":\"2021-08-03\",\"addl_charge_code12\":null,\"addl_charge_code3\":null,\"return_redelivery_flag_text\":\"None\",\"return_redelivery_flag\":\"N\",\"additional_instructions\":null,\"updated_by_scanner\":false,\"special_instructions3\":null,\"addl_charge_occur5\":null,\"address_point\":0,\"actual_weight\":null,\"received_company\":null,\"addl_charge_code2\":null,\"state\":\"GA\"}}";
+                                    // objresponse.Reason = "{\"00204352124\": {\"posted_by\": null, \"addon_billing_amt\": null, \"minutes_late\": 0, \"insurance_value\": null, \"addl_charge_occur5\": null, \"actual_pieces\": null, \"actual_depart_time\": null, \"created_time\": \"08:43:34\", \"cod_amount\": null, \"special_instructions3\": null, \"width\": null, \"ordered_by\": null, \"addl_charge_code1\": null, \"signature_filename\": null, \"updated_date\": null, \"latitude\": null, \"signature\": null, \"received_branch\": null, \"late_notice_time\": null, \"route_code_text\": \"HDHOLD\", \"route_code\": \"HDHOLD\", \"phone_ext\": null, \"addl_charge_occur1\": null, \"received_sequence\": null, \"address_name\": \"TEST1\", \"address_point_customer\": null, \"actual_cod_amt\": null, \"signature_required\": true, \"stop_type_text\": \"Delivery\", \"stop_type\": \"D\", \"origin_code_text\": \"Added using API\", \"origin_code\": \"A\", \"invoice_number\": null, \"addl_charge_code11\": null, \"addl_charge_code12\": null, \"length\": null, \"vehicle\": null, \"item_scans_required\": true, \"updated_by_scanner\": false, \"addl_charge_code10\": null, \"unique_id\": 4352124, \"attention\": null, \"items\": [{\"item_number\": \"item1\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 3, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 50, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container1\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 1, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240001\", \"truck_id\": 0}, {\"item_number\": \"item2\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 150, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container2\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 2, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:34\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240002\", \"truck_id\": 0}, {\"item_number\": \"item3\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 1, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 250, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container3\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 3, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:35\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240003\", \"truck_id\": 0}, {\"item_number\": \"item4\", \"item_description\": \"first item\", \"reference\": \"1\", \"rma_route\": null, \"upload_time\": null, \"rma_stop_id\": 0, \"width\": null, \"redelivery\": false, \"received_pieces\": null, \"cod_amount\": null, \"height\": null, \"comments\": null, \"actual_pieces\": null, \"actual_cod_amount\": null, \"rma_number\": null, \"manually_updated\": 0, \"unique_id\": 4352124, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"barcodes_unique\": false, \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"return_redel_seq\": 0, \"expected_pieces\": 21, \"signature\": null, \"exception_code\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"updated_date\": null, \"expected_weight\": 350, \"created_date\": \"2021-08-26\", \"rma_origin\": null, \"created_by\": \"DX*\", \"loaded_pieces\": null, \"return_redelivery_flag_text\": \"\", \"return_redelivery_flag\": null, \"original_id\": 0, \"container_id\": \"container4\", \"return\": false, \"length\": null, \"notes\": [], \"actual_weight\": null, \"updated_by\": null, \"photos_exist\": false, \"second_container_id\": null, \"return_redel_id\": 0, \"asn_sent\": 0, \"actual_departure_time\": null, \"updated_time\": null, \"return_redelivery_date\": null, \"actual_arrival_time\": null, \"item_sequence\": 4, \"pallet_number\": null, \"actual_date\": null, \"insurance_value\": null, \"created_time\": \"08:43:36\", \"upload_date\": null, \"scans\": [], \"id\": \"002043521240004\", \"truck_id\": 0}], \"addl_charge_occur10\": null, \"verification_id_type_text\": \"None\", \"verification_id_type\": \"0\", \"addl_charge_occur7\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"posted_time\": null, \"c2_paperwork\": false, \"original_id\": null, \"progress\": [{\"status_time\": \"08:43:34\", \"status_date\": \"2021-08-26\", \"status_text\": \"Entered in carrier's system\"}], \"service_level_text\": \"Basic Delivery\", \"service_level\": 56, \"created_by\": \"DX*\", \"required_signature_type_text\": \"Any signature\", \"required_signature_type\": \"0\", \"special_instructions1\": null, \"actual_billing_amt\": null, \"branch_id_text\": \"JWL Baltimore, MD\", \"branch_id\": \"BWI\", \"actual_cod_type_text\": \"None\", \"actual_cod_type\": \"0\", \"pricing_zone\": null, \"state\": \"TX\", \"signature_images\": [], \"special_instructions4\": null, \"photos_exist\": false, \"height\": null, \"eta_date\": null, \"upload_date\": null, \"zip_code\": \"75034\", \"actual_latitude\": null, \"override_settle_percent\": null, \"notes\": [{\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected pieces: 0 -> 3\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:34\", \"note_text\": \"** Expected weight:      0 ->      50\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084334DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected pieces: 3 -> 4\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:35\", \"note_text\": \"** Expected weight:     50 ->     200\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084335DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected pieces: 4 -> 5\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:36\", \"note_text\": \"** Expected weight:    200 ->     450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084336DX* 25\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected pieces: 5 -> 26\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 24\", \"user_id\": \"DX*\"}, {\"entry_time\": \"08:43:37\", \"note_text\": \"** Expected weight:    450 ->     800\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"item_sequence\": null, \"entry_date\": \"2021-08-26\", \"user_entered\": false, \"show_to_cust\": false, \"note_type_text\": \"Stop\", \"note_type\": \"0\", \"unique_id\": 4352124, \"id\": \"00204352124    0020210826084337DX* 25\", \"user_id\": \"DX*\"}], \"additional_instructions\": null, \"addl_charge_occur6\": null, \"driver_app_status_text\": \"\", \"driver_app_status\": \"0\", \"combine_data\": null, \"addl_charge_code2\": null, \"service_time\": null, \"city\": \"FRISCO\", \"room\": null, \"addl_charge_code7\": null, \"billing_override_amt\": null, \"totes\": null, \"sent_to_phone\": false, \"address\": \"1000 PARKWOOD BLVD\", \"posted_date\": null, \"phone\": \"111-111-1111\", \"late_notice_date\": null, \"received_route\": null, \"bol_number\": \"1\", \"asn_sent\": 0, \"addl_charge_occur3\": null, \"departure_time\": null, \"received_unique_id\": null, \"orig_order_number\": null, \"reference\": \"1\", \"comments\": null, \"updated_by\": null, \"customer_number_text\": \"HD - BWI 21229\", \"customer_number\": 516, \"addl_charge_code4\": null, \"addl_charge_code9\": null, \"location_accuracy\": null, \"verification_id_details\": null, \"cases\": null, \"actual_arrival_time\": null, \"received_company\": null, \"addl_charge_code5\": null, \"addl_charge_occur11\": null, \"addl_charge_code6\": null, \"actual_settlement_amt\": null, \"addl_charge_occur12\": null, \"cod_check_no\": null, \"updated_time\": null, \"expected_pieces\": 26, \"times_sent\": 0, \"addl_charge_occur9\": null, \"id\": \"00204352124\", \"route_date\": \"2021-08-31\", \"schedule_stop_id\": null, \"return\": false, \"addl_charge_occur4\": null, \"image_sign_req\": false, \"created_date\": \"2021-08-26\", \"longitude\": null, \"redelivery\": false, \"actual_weight\": null, \"cod_type_text\": \"None\", \"cod_type\": \"0\", \"eta\": null, \"transfer_to_sequence\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"alt_lookup\": null, \"addl_charge_occur8\": null, \"posted_status\": false, \"addl_charge_occur2\": null, \"transfer_to_route\": null, \"shift_id\": null, \"addl_charge_code8\": null, \"upload_time\": null, \"received_shift\": null, \"return_redel_id\": null, \"addl_charge_code3\": null, \"stop_sequence\": \"0010\", \"dispatch_zone\": null, \"expected_weight\": 800, \"special_instructions2\": null, \"actual_longitude\": null, \"settlement_override_amt\": null, \"actual_delivery_date\": null, \"arrival_time\": null, \"return_redelivery_flag_text\": \"None\", \"return_redelivery_flag\": \"N\", \"loaded_pieces\": null, \"exception_code\": null, \"address_point\": 0, \"return_redelivery_date\": null, \"received_pieces\": null, \"_utc_offset\": \"-04:00\"}}";
+                                    if (objresponse.ResponseVal)
+                                    {
+                                        strExecutionLogMessage = "RouteStopPutAPI Success " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        // DataSet dsOrderResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPostAPI");
+                                        DataSet dsResponse = objCommon.jsonToDataSet(objresponse.Reason, "RouteStopPutAPI");
+                                        var UniqueId = Convert.ToString(dsResponse.Tables[0].Rows[0]["id"]);
+                                        try
+                                        {
+                                            if (dsResponse.Tables.Contains(UniqueId))
+                                            {
+                                                List<ResponseRouteStop> idList = new List<ResponseRouteStop>();
+                                                for (int i = 0; i < dsResponse.Tables[0].Rows.Count; i++)
+                                                {
+                                                    DataTable dt = new DataTable();
+                                                    dt = dsResponse.Tables[0];
+                                                    ResponseRouteStop objIds = new ResponseRouteStop();
+
+                                                    objIds.room = dt.Rows[i]["room"];
+                                                    objIds.unique_id = dt.Rows[i]["unique_id"];
+
+                                                    objIds.c2_paperwork = dt.Rows[i]["c2_paperwork"];
+                                                    objIds.company_number_text = dt.Rows[i]["company_number_text"];
+                                                    objIds.company_number = dt.Rows[i]["company_number"];
+                                                    objIds.addl_charge_code11 = dt.Rows[i]["addl_charge_code11"];
+                                                    objIds.billing_override_amt = dt.Rows[i]["billing_override_amt"];
+                                                    objIds.addl_charge_occur1 = dt.Rows[i]["addl_charge_occur1"];
+                                                    objIds.updated_time = dt.Rows[i]["updated_time"];
+                                                    objIds.stop_sequence = dt.Rows[i]["stop_sequence"];
+
+                                                    objIds.phone = dt.Rows[i]["phone"];
+                                                    objIds.city = dt.Rows[i]["city"];
+                                                    objIds.created_by = dt.Rows[i]["created_by"];
+                                                    objIds.pricing_zone = dt.Rows[i]["pricing_zone"];
+                                                    objIds.signature_filename = dt.Rows[i]["signature_filename"];
+                                                    objIds.addl_charge_code10 = dt.Rows[i]["addl_charge_code10"];
+                                                    objIds.cod_check_no = dt.Rows[i]["cod_check_no"];
+                                                    objIds.length = dt.Rows[i]["length"];
+
+                                                    objIds.expected_weight = dt.Rows[i]["expected_weight"];
+                                                    objIds.actual_settlement_amt = dt.Rows[i]["actual_settlement_amt"];
+                                                    objIds.actual_pieces = dt.Rows[i]["actual_pieces"];
+                                                    objIds.updated_date = dt.Rows[i]["updated_date"];
+                                                    objIds.schedule_stop_id = dt.Rows[i]["schedule_stop_id"];
+                                                    objIds.photos_exist = dt.Rows[i]["photos_exist"];
+                                                    objIds.stop_type_text = dt.Rows[i]["stop_type_text"];
+                                                    objIds.stop_type = dt.Rows[i]["stop_type"];
+                                                    objIds.@return = dt.Rows[i]["return"];
+                                                    objIds.addl_charge_code6 = dt.Rows[i]["addl_charge_code6"];
+                                                    objIds.dispatch_zone = dt.Rows[i]["dispatch_zone"];
+                                                    objIds.upload_time = dt.Rows[i]["upload_time"];
+                                                    objIds.actual_cod_amt = dt.Rows[i]["actual_cod_amt"];
+                                                    objIds.location_accuracy = dt.Rows[i]["location_accuracy"];
+                                                    objIds.received_route = dt.Rows[i]["received_route"];
+                                                    objIds.override_settle_percent = dt.Rows[i]["override_settle_percent"];
+                                                    objIds.cod_amount = dt.Rows[i]["cod_amount"];
+                                                    objIds.addl_charge_code9 = dt.Rows[i]["addl_charge_code9"];
+                                                    objIds.eta_date = dt.Rows[i]["eta_date"];
+                                                    objIds.cod_type_text = dt.Rows[i]["cod_type_text"];
+                                                    objIds.cod_type = dt.Rows[i]["cod_type"];
+                                                    objIds.addl_charge_occur3 = dt.Rows[i]["addl_charge_occur3"];
+                                                    objIds.reference = dt.Rows[i]["reference"];
+                                                    objIds.sent_to_phone = dt.Rows[i]["sent_to_phone"];
+                                                    objIds.addl_charge_occur12 = dt.Rows[i]["addl_charge_occur12"];
+                                                    objIds.callback_required_text = dt.Rows[i]["callback_required_text"];
+                                                    objIds.callback_required = dt.Rows[i]["callback_required"];
+                                                    objIds.service_level_text = dt.Rows[i]["service_level_text"];
+                                                    objIds.service_level = dt.Rows[i]["service_level"];
+                                                    objIds.original_id = dt.Rows[i]["original_id"];
+                                                    objIds.width = dt.Rows[i]["width"];
+                                                    objIds.received_sequence = dt.Rows[i]["received_sequence"];
+                                                    objIds.transfer_to_sequence = dt.Rows[i]["transfer_to_sequence"];
+                                                    objIds.cases = dt.Rows[i]["cases"];
+                                                    objIds.times_sent = dt.Rows[i]["times_sent"];
+                                                    objIds.transfer_to_route = dt.Rows[i]["transfer_to_route"];
+                                                    objIds.zip_code = dt.Rows[i]["zip_code"];
+                                                    objIds.settlement_override_amt = dt.Rows[i]["settlement_override_amt"];
+                                                    objIds.driver_app_status_text = dt.Rows[i]["driver_app_status_text"];
+                                                    objIds.driver_app_status = dt.Rows[i]["driver_app_status"];
+                                                    objIds.route_code_text = dt.Rows[i]["route_code_text"];
+                                                    objIds.route_code = dt.Rows[i]["route_code"];
+                                                    objIds.received_shift = dt.Rows[i]["received_shift"];
+                                                    objIds.addl_charge_occur6 = dt.Rows[i]["addl_charge_occur6"];
+                                                    objIds.addl_charge_occur11 = dt.Rows[i]["addl_charge_occur11"];
+                                                    objIds.vehicle = dt.Rows[i]["vehicle"];
+                                                    objIds.addl_charge_code5 = dt.Rows[i]["addl_charge_code5"];
+                                                    objIds.addl_charge_occur9 = dt.Rows[i]["addl_charge_occur9"];
+
+                                                    objIds.eta = dt.Rows[i]["eta"];
+                                                    objIds.departure_time = dt.Rows[i]["departure_time"];
+                                                    objIds.combine_data = dt.Rows[i]["combine_data"];
+                                                    objIds.actual_latitude = dt.Rows[i]["actual_latitude"];
+                                                    objIds.posted_by = dt.Rows[i]["posted_by"];
+                                                    objIds.insurance_value = dt.Rows[i]["insurance_value"];
+                                                    objIds.return_redel_id = dt.Rows[i]["return_redel_id"];
+                                                    objIds.addl_charge_code1 = dt.Rows[i]["addl_charge_code1"];
+                                                    objIds.origin_code_text = dt.Rows[i]["origin_code_text"];
+                                                    objIds.origin_code = dt.Rows[i]["origin_code"];
+                                                    objIds.ordered_by = dt.Rows[i]["ordered_by"];
+                                                    objIds.posted_date = dt.Rows[i]["posted_date"];
+                                                    objIds.actual_billing_amt = dt.Rows[i]["actual_billing_amt"];
+                                                    objIds.created_date = dt.Rows[i]["created_date"];
+                                                    objIds.latitude = dt.Rows[i]["latitude"];
+                                                    objIds.received_pieces = dt.Rows[i]["received_pieces"];
+                                                    objIds.addl_charge_code7 = dt.Rows[i]["addl_charge_code7"];
+                                                    objIds.totes = dt.Rows[i]["totes"];
+                                                    objIds.asn_sent = dt.Rows[i]["asn_sent"];
+                                                    objIds.comments = dt.Rows[i]["comments"];
+                                                    objIds.verification_id_type_text = dt.Rows[i]["verification_id_type_text"];
+                                                    objIds.verification_id_type = dt.Rows[i]["verification_id_type"];
+                                                    objIds.posted_time = dt.Rows[i]["posted_time"];
+                                                    objIds.item_scans_required = dt.Rows[i]["item_scans_required"];
+                                                    objIds.shift_id = dt.Rows[i]["shift_id"];
+                                                    objIds.addon_billing_amt = dt.Rows[i]["addon_billing_amt"];
+                                                    objIds.actual_delivery_date = dt.Rows[i]["actual_delivery_date"];
+                                                    objIds.id = dt.Rows[i]["id"];
+                                                    objIds.actual_arrival_time = dt.Rows[i]["actual_arrival_time"];
+                                                    objIds.signature_required = dt.Rows[i]["signature_required"];
+                                                    objIds.longitude = dt.Rows[i]["longitude"];
+                                                    objIds.expected_pieces = dt.Rows[i]["expected_pieces"];
+                                                    objIds.loaded_pieces = dt.Rows[i]["loaded_pieces"];
+                                                    objIds.alt_lookup = dt.Rows[i]["alt_lookup"];
+                                                    objIds.customer_number_text = dt.Rows[i]["customer_number_text"];
+                                                    objIds.customer_number = dt.Rows[i]["customer_number"];
+                                                    objIds.created_time = dt.Rows[i]["created_time"];
+                                                    objIds.addl_charge_code8 = dt.Rows[i]["addl_charge_code8"];
+                                                    objIds.signature = dt.Rows[i]["signature"];
+                                                    objIds.actual_depart_time = dt.Rows[i]["actual_depart_time"];
+                                                    objIds.bol_number = dt.Rows[i]["bol_number"];
+                                                    objIds.actual_cod_type_text = dt.Rows[i]["actual_cod_type_text"];
+                                                    objIds.actual_cod_type = dt.Rows[i]["actual_cod_type"];
+                                                    objIds.invoice_number = dt.Rows[i]["invoice_number"];
+                                                    objIds.branch_id = dt.Rows[i]["branch_id"];
+                                                    objIds.special_instructions2 = dt.Rows[i]["special_instructions2"];
+                                                    objIds.updated_by = dt.Rows[i]["updated_by"];
+                                                    objIds.verification_id_details = dt.Rows[i]["verification_id_details"];
+                                                    objIds.required_signature_type_text = dt.Rows[i]["required_signature_type_text"];
+                                                    objIds.required_signature_type = dt.Rows[i]["required_signature_type"];
+                                                    objIds.addl_charge_occur7 = dt.Rows[i]["addl_charge_occur7"];
+                                                    objIds.orig_order_number = dt.Rows[i]["orig_order_number"];
+                                                    objIds.special_instructions1 = dt.Rows[i]["special_instructions1"];
+                                                    objIds.image_sign_req = dt.Rows[i]["image_sign_req"];
+                                                    objIds.attention = dt.Rows[i]["attention"];
+                                                    objIds.minutes_late = dt.Rows[i]["minutes_late"];
+                                                    objIds.late_notice_time = dt.Rows[i]["late_notice_time"];
+                                                    objIds.received_unique_id = dt.Rows[i]["received_unique_id"];
+                                                    objIds.exception_code = dt.Rows[i]["exception_code"];
+                                                    objIds.addl_charge_code4 = dt.Rows[i]["addl_charge_code4"];
+                                                    objIds.addl_charge_occur4 = dt.Rows[i]["addl_charge_occur4"];
+                                                    objIds.redelivery = dt.Rows[i]["redelivery"];
+                                                    objIds.addl_charge_occur10 = dt.Rows[i]["addl_charge_occur10"];
+                                                    objIds.upload_date = dt.Rows[i]["upload_date"];
+                                                    objIds.special_instructions4 = dt.Rows[i]["special_instructions4"];
+                                                    objIds.address_name = dt.Rows[i]["address_name"];
+                                                    objIds.addl_charge_occur8 = dt.Rows[i]["addl_charge_occur8"];
+                                                    objIds.address_point_customer = dt.Rows[i]["address_point_customer"];
+                                                    objIds.received_branch = dt.Rows[i]["received_branch"];
+                                                    objIds.return_redelivery_date = dt.Rows[i]["return_redelivery_date"];
+                                                    objIds.height = dt.Rows[i]["height"];
+                                                    objIds.actual_longitude = dt.Rows[i]["actual_longitude"];
+                                                    objIds.service_time = dt.Rows[i]["service_time"];
+                                                    objIds.phone_ext = dt.Rows[i]["phone_ext"];
+                                                    objIds.addl_charge_occur2 = dt.Rows[i]["addl_charge_occur2"];
+                                                    objIds.late_notice_date = dt.Rows[i]["late_notice_date"];
+                                                    objIds.address = dt.Rows[i]["address"];
+                                                    objIds.arrival_time = dt.Rows[i]["arrival_time"];
+                                                    objIds.posted_status = dt.Rows[i]["posted_status"];
+                                                    objIds.route_date = dt.Rows[i]["route_date"];
+                                                    objIds.addl_charge_code12 = dt.Rows[i]["addl_charge_code12"];
+                                                    objIds.addl_charge_code3 = dt.Rows[i]["addl_charge_code3"];
+                                                    objIds.return_redelivery_flag_text = dt.Rows[i]["return_redelivery_flag_text"];
+                                                    objIds.return_redelivery_flag = dt.Rows[i]["return_redelivery_flag"];
+                                                    objIds.additional_instructions = dt.Rows[i]["additional_instructions"];
+                                                    objIds.updated_by_scanner = dt.Rows[i]["updated_by_scanner"];
+                                                    objIds.special_instructions3 = dt.Rows[i]["special_instructions3"];
+                                                    objIds.addl_charge_occur5 = dt.Rows[i]["addl_charge_occur5"];
+                                                    objIds.address_point = dt.Rows[i]["address_point"];
+                                                    objIds.actual_weight = dt.Rows[i]["actual_weight"];
+                                                    objIds.received_company = dt.Rows[i]["received_company"];
+                                                    objIds.addl_charge_code2 = dt.Rows[i]["addl_charge_code2"];
+                                                    objIds.state = dt.Rows[i]["state"];
+                                                    // public object @return { get; set; }
+                                                    idList.Add(objIds);
+                                                }
+                                                objCommon.SaveOutputDataToCsvFile(idList, "RouteStop-Put",
+                                   strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            }
+
+                                            if (dsResponse.Tables.Contains("progress"))
+                                            {
+
+                                                List<RouteStopResponseProgress> progressList = new List<RouteStopResponseProgress>();
+                                                for (int i = 0; i < dsResponse.Tables["progress"].Rows.Count; i++)
+                                                {
+                                                    RouteStopResponseProgress progress = new RouteStopResponseProgress();
+                                                    DataTable dt = new DataTable();
+                                                    dt = dsResponse.Tables["progress"];
+
+                                                    progress.status_date = (dt.Rows[i]["status_date"]);
+                                                    progress.status_text = (dt.Rows[i]["status_text"]);
+                                                    progress.status_time = (dt.Rows[i]["status_time"]);
+                                                    // progress.id = (dt.Rows[i]["id"]);
+                                                    progressList.Add(progress);
+                                                }
+
+                                                objCommon.SaveOutputDataToCsvFile(progressList, "RouteStopPut-Progress",
+                                                     strInputFilePath, UniqueId, strFileName, strDatetime);
+                                            }
+
+                                            //  public List<object> signature_images { get; set; }
+                                            // public List<Progress> progress { get; set; }
+                                            // public List<object> notes { get; set; }
+                                            // public List<object> items { get; set; }
+
+                                            if (dsResponse.Tables.Contains("notes"))
+                                            {
+
+                                                List<RouteStopResponseNote> noteList = new List<RouteStopResponseNote>();
+                                                for (int i = 0; i < dsResponse.Tables["notes"].Rows.Count; i++)
+                                                {
+                                                    RouteStopResponseNote note = new RouteStopResponseNote();
+                                                    DataTable dt = new DataTable();
+                                                    dt = dsResponse.Tables["notes"];
+                                                    note.entry_time = (dt.Rows[i]["entry_time"]);
+                                                    note.note_text = (dt.Rows[i]["note_text"]);
+                                                    note.company_number_text = (dt.Rows[i]["company_number_text"]);
+                                                    note.company_number = (dt.Rows[i]["company_number"]);
+                                                    note.item_sequence = (dt.Rows[i]["item_sequence"]);
+                                                    note.user_id = (dt.Rows[i]["user_id"]);
+                                                    note.entry_date = (dt.Rows[i]["entry_date"]);
+                                                    note.user_entered = (dt.Rows[i]["user_entered"]);
+                                                    note.show_to_cust = (dt.Rows[i]["show_to_cust"]);
+                                                    note.note_type_text = (dt.Rows[i]["note_type_text"]);
+                                                    note.note_type = (dt.Rows[i]["note_type"]);
+                                                    note.unique_id = (dt.Rows[i]["unique_id"]);
+                                                    note.id = (dt.Rows[i]["id"]);
+                                                    noteList.Add(note);
+                                                }
+
+                                                objCommon.SaveOutputDataToCsvFile(noteList, "RouteStopPut-Note",
+                                                   strInputFilePath, UniqueId, strFileName, strDatetime);
+
+                                            }
+
+                                            if (dsResponse.Tables.Contains("items"))
+                                            {
+
+                                                List<RouteStopResponseItem> itemList = new List<RouteStopResponseItem>();
+                                                for (int i = 0; i < dsResponse.Tables["items"].Rows.Count; i++)
+                                                {
+                                                    RouteStopResponseItem item = new RouteStopResponseItem();
+                                                    DataTable dt = new DataTable();
+                                                    dt = dsResponse.Tables["items"];
+
+                                                    item.item_number = (dt.Rows[i]["item_number"]);
+                                                    item.item_description = (dt.Rows[i]["item_description"]);
+                                                    item.reference = (dt.Rows[i]["reference"]);
+                                                    item.rma_route = (dt.Rows[i]["rma_route"]);
+                                                    item.upload_time = (dt.Rows[i]["upload_time"]);
+                                                    item.rma_stop_id = (dt.Rows[i]["rma_stop_id"]);
+                                                    item.width = (dt.Rows[i]["width"]);
+                                                    item.redelivery = (dt.Rows[i]["redelivery"]);
+                                                    item.received_pieces = (dt.Rows[i]["received_pieces"]);
+                                                    item.cod_amount = (dt.Rows[i]["cod_amount"]);
+                                                    item.height = (dt.Rows[i]["height"]);
+                                                    item.comments = (dt.Rows[i]["comments"]);
+                                                    item.actual_pieces = (dt.Rows[i]["actual_pieces"]);
+                                                    item.actual_cod_amount = (dt.Rows[i]["actual_cod_amount"]);
+                                                    item.rma_number = (dt.Rows[i]["rma_number"]);
+                                                    item.manually_updated = (dt.Rows[i]["manually_updated"]);
+                                                    item.unique_id = (dt.Rows[i]["unique_id"]);
+                                                    item.cod_type_text = (dt.Rows[i]["cod_type_text"]);
+                                                    item.cod_type = (dt.Rows[i]["cod_type"]);
+                                                    item.barcodes_unique = (dt.Rows[i]["barcodes_unique"]);
+                                                    item.actual_cod_type = (dt.Rows[i]["actual_cod_type"]);
+                                                    item.return_redel_seq = (dt.Rows[i]["return_redel_seq"]);
+                                                    item.expected_pieces = (dt.Rows[i]["expected_pieces"]);
+                                                    item.signature = (dt.Rows[i]["signature"]);
+                                                    item.exception_code = (dt.Rows[i]["exception_code"]);
+                                                    item.company_number_text = (dt.Rows[i]["company_number_text"]);
+                                                    item.company_number = (dt.Rows[i]["company_number"]);
+                                                    item.updated_date = (dt.Rows[i]["updated_date"]);
+                                                    item.expected_weight = (dt.Rows[i]["expected_weight"]);
+                                                    item.created_date = (dt.Rows[i]["created_date"]);
+                                                    item.rma_origin = (dt.Rows[i]["rma_origin"]);
+                                                    item.created_by = (dt.Rows[i]["created_by"]);
+                                                    item.loaded_pieces = (dt.Rows[i]["loaded_pieces"]);
+                                                    item.return_redelivery_flag_text = (dt.Rows[i]["return_redelivery_flag_text"]);
+                                                    item.return_redelivery_flag = (dt.Rows[i]["return_redelivery_flag"]);
+                                                    item.original_id = (dt.Rows[i]["original_id"]);
+                                                    item.container_id = (dt.Rows[i]["container_id"]);
+                                                    item.@return = (dt.Rows[i]["return"]);
+                                                    item.length = (dt.Rows[i]["length"]);
+                                                    item.actual_weight = (dt.Rows[i]["actual_weight"]);
+                                                    item.updated_by = (dt.Rows[i]["updated_by"]);
+                                                    item.photos_exist = (dt.Rows[i]["photos_exist"]);
+                                                    item.second_container_id = (dt.Rows[i]["second_container_id"]);
+                                                    item.return_redel_id = (dt.Rows[i]["return_redel_id"]);
+                                                    item.asn_sent = (dt.Rows[i]["asn_sent"]);
+                                                    item.actual_departure_time = (dt.Rows[i]["actual_departure_time"]);
+                                                    item.updated_time = (dt.Rows[i]["updated_time"]);
+                                                    item.return_redelivery_date = (dt.Rows[i]["return_redelivery_date"]);
+                                                    item.actual_arrival_time = (dt.Rows[i]["actual_arrival_time"]);
+                                                    item.item_sequence = (dt.Rows[i]["item_sequence"]);
+                                                    item.pallet_number = (dt.Rows[i]["pallet_number"]);
+                                                    item.actual_date = (dt.Rows[i]["actual_date"]);
+                                                    item.insurance_value = (dt.Rows[i]["insurance_value"]);
+                                                    item.created_time = (dt.Rows[i]["created_time"]);
+                                                    item.upload_date = (dt.Rows[i]["upload_date"]);
+                                                    item.id = (dt.Rows[i]["id"]);
+                                                    item.truck_id = (dt.Rows[i]["truck_id"]);
+
+                                                    // public List<object> notes { get; set; }
+                                                    // public List<object> scans { get; set; }
+                                                    itemList.Add(item);
+                                                }
+
+                                                objCommon.SaveOutputDataToCsvFile(itemList, "RouteStopPut-Item",
+                                                   strInputFilePath, UniqueId, strFileName, strDatetime);
+
+                                            }
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            strExecutionLogMessage = "RouteStopPutFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                            strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
+                                            //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+
+                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                            objErrorResponse.error = "Found exception while processing the record";
+                                            objErrorResponse.status = "Error";
+                                            objErrorResponse.code = "Excception while procesing the record.";
+                                            objErrorResponse.reference = ReferenceId;
+                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                            objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                           strInputFilePath, ReferenceId, strFileName, strDatetime);
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "RouteStopPutAPI Failed " + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
+                                        objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+
+                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
+                                        dsFailureResponse.Tables[0].TableName = "RouteStopPutFailure";
+                                        dsFailureResponse.Tables[0].Columns.Add("Reference", typeof(System.String));
+                                        foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
+                                        {
+                                            row["Reference"] = ReferenceId;
+                                        }
+                                        objCommon.WriteDataToCsvFile(dsFailureResponse.Tables[0],
+                                    strInputFilePath, ReferenceId, strFileName, strDatetime);
+
+                                    }
+
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    strExecutionLogMessage = "ProcessUpdateRouteStopFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                    strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                    strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                                    strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
+                                    //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                    objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+                                }
+                                rowindex++;
+                            }
+
+                            objCommon.MoveOutputFilesToOutputLocation(strInputFilePath);
+                        }
+                        else
+                        {
+                            strExecutionLogMessage = "Template sheet data not found for the file " + strInputFilePath + @"\" + strFileName;
+                            objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        strExecutionLogMessage = "ProcessUpdateRouteStopFiles Exception -" + ex.Message + System.Environment.NewLine;
+                        strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                        strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
+                        strExecutionLogMessage += "For Reference -" + ReferenceId + System.Environment.NewLine;
+                        // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                        objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+                    }
+                }
+
+                strExecutionLogMessage = "Finished processing all the files for the location " + strInputFilePath;
+                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+            }
+            catch (Exception ex)
+            {
+                objCommon.WriteErrorLog(ex);
+                throw new Exception("Error in ProcessUpdateRouteStopFiles -->" + ex.Message + ex.StackTrace);
             }
         }
     }

@@ -105,7 +105,7 @@ namespace DatatracAPIOrder_OrderSettlement
                         url = objCommon.GetConfigValue("DatatracURL") + "/order_settlement/" + UniqueId +"?user=" + enteredby + "";
                     }
 
-                    objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), "OrderSettlementPutAPI url :" + url);
+                    //objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), "OrderSettlementPutAPI url :" + url);
 
 
                     client.DefaultRequestHeaders
