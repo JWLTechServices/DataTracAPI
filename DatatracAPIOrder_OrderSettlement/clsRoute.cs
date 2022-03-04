@@ -241,6 +241,7 @@ namespace DatatracAPIOrder_OrderSettlement
             catch (Exception ex)
             {
                 objResponse.dsResp.ResponseVal = false;
+                WriteErrorLog(ex, "GetRouteStopDetails");
                 LogEvents(ex, "GetRouteStopDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
             }
             return objResponse;
@@ -278,6 +279,7 @@ namespace DatatracAPIOrder_OrderSettlement
             catch (Exception ex)
             {
                 objResponse.dsResp.ResponseVal = false;
+                WriteErrorLog(ex, "GetServiceTypeDetails");
                 LogEvents(ex, "GetServiceTypeDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
             }
             return objResponse;
@@ -918,6 +920,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
     public class RouteStopResponseProgress
     {
+        Progress
         public object status_time { get; set; }
         public object status_date { get; set; }
         public object status_text { get; set; }
