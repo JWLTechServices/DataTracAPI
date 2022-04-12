@@ -257,12 +257,9 @@ namespace DatatracAPIOrder_OrderSettlement
                 SqlParameter paramCompanyNumber = new SqlParameter("@CompanyNumber", SqlDbType.Int);
                 paramCompanyNumber.Value = CompanyNumber;
 
-
                 SqlParameter paramCustomerNumber = new SqlParameter("@CustomerNumber", SqlDbType.VarChar);
                 paramCustomerNumber.Value = CustomerNumber;
-
                 
-
                 dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_SERVICETYPE_CUSTOMERMAPPING",
                     paramCompanyNumber, paramCustomerNumber);
                 if (dsDtls.Tables[0].Rows.Count > 0)
@@ -920,7 +917,6 @@ namespace DatatracAPIOrder_OrderSettlement
 
     public class RouteStopResponseProgress
     {
-        Progress
         public object status_time { get; set; }
         public object status_date { get; set; }
         public object status_text { get; set; }
