@@ -527,8 +527,10 @@ namespace DatatracAPIOrder_OrderSettlement
         public string po_number { get; set; }
         public string house_airway_bill_number { get; set; }
         public string deliver_phone { get; set; }
-
         public List<order_line_item> line_items { get; set; }
+        public string pickup_room { get; set; }
+        public string pickup_attention { get; set; }
+        public string deliver_attention { get; set; }
 
     }
     public class notes
