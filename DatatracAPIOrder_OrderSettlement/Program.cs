@@ -308,7 +308,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                             }
 
-                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DevideToProcessParallelly"));
+                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DivideToProcessParallelly"));
 
                             if (CustomerName == "BBB")
                             {
@@ -321,6 +321,12 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
 
+                            DataTable dtEBusy = new DataTable();
+
+                            DataTable dataTableEBusy = new DataTable();
+                            dataTableEBusy.Clear();
+                            dataTableEBusy.Columns.Add("CustomerReference");
+
                             Parallel.ForEach(splitdt, currentDatatable =>
                             {
                                 var fileName = currentDatatable.TableName;
@@ -329,7 +335,6 @@ namespace DatatracAPIOrder_OrderSettlement
                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                 DataTable datatable; //  = currentDatatable;
-
                                 if (CustomerName == "BBB")
                                 {
                                     datatable = RemoveDuplicateRows(dsExcel.Tables[0], "Customer Reference");
@@ -740,6 +745,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         //  objresponse.Reason = "{\"002018724450\": {\"roundtrip_actual_date\": null, \"notes\": [], \"pickup_phone_ext\": null, \"holiday_groups\": null, \"deliver_eta_time\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"add_charge_occur4\": null, \"deliver_state\": \"VA\", \"quote_amount\": null, \"cod_text\": \"No\", \"cod\": \"N\", \"additional_drivers\": false, \"rescheduled_ctrl_number\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_actual_pieces\": null, \"record_type\": 0, \"pickup_special_instr_long\": null, \"pickup_special_instructions3\": null, \"exception_timestamp\": null, \"deliver_actual_arr_time\": \"08:00\", \"house_airway_bill_number\": null, \"deliver_pricing_zone\": 1, \"total_pages\": 1, \"add_charge_occur11\": null, \"deliver_omw_latitude\": null, \"callback_userid\": null, \"rate_buck_amt1\": 57.00, \"pickup_point_customer\": 31025, \"pickup_eta_time\": null, \"add_charge_occur8\": null, \"invoice_period_end_date\": null, \"pickup_special_instructions1\": null, \"rate_buck_amt2\": null, \"pickup_special_instructions4\": null, \"manual_notepad\": false, \"edi_acknowledgement_required\": false, \"pickup_name\": \"BIG LOTS\", \"ordered_by_phone_number\": null, \"add_charge_amt12\": null, \"delivery_point_customer\": 31025, \"deliver_actual_dep_time\": \"08:15\", \"email_addresses\": null, \"pickup_address\": \"540 EASTPARK CT\", \"driver2\": null, \"signature_images\": [], \"rate_buck_amt11\": null, \"delivery_latitude\": 37.48366600, \"pickup_attention\": null, \"date_order_entered\": \"2021-07-08\", \"vehicle_type\": null, \"add_charge_amt9\": null, \"pickup_phone\": null, \"rate_miles\": null, \"customers_etrac_partner_id\": \"96609250\", \"order_type_text\": \"One way\", \"order_type\": \"O\", \"dl_arrive_notification_sent\": false, \"add_charge_code3\": null, \"etrac_number\": null, \"pickup_requested_arr_time\": \"07:00\", \"rate_buck_amt3\": null, \"pickup_actual_dep_time\": \"08:30\", \"line_items\": [], \"pickup_sign_req\": true, \"add_charge_code10\": null, \"deliver_city\": \"LANEXA\", \"fuel_plan\": null, \"add_charge_amt10\": null, \"roundtrip_actual_depart_time\": null, \"control_number\": 1872445, \"pickup_dispatch_zone\": null, \"send_new_order_alert\": false, \"settlements\": [{\"settlement_bucket4_pct\": null, \"charge1\": null, \"date_last_updated\": \"2021-07-08\", \"fuel_price_zone\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge4\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"time_last_updated\": \"05:06\", \"charge6\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"control_number\": 1872445, \"settlement_bucket2_pct\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"voucher_date\": null, \"agent_etrac_transaction_number\": null, \"settlement_bucket5_pct\": null, \"record_type\": 0, \"voucher_number\": null, \"voucher_amount\": null, \"pay_chart_used\": null, \"settlement_pct\": 100.00, \"vendor_invoice_number\": null, \"settlement_bucket3_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"pre_book_percentage\": true, \"charge3\": null, \"settlement_bucket6_pct\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"adjustment_type\": null, \"id\": \"002018724450D1\", \"agents_etrac_partner_id\": null, \"fuel_plan\": null, \"fuel_price_source\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"vendor_employee_numer\": null, \"settlement_bucket1_pct\": null, \"order_date\": \"2021-06-28\", \"charge2\": null}], \"deliver_actual_latitude\": null, \"fuel_price_zone\": null, \"verified_weight\": null, \"deliver_requested_dep_time\": \"17:00\", \"pickup_airport_code\": null, \"dispatch_time\": null, \"deliver_attention\": null, \"time_order_entered\": \"06:06\", \"rate_buck_amt4\": null, \"roundtrip_wait_time\": null, \"add_charge_amt2\": null, \"az_equip3\": null, \"progress\": [{\"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\", \"status_time\": \"06:06:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\", \"status_time\": \"08:30:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\", \"status_time\": \"08:15:00\"}], \"page_number\": 1, \"roundtrip_sign_req\": false, \"add_charge_amt1\": null, \"add_charge_code8\": null, \"weight\": null, \"rate_buck_amt6\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"bringg_send_sms\": false, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"custom_special_instr_long\": null, \"deliver_requested_arr_time\": \"08:00\", \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"az_equip1\": null, \"add_charge_code4\": null, \"bringg_order_id\": null, \"delivery_address_point_number_text\": \"JOSEPH FESSMAN\", \"delivery_address_point_number\": 26313, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"deliver_special_instructions1\": null, \"pickup_wait_time\": null, \"add_charge_occur5\": null, \"push_partner_order_id\": null, \"deliver_route_sequence\": null, \"pickup_country\": null, \"pickup_state\": \"VA\", \"original_schedule_number\": null, \"frequent_caller_id\": null, \"distribution_unique_id\": 0, \"fuel_miles\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"rate_buck_amt5\": null, \"exception_sign_required\": false, \"pickup_route_code\": null, \"deliver_dispatch_zone\": null, \"delivery_longitude\": -76.90426400, \"pickup_pricing_zone\": 1, \"zone_set_used\": 1, \"deliver_special_instructions2\": null, \"add_charge_amt3\": null, \"deliver_phone\": null, \"pickup_email_notification_sent\": false, \"add_charge_occur12\": null, \"reference_text\": \"2125617401\", \"reference\": \"2125617401\", \"deliver_requested_date\": \"2021-06-28\", \"deliver_actual_longitude\": null, \"image_sign_req\": false, \"pickup_eta_date\": null, \"deliver_phone_ext\": null, \"pickup_omw_longitude\": null, \"original_ctrl_number\": null, \"pickup_special_instructions2\": null, \"order_automatically_quoted\": false, \"bol_number\": null, \"rate_buck_amt10\": 2.34, \"callback_time\": null, \"hazmat\": false, \"distribution_shift_id\": null, \"pickup_latitude\": 37.53250820, \"ordered_by\": \"RYDER\", \"insurance_amount\": null, \"cod_accept_cashiers_check\": false, \"add_charge_amt4\": null, \"add_charge_code7\": null, \"deliver_actual_pieces\": null, \"deliver_address\": \"15400 STAGE RD\", \"cod_accept_company_check\": false, \"signature\": \"SOF\", \"previous_ctrl_number\": null, \"deliver_zip\": \"23089\", \"deliver_special_instructions3\": null, \"rate_buck_amt7\": null, \"hist_inv_number\": 0, \"callback_date\": null, \"deliver_special_instr_long\": null, \"po_number\": null, \"pickup_actual_arr_time\": \"08:00\", \"pickup_requested_date\": \"2021-06-28\", \"number_of_pieces\": 2, \"dispatch_id\": null, \"photos_exist\": false, \"pickup_actual_latitude\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"id\": \"002018724450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"del_actual_location_accuracy\": null, \"add_charge_occur7\": null, \"add_charge_occur9\": null, \"roundtrip_actual_latitude\": null, \"add_charge_occur6\": null, \"pickup_actual_longitude\": null, \"pickup_omw_timestamp\": null, \"bringg_last_loc_sent\": null, \"add_charge_code5\": null, \"deliver_country\": null, \"master_airway_bill_number\": null, \"pickup_route_seq\": null, \"roundtrip_signature\": null, \"calc_add_on_chgs\": false, \"deliver_actual_date\": \"2021-06-28\", \"cod_amount\": null, \"add_charge_code12\": null, \"rt_actual_location_accuracy\": null, \"rate_chart_used\": 0, \"pickup_longitude\": -77.33035820, \"pickup_signature\": \"SOF\", \"add_charge_amt5\": null, \"pu_arrive_notification_sent\": false, \"pickup_actual_date\": \"2021-06-28\", \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"push_services\": null, \"deliver_eta_date\": null, \"driver1_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver1\": 3208, \"deliver_omw_longitude\": null, \"deliver_wait_time\": null, \"pickup_room\": null, \"deliver_special_instructions4\": null, \"add_charge_amt7\": null, \"az_equip2\": null, \"hours\": \"15\", \"add_charge_code2\": null, \"exception_code\": null, \"roundtrip_actual_pieces\": null, \"rate_special_instructions\": null, \"roundtrip_actual_arrival_time\": null, \"add_charge_occur1\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"delivery_airport_code\": null, \"distribution_branch_id\": null, \"hist_inv_date\": null, \"add_charge_code1\": null, \"pickup_requested_dep_time\": \"09:00\", \"deliver_route_code\": null, \"roundtrip_actual_longitude\": null, \"pickup_city\": \"SANDSTON\", \"rate_buck_amt8\": null, \"pickup_omw_latitude\": null, \"deliver_omw_timestamp\": null, \"rate_buck_amt9\": null, \"deliver_room\": null, \"add_charge_code6\": null, \"add_charge_occur3\": null, \"blocks\": null, \"add_charge_code9\": null, \"actual_miles\": null, \"add_charge_occur10\": null, \"add_charge_code11\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"customer_name\": \"MXD/RYDER\", \"pu_actual_location_accuracy\": null, \"deliver_name\": \"JOSEPH FESSMAN\", \"add_charge_amt6\": null, \"signature_required\": true, \"csr\": \"DX*\", \"add_charge_amt8\": null, \"callback_to\": null, \"fuel_price_source\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"pickup_zip\": \"23150\", \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"return_svc_level\": null, \"add_charge_amt11\": null, \"add_charge_occur2\": null}}";
                                                         //objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                                         // objresponse.Reason = "{\"999000115280\": {\"deliver_eta_time\": null, \"deliver_special_instructions4\": null, \"del_actual_location_accuracy\": null, \"add_charge_amt8\": null, \"callback_to\": null, \"rate_chart_used\": 1, \"pickup_actual_latitude\": null, \"signature_images\": [], \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"add_charge_occur8\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"hours\": null, \"distribution_shift_id\": null, \"pickup_longitude\": null, \"hist_inv_number\": 0, \"add_charge_amt7\": null, \"dispatch_id\": null, \"dl_arrive_notification_sent\": false, \"add_charge_code8\": null, \"roundtrip_sign_req\": false, \"exception_timestamp\": null, \"pickup_city\": null, \"delivery_airport_code\": null, \"progress\": [{\"status_time\": \"08:34:00\", \"status_date\": \"2022-03-10\", \"status_text\": \"Entered in carrier's system\"}], \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"add_charge_amt2\": null, \"pickup_special_instructions1\": null, \"time_order_entered\": \"08:34\", \"distribution_unique_id\": 0, \"pickup_eta_date\": null, \"rate_buck_amt2\": null, \"rate_buck_amt9\": null, \"deliver_zip\": \"48150\", \"rate_buck_amt7\": null, \"customer_name\": \"TEST\", \"deliver_phone_ext\": null, \"roundtrip_actual_depart_time\": null, \"add_charge_code10\": null, \"add_charge_occur2\": null, \"deliver_state\": \"MI\", \"pickup_wait_time\": null, \"pickup_requested_arr_time\": null, \"csr\": \"RG\", \"add_charge_amt4\": null, \"holiday_groups\": null, \"total_pages\": 1, \"delivery_longitude\": -83.35663860, \"bringg_last_loc_sent\": null, \"deliver_name\": \"TANTARA\", \"deliver_actual_longitude\": null, \"distribution_branch_id\": null, \"deliver_wait_time\": null, \"add_charge_occur11\": null, \"deliver_omw_timestamp\": null, \"add_charge_amt3\": null, \"add_charge_amt10\": null, \"rate_buck_amt3\": null, \"rescheduled_ctrl_number\": null, \"add_charge_occur10\": null, \"deliver_address\": \"31782 ENTERPRISE DR\", \"pickup_latitude\": null, \"rate_buck_amt1\": null, \"pickup_phone\": null, \"pickup_actual_date\": \"2022-01-03\", \"previous_ctrl_number\": null, \"control_number\": 11528, \"rate_buck_amt11\": null, \"fuel_price_source\": null, \"add_charge_code9\": null, \"add_charge_occur3\": null, \"fuel_price_zone\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"rate_buck_amt10\": null, \"add_charge_code12\": null, \"quote_amount\": null, \"deliver_phone\": null, \"ordered_by_phone_number\": null, \"cod_accept_company_check\": false, \"callback_time\": null, \"deliver_dispatch_zone\": null, \"hazmat\": false, \"az_equip2\": null, \"add_charge_occur1\": null, \"pickup_email_notification_sent\": false, \"deliver_requested_dep_time\": null, \"deliver_special_instructions1\": null, \"deliver_actual_date\": null, \"rt_actual_location_accuracy\": null, \"signature_required\": false, \"pickup_attention\": null, \"pu_actual_location_accuracy\": null, \"rate_special_instructions\": null, \"pickup_special_instructions2\": null, \"driver2\": null, \"deliver_route_sequence\": null, \"add_charge_code2\": null, \"pickup_state\": null, \"add_charge_code1\": null, \"deliver_actual_pieces\": null, \"pickup_country\": null, \"signature\": null, \"add_charge_occur12\": null, \"reference_text\": \"FEDX01032022\", \"reference\": \"FEDX01032022\", \"pickup_pricing_zone\": null, \"pickup_route_seq\": null, \"pickup_actual_arr_time\": null, \"date_order_entered\": \"2022-03-10\", \"rate_buck_amt5\": null, \"number_of_pieces\": null, \"add_charge_code11\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_omw_timestamp\": null, \"delivery_point_customer\": 1, \"roundtrip_actual_latitude\": null, \"rate_buck_amt4\": null, \"pickup_requested_date\": \"2022-01-03\", \"po_number\": null, \"origin_code_text\": \"Web-Carrier UI\", \"origin_code\": \"X\", \"add_charge_occur7\": null, \"exception_sign_required\": false, \"id\": \"999000115280\", \"pickup_route_code\": null, \"pickup_airport_code\": null, \"roundtrip_actual_date\": null, \"roundtrip_signature\": null, \"roundtrip_actual_pieces\": null, \"pickup_phone_ext\": null, \"deliver_city\": \"LIVONIA\", \"deliver_omw_latitude\": null, \"service_level_text\": \"REGULAR\", \"service_level\": 1, \"order_timeliness_text\": \"Open\", \"order_timeliness\": \"5\", \"roundtrip_actual_arrival_time\": null, \"deliver_actual_arr_time\": null, \"etrac_number\": null, \"add_charge_occur9\": null, \"az_equip1\": null, \"rate_miles\": null, \"frequent_caller_id\": null, \"pickup_sign_req\": false, \"customer_type\": null, \"pickup_omw_latitude\": null, \"actual_miles\": null, \"add_charge_code3\": null, \"deliver_eta_date\": null, \"fuel_miles\": null, \"pickup_special_instructions4\": null, \"house_airway_bill_number\": null, \"vehicle_type\": null, \"cod_accept_cashiers_check\": false, \"settlements\": [], \"pickup_address\": null, \"pickup_room\": null, \"weight\": null, \"pickup_actual_longitude\": null, \"rate_buck_amt8\": null, \"delivery_address_point_number_text\": \"TANTARA\", \"delivery_address_point_number\": 10, \"status_code_text\": \"Entered\", \"status_code\": \"E\", \"master_airway_bill_number\": null, \"delivery_latitude\": 42.36977420, \"bringg_order_id\": null, \"add_charge_code7\": null, \"roundtrip_wait_time\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"cod_text\": \"No\", \"cod\": \"N\", \"deliver_room\": null, \"rate_buck_amt6\": null, \"pu_arrive_notification_sent\": false, \"deliver_actual_latitude\": null, \"blocks\": null, \"callback_userid\": null, \"edi_acknowledgement_required\": false, \"add_charge_code4\": null, \"driver1\": null, \"calc_add_on_chgs\": false, \"fuel_plan\": null, \"add_charge_amt9\": null, \"pickup_point_customer\": 0, \"zone_set_used\": 1, \"exception_code\": null, \"invoice_period_end_date\": null, \"push_partner_order_id\": null, \"verified_weight\": null, \"pickup_actual_pieces\": null, \"notes\": [], \"add_charge_amt12\": null, \"deliver_special_instructions3\": null, \"deliver_special_instructions2\": null, \"customer_number_text\": \"test\", \"customer_number\": 1, \"return_svc_level\": null, \"add_charge_amt1\": null, \"az_equip3\": null, \"image_sign_req\": false, \"pickup_omw_longitude\": null, \"deliver_requested_arr_time\": null, \"pickup_name\": null, \"pickup_address_point_number\": null, \"pickup_signature\": null, \"pickup_special_instructions3\": null, \"original_ctrl_number\": null, \"add_charge_code6\": null, \"deliver_omw_longitude\": null, \"additional_drivers\": false, \"deliver_country\": null, \"add_charge_amt5\": null, \"insurance_amount\": null, \"cod_amount\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": null, \"page_number\": 1, \"dispatch_time\": null, \"callback_date\": null, \"add_charge_occur5\": null, \"add_charge_occur6\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"pickup_dispatch_zone\": null, \"deliver_attention\": null, \"record_type\": 0, \"deliver_pricing_zone\": 1, \"deliver_requested_date\": \"2022-01-03\", \"push_services\": null, \"add_charge_amt6\": null, \"order_automatically_quoted\": false, \"custom_special_instr_long\": null, \"bol_number\": \"FEDX01032022\", \"hist_inv_date\": null, \"roundtrip_actual_longitude\": null, \"add_charge_amt11\": null, \"bringg_send_sms\": false, \"pickup_special_instr_long\": null, \"ordered_by\": \"DET\", \"deliver_special_instr_long\": null, \"pickup_zip\": null, \"pickup_requested_dep_time\": null, \"deliver_route_code\": null, \"deliver_actual_dep_time\": null, \"customers_etrac_partner_id\": null, \"add_charge_code5\": null, \"photos_exist\": false, \"original_schedule_number\": null, \"add_charge_occur4\": null, \"send_new_order_alert\": false, \"manual_notepad\": false, \"line_items\": [], \"pickup_eta_time\": null, \"_utc_offset\": \"-06:00\"}}";
+                                                       // objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
+
                                                         if (objresponse.ResponseVal)
                                                         {
                                                             strExecutionLogMessage = "OrderPostAPI Success " + System.Environment.NewLine;
@@ -1681,18 +1688,40 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
                                                         strInputFilePath, processingFileName, strDatetime);
 
+                                                            if (dsFailureResponse.Tables[0].Columns.Contains("code"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"])))
+                                                                {
+                                                                    string code = Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"]);
+                                                                    if (code.Contains("E.Busy"))
+                                                                    {
+                                                                        if (dtEBusy.Rows.Count > 0)
+                                                                        {
+                                                                            DataTable dtBusy = curDatatable.Select("[Customer Reference]= '" + objOrder.reference + "'").CopyToDataTable();
+                                                                            for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                                            {
+                                                                                DataRow dr1 = dtEBusy.NewRow();
+                                                                                for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                                                {
+                                                                                    dr1[column] = dtBusy.Rows[row][column];
+                                                                                }
+                                                                                dtEBusy.Rows.Add(dr1.ItemArray);
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            dtEBusy = curDatatable.Select("[Customer Reference]= '" + objOrder.reference + "'").CopyToDataTable();
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
                                                         }
-
                                                     }
                                                 }
                                             }
-
-
-
                                         }
                                         else
                                         {
-
                                             objOrder.line_items = objorder_line_itemList;
                                             objOrder.company_number = Convert.ToInt32(dr["Company"]);
                                             objOrder.service_level = Convert.ToInt32(dr["Service Type"]);
@@ -2020,6 +2049,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                             //  objresponse.Reason = "{\"002018724450\": {\"roundtrip_actual_date\": null, \"notes\": [], \"pickup_phone_ext\": null, \"holiday_groups\": null, \"deliver_eta_time\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"add_charge_occur4\": null, \"deliver_state\": \"VA\", \"quote_amount\": null, \"cod_text\": \"No\", \"cod\": \"N\", \"additional_drivers\": false, \"rescheduled_ctrl_number\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_actual_pieces\": null, \"record_type\": 0, \"pickup_special_instr_long\": null, \"pickup_special_instructions3\": null, \"exception_timestamp\": null, \"deliver_actual_arr_time\": \"08:00\", \"house_airway_bill_number\": null, \"deliver_pricing_zone\": 1, \"total_pages\": 1, \"add_charge_occur11\": null, \"deliver_omw_latitude\": null, \"callback_userid\": null, \"rate_buck_amt1\": 57.00, \"pickup_point_customer\": 31025, \"pickup_eta_time\": null, \"add_charge_occur8\": null, \"invoice_period_end_date\": null, \"pickup_special_instructions1\": null, \"rate_buck_amt2\": null, \"pickup_special_instructions4\": null, \"manual_notepad\": false, \"edi_acknowledgement_required\": false, \"pickup_name\": \"BIG LOTS\", \"ordered_by_phone_number\": null, \"add_charge_amt12\": null, \"delivery_point_customer\": 31025, \"deliver_actual_dep_time\": \"08:15\", \"email_addresses\": null, \"pickup_address\": \"540 EASTPARK CT\", \"driver2\": null, \"signature_images\": [], \"rate_buck_amt11\": null, \"delivery_latitude\": 37.48366600, \"pickup_attention\": null, \"date_order_entered\": \"2021-07-08\", \"vehicle_type\": null, \"add_charge_amt9\": null, \"pickup_phone\": null, \"rate_miles\": null, \"customers_etrac_partner_id\": \"96609250\", \"order_type_text\": \"One way\", \"order_type\": \"O\", \"dl_arrive_notification_sent\": false, \"add_charge_code3\": null, \"etrac_number\": null, \"pickup_requested_arr_time\": \"07:00\", \"rate_buck_amt3\": null, \"pickup_actual_dep_time\": \"08:30\", \"line_items\": [], \"pickup_sign_req\": true, \"add_charge_code10\": null, \"deliver_city\": \"LANEXA\", \"fuel_plan\": null, \"add_charge_amt10\": null, \"roundtrip_actual_depart_time\": null, \"control_number\": 1872445, \"pickup_dispatch_zone\": null, \"send_new_order_alert\": false, \"settlements\": [{\"settlement_bucket4_pct\": null, \"charge1\": null, \"date_last_updated\": \"2021-07-08\", \"fuel_price_zone\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge4\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"time_last_updated\": \"05:06\", \"charge6\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"control_number\": 1872445, \"settlement_bucket2_pct\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"voucher_date\": null, \"agent_etrac_transaction_number\": null, \"settlement_bucket5_pct\": null, \"record_type\": 0, \"voucher_number\": null, \"voucher_amount\": null, \"pay_chart_used\": null, \"settlement_pct\": 100.00, \"vendor_invoice_number\": null, \"settlement_bucket3_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"pre_book_percentage\": true, \"charge3\": null, \"settlement_bucket6_pct\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"adjustment_type\": null, \"id\": \"002018724450D1\", \"agents_etrac_partner_id\": null, \"fuel_plan\": null, \"fuel_price_source\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"vendor_employee_numer\": null, \"settlement_bucket1_pct\": null, \"order_date\": \"2021-06-28\", \"charge2\": null}], \"deliver_actual_latitude\": null, \"fuel_price_zone\": null, \"verified_weight\": null, \"deliver_requested_dep_time\": \"17:00\", \"pickup_airport_code\": null, \"dispatch_time\": null, \"deliver_attention\": null, \"time_order_entered\": \"06:06\", \"rate_buck_amt4\": null, \"roundtrip_wait_time\": null, \"add_charge_amt2\": null, \"az_equip3\": null, \"progress\": [{\"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\", \"status_time\": \"06:06:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\", \"status_time\": \"08:30:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\", \"status_time\": \"08:15:00\"}], \"page_number\": 1, \"roundtrip_sign_req\": false, \"add_charge_amt1\": null, \"add_charge_code8\": null, \"weight\": null, \"rate_buck_amt6\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"bringg_send_sms\": false, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"custom_special_instr_long\": null, \"deliver_requested_arr_time\": \"08:00\", \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"az_equip1\": null, \"add_charge_code4\": null, \"bringg_order_id\": null, \"delivery_address_point_number_text\": \"JOSEPH FESSMAN\", \"delivery_address_point_number\": 26313, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"deliver_special_instructions1\": null, \"pickup_wait_time\": null, \"add_charge_occur5\": null, \"push_partner_order_id\": null, \"deliver_route_sequence\": null, \"pickup_country\": null, \"pickup_state\": \"VA\", \"original_schedule_number\": null, \"frequent_caller_id\": null, \"distribution_unique_id\": 0, \"fuel_miles\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"rate_buck_amt5\": null, \"exception_sign_required\": false, \"pickup_route_code\": null, \"deliver_dispatch_zone\": null, \"delivery_longitude\": -76.90426400, \"pickup_pricing_zone\": 1, \"zone_set_used\": 1, \"deliver_special_instructions2\": null, \"add_charge_amt3\": null, \"deliver_phone\": null, \"pickup_email_notification_sent\": false, \"add_charge_occur12\": null, \"reference_text\": \"2125617401\", \"reference\": \"2125617401\", \"deliver_requested_date\": \"2021-06-28\", \"deliver_actual_longitude\": null, \"image_sign_req\": false, \"pickup_eta_date\": null, \"deliver_phone_ext\": null, \"pickup_omw_longitude\": null, \"original_ctrl_number\": null, \"pickup_special_instructions2\": null, \"order_automatically_quoted\": false, \"bol_number\": null, \"rate_buck_amt10\": 2.34, \"callback_time\": null, \"hazmat\": false, \"distribution_shift_id\": null, \"pickup_latitude\": 37.53250820, \"ordered_by\": \"RYDER\", \"insurance_amount\": null, \"cod_accept_cashiers_check\": false, \"add_charge_amt4\": null, \"add_charge_code7\": null, \"deliver_actual_pieces\": null, \"deliver_address\": \"15400 STAGE RD\", \"cod_accept_company_check\": false, \"signature\": \"SOF\", \"previous_ctrl_number\": null, \"deliver_zip\": \"23089\", \"deliver_special_instructions3\": null, \"rate_buck_amt7\": null, \"hist_inv_number\": 0, \"callback_date\": null, \"deliver_special_instr_long\": null, \"po_number\": null, \"pickup_actual_arr_time\": \"08:00\", \"pickup_requested_date\": \"2021-06-28\", \"number_of_pieces\": 2, \"dispatch_id\": null, \"photos_exist\": false, \"pickup_actual_latitude\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"id\": \"002018724450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"del_actual_location_accuracy\": null, \"add_charge_occur7\": null, \"add_charge_occur9\": null, \"roundtrip_actual_latitude\": null, \"add_charge_occur6\": null, \"pickup_actual_longitude\": null, \"pickup_omw_timestamp\": null, \"bringg_last_loc_sent\": null, \"add_charge_code5\": null, \"deliver_country\": null, \"master_airway_bill_number\": null, \"pickup_route_seq\": null, \"roundtrip_signature\": null, \"calc_add_on_chgs\": false, \"deliver_actual_date\": \"2021-06-28\", \"cod_amount\": null, \"add_charge_code12\": null, \"rt_actual_location_accuracy\": null, \"rate_chart_used\": 0, \"pickup_longitude\": -77.33035820, \"pickup_signature\": \"SOF\", \"add_charge_amt5\": null, \"pu_arrive_notification_sent\": false, \"pickup_actual_date\": \"2021-06-28\", \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"push_services\": null, \"deliver_eta_date\": null, \"driver1_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver1\": 3208, \"deliver_omw_longitude\": null, \"deliver_wait_time\": null, \"pickup_room\": null, \"deliver_special_instructions4\": null, \"add_charge_amt7\": null, \"az_equip2\": null, \"hours\": \"15\", \"add_charge_code2\": null, \"exception_code\": null, \"roundtrip_actual_pieces\": null, \"rate_special_instructions\": null, \"roundtrip_actual_arrival_time\": null, \"add_charge_occur1\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"delivery_airport_code\": null, \"distribution_branch_id\": null, \"hist_inv_date\": null, \"add_charge_code1\": null, \"pickup_requested_dep_time\": \"09:00\", \"deliver_route_code\": null, \"roundtrip_actual_longitude\": null, \"pickup_city\": \"SANDSTON\", \"rate_buck_amt8\": null, \"pickup_omw_latitude\": null, \"deliver_omw_timestamp\": null, \"rate_buck_amt9\": null, \"deliver_room\": null, \"add_charge_code6\": null, \"add_charge_occur3\": null, \"blocks\": null, \"add_charge_code9\": null, \"actual_miles\": null, \"add_charge_occur10\": null, \"add_charge_code11\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"customer_name\": \"MXD/RYDER\", \"pu_actual_location_accuracy\": null, \"deliver_name\": \"JOSEPH FESSMAN\", \"add_charge_amt6\": null, \"signature_required\": true, \"csr\": \"DX*\", \"add_charge_amt8\": null, \"callback_to\": null, \"fuel_price_source\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"pickup_zip\": \"23150\", \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"return_svc_level\": null, \"add_charge_amt11\": null, \"add_charge_occur2\": null}}";
                                             //  objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                             // objresponse.Reason = "{\"999000115280\": {\"deliver_eta_time\": null, \"deliver_special_instructions4\": null, \"del_actual_location_accuracy\": null, \"add_charge_amt8\": null, \"callback_to\": null, \"rate_chart_used\": 1, \"pickup_actual_latitude\": null, \"signature_images\": [], \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"add_charge_occur8\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"hours\": null, \"distribution_shift_id\": null, \"pickup_longitude\": null, \"hist_inv_number\": 0, \"add_charge_amt7\": null, \"dispatch_id\": null, \"dl_arrive_notification_sent\": false, \"add_charge_code8\": null, \"roundtrip_sign_req\": false, \"exception_timestamp\": null, \"pickup_city\": null, \"delivery_airport_code\": null, \"progress\": [{\"status_time\": \"08:34:00\", \"status_date\": \"2022-03-10\", \"status_text\": \"Entered in carrier's system\"}], \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"add_charge_amt2\": null, \"pickup_special_instructions1\": null, \"time_order_entered\": \"08:34\", \"distribution_unique_id\": 0, \"pickup_eta_date\": null, \"rate_buck_amt2\": null, \"rate_buck_amt9\": null, \"deliver_zip\": \"48150\", \"rate_buck_amt7\": null, \"customer_name\": \"TEST\", \"deliver_phone_ext\": null, \"roundtrip_actual_depart_time\": null, \"add_charge_code10\": null, \"add_charge_occur2\": null, \"deliver_state\": \"MI\", \"pickup_wait_time\": null, \"pickup_requested_arr_time\": null, \"csr\": \"RG\", \"add_charge_amt4\": null, \"holiday_groups\": null, \"total_pages\": 1, \"delivery_longitude\": -83.35663860, \"bringg_last_loc_sent\": null, \"deliver_name\": \"TANTARA\", \"deliver_actual_longitude\": null, \"distribution_branch_id\": null, \"deliver_wait_time\": null, \"add_charge_occur11\": null, \"deliver_omw_timestamp\": null, \"add_charge_amt3\": null, \"add_charge_amt10\": null, \"rate_buck_amt3\": null, \"rescheduled_ctrl_number\": null, \"add_charge_occur10\": null, \"deliver_address\": \"31782 ENTERPRISE DR\", \"pickup_latitude\": null, \"rate_buck_amt1\": null, \"pickup_phone\": null, \"pickup_actual_date\": \"2022-01-03\", \"previous_ctrl_number\": null, \"control_number\": 11528, \"rate_buck_amt11\": null, \"fuel_price_source\": null, \"add_charge_code9\": null, \"add_charge_occur3\": null, \"fuel_price_zone\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"rate_buck_amt10\": null, \"add_charge_code12\": null, \"quote_amount\": null, \"deliver_phone\": null, \"ordered_by_phone_number\": null, \"cod_accept_company_check\": false, \"callback_time\": null, \"deliver_dispatch_zone\": null, \"hazmat\": false, \"az_equip2\": null, \"add_charge_occur1\": null, \"pickup_email_notification_sent\": false, \"deliver_requested_dep_time\": null, \"deliver_special_instructions1\": null, \"deliver_actual_date\": null, \"rt_actual_location_accuracy\": null, \"signature_required\": false, \"pickup_attention\": null, \"pu_actual_location_accuracy\": null, \"rate_special_instructions\": null, \"pickup_special_instructions2\": null, \"driver2\": null, \"deliver_route_sequence\": null, \"add_charge_code2\": null, \"pickup_state\": null, \"add_charge_code1\": null, \"deliver_actual_pieces\": null, \"pickup_country\": null, \"signature\": null, \"add_charge_occur12\": null, \"reference_text\": \"FEDX01032022\", \"reference\": \"FEDX01032022\", \"pickup_pricing_zone\": null, \"pickup_route_seq\": null, \"pickup_actual_arr_time\": null, \"date_order_entered\": \"2022-03-10\", \"rate_buck_amt5\": null, \"number_of_pieces\": null, \"add_charge_code11\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_omw_timestamp\": null, \"delivery_point_customer\": 1, \"roundtrip_actual_latitude\": null, \"rate_buck_amt4\": null, \"pickup_requested_date\": \"2022-01-03\", \"po_number\": null, \"origin_code_text\": \"Web-Carrier UI\", \"origin_code\": \"X\", \"add_charge_occur7\": null, \"exception_sign_required\": false, \"id\": \"999000115280\", \"pickup_route_code\": null, \"pickup_airport_code\": null, \"roundtrip_actual_date\": null, \"roundtrip_signature\": null, \"roundtrip_actual_pieces\": null, \"pickup_phone_ext\": null, \"deliver_city\": \"LIVONIA\", \"deliver_omw_latitude\": null, \"service_level_text\": \"REGULAR\", \"service_level\": 1, \"order_timeliness_text\": \"Open\", \"order_timeliness\": \"5\", \"roundtrip_actual_arrival_time\": null, \"deliver_actual_arr_time\": null, \"etrac_number\": null, \"add_charge_occur9\": null, \"az_equip1\": null, \"rate_miles\": null, \"frequent_caller_id\": null, \"pickup_sign_req\": false, \"customer_type\": null, \"pickup_omw_latitude\": null, \"actual_miles\": null, \"add_charge_code3\": null, \"deliver_eta_date\": null, \"fuel_miles\": null, \"pickup_special_instructions4\": null, \"house_airway_bill_number\": null, \"vehicle_type\": null, \"cod_accept_cashiers_check\": false, \"settlements\": [], \"pickup_address\": null, \"pickup_room\": null, \"weight\": null, \"pickup_actual_longitude\": null, \"rate_buck_amt8\": null, \"delivery_address_point_number_text\": \"TANTARA\", \"delivery_address_point_number\": 10, \"status_code_text\": \"Entered\", \"status_code\": \"E\", \"master_airway_bill_number\": null, \"delivery_latitude\": 42.36977420, \"bringg_order_id\": null, \"add_charge_code7\": null, \"roundtrip_wait_time\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"cod_text\": \"No\", \"cod\": \"N\", \"deliver_room\": null, \"rate_buck_amt6\": null, \"pu_arrive_notification_sent\": false, \"deliver_actual_latitude\": null, \"blocks\": null, \"callback_userid\": null, \"edi_acknowledgement_required\": false, \"add_charge_code4\": null, \"driver1\": null, \"calc_add_on_chgs\": false, \"fuel_plan\": null, \"add_charge_amt9\": null, \"pickup_point_customer\": 0, \"zone_set_used\": 1, \"exception_code\": null, \"invoice_period_end_date\": null, \"push_partner_order_id\": null, \"verified_weight\": null, \"pickup_actual_pieces\": null, \"notes\": [], \"add_charge_amt12\": null, \"deliver_special_instructions3\": null, \"deliver_special_instructions2\": null, \"customer_number_text\": \"test\", \"customer_number\": 1, \"return_svc_level\": null, \"add_charge_amt1\": null, \"az_equip3\": null, \"image_sign_req\": false, \"pickup_omw_longitude\": null, \"deliver_requested_arr_time\": null, \"pickup_name\": null, \"pickup_address_point_number\": null, \"pickup_signature\": null, \"pickup_special_instructions3\": null, \"original_ctrl_number\": null, \"add_charge_code6\": null, \"deliver_omw_longitude\": null, \"additional_drivers\": false, \"deliver_country\": null, \"add_charge_amt5\": null, \"insurance_amount\": null, \"cod_amount\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": null, \"page_number\": 1, \"dispatch_time\": null, \"callback_date\": null, \"add_charge_occur5\": null, \"add_charge_occur6\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"pickup_dispatch_zone\": null, \"deliver_attention\": null, \"record_type\": 0, \"deliver_pricing_zone\": 1, \"deliver_requested_date\": \"2022-01-03\", \"push_services\": null, \"add_charge_amt6\": null, \"order_automatically_quoted\": false, \"custom_special_instr_long\": null, \"bol_number\": \"FEDX01032022\", \"hist_inv_date\": null, \"roundtrip_actual_longitude\": null, \"add_charge_amt11\": null, \"bringg_send_sms\": false, \"pickup_special_instr_long\": null, \"ordered_by\": \"DET\", \"deliver_special_instr_long\": null, \"pickup_zip\": null, \"pickup_requested_dep_time\": null, \"deliver_route_code\": null, \"deliver_actual_dep_time\": null, \"customers_etrac_partner_id\": null, \"add_charge_code5\": null, \"photos_exist\": false, \"original_schedule_number\": null, \"add_charge_occur4\": null, \"send_new_order_alert\": false, \"manual_notepad\": false, \"line_items\": [], \"pickup_eta_time\": null, \"_utc_offset\": \"-06:00\"}}";
+                                           // objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
                                             if (objresponse.ResponseVal)
                                             {
                                                 strExecutionLogMessage = "OrderPostAPI Success " + System.Environment.NewLine;
@@ -2961,6 +2991,38 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
                                             strInputFilePath, processingFileName, strDatetime);
 
+
+
+                                                if (dsFailureResponse.Tables[0].Columns.Contains("code"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"])))
+                                                    {
+                                                        string code = Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"]);
+                                                        if (code.Contains("E.Busy"))
+                                                        {
+                                                            DataRow _newRow = dataTableEBusy.NewRow();
+                                                            _newRow["CustomerReference"] = objOrder.reference;
+                                                            dataTableEBusy.Rows.Add(_newRow);
+                                                            //if (dtEBusy.Rows.Count > 0)
+                                                            //{
+                                                            //    DataTable dtBusy = datatable.Select("[Customer Reference]= '" + objOrder.reference + "'").CopyToDataTable();
+                                                            //    for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                            //    {
+                                                            //        DataRow dr1 = dtEBusy.NewRow();
+                                                            //        for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                            //        {
+                                                            //            dr1[column] = dtBusy.Rows[row][column];
+                                                            //        }
+                                                            //        dtEBusy.Rows.Add(dr1.ItemArray);
+                                                            //    }
+                                                            //}
+                                                            //else
+                                                            //{
+                                                            //    dtEBusy = datatable.Select("[Customer Reference]= '" + objOrder.reference + "'").CopyToDataTable();
+                                                            //}
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -2986,7 +3048,6 @@ namespace DatatracAPIOrder_OrderSettlement
                                     strInputFilePath, processingFileName, strDatetime);
                                     }
                                 }
-
                             });
 
                             objCommon.MergeSplittedOutputFiles(strFileName, "Order-Create", strDatetime);
@@ -2997,6 +3058,60 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlementFailure", strDatetime);
                             objCommon.MoveMergedOutputFilesToOutputLocation(strInputFilePath);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
+                            if (CustomerName == "BBB")
+                            {
+                                if (dtEBusy.Rows.Count > 0)
+                                {
+                                    dtEBusy.TableName = "Template";
+                                    int noofrowsperdatatable = 0;
+                                    List<DataTable> splitdatattable = clsCommon.SplitTable(dtEBusy, noofrowsperdatatable, strFileName, strDatetime);
+                                    foreach (DataTable dataTable in splitdatattable)
+                                    {
+                                        string strfilename = dataTable.TableName;
+                                        dataTable.TableName = "Template";
+                                        objCommon.ExportDataTableToXLSX(dataTable, strInputFilePath, strfilename);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                DataTable dtEBusyOutput = new DataTable();
+                                if (dataTableEBusy.Rows.Count > 0)
+                                {
+                                    foreach (DataRow dr in dataTableEBusy.Rows)
+                                    {
+                                        if (dtEBusyOutput.Rows.Count > 0)
+                                        {
+                                            DataTable dtBusy = dsExcel.Tables[0].Select("[Customer Reference]= '" + dr["CustomerReference"] + "'").CopyToDataTable();
+                                            for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                            {
+                                                DataRow dr1 = dtEBusyOutput.NewRow();
+                                                for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                {
+                                                    dr1[column] = dtBusy.Rows[row][column];
+                                                }
+                                                dtEBusyOutput.Rows.Add(dr1.ItemArray);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dtEBusyOutput = dsExcel.Tables[0].Select("[Customer Reference]= '" + dr["CustomerReference"] + "'").CopyToDataTable();
+                                        }
+                                    }
+                                }
+                                if (dtEBusyOutput.Rows.Count > 0)
+                                {
+                                    dtEBusyOutput.TableName = "Template";
+                                    int noofrowsperdatatable = Convert.ToInt16(objCommon.GetConfigValue("DivideEBusyDataIntoMultipleInputFiles"));
+                                    List<DataTable> splitdatattable = clsCommon.SplitTable(dtEBusyOutput, noofrowsperdatatable, strFileName, strDatetime);
+                                    foreach (DataTable dataTable in splitdatattable)
+                                    {
+                                        string strfilename = dataTable.TableName;
+                                        dataTable.TableName = "Template";
+                                        objCommon.ExportDataTableToXLSX(dataTable, strInputFilePath, strfilename);
+                                    }
+                                }
+                            }
 
                             strExecutionLogMessage = "Parallelly Processing  finished for the  file : " + strFileName + "." + System.Environment.NewLine;
                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
@@ -3090,13 +3205,19 @@ namespace DatatracAPIOrder_OrderSettlement
                             }
                             dsExcel.Tables[0].AcceptChanges();
 
-                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DevideToProcessParallelly"));
+                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DivideToProcessParallelly"));
                             List<DataTable> splitdt = clsCommon.SplitTable(dsExcel.Tables[0], noofrowspertable, strFileName, strDatetime);
 
                             strExecutionLogMessage = "Parallelly Processing Statred for the  file : " + strFileName + "." + System.Environment.NewLine + "Number of processess are going to exicute is :" + noofrowspertable;
                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
 
+                            // DataTable dtEBusy = new DataTable();
+
+                            DataTable dataTableEBusy = new DataTable();
+                            dataTableEBusy.Clear();
+                            dataTableEBusy.Columns.Add("CompanyNumber");
+                            dataTableEBusy.Columns.Add("ControlNumber");
 
                             Parallel.ForEach(splitdt, currentDatatable =>
                             {
@@ -3104,7 +3225,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                 var processingFileName = currentDatatable.TableName;
                                 strExecutionLogMessage = "Current Processing File is  : " + fileName + "." + System.Environment.NewLine;
                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-
+                                // var companynumber = 0;
+                                //var controlnumber = 0;
                                 var datatable = currentDatatable;
                                 int rowindex = 1;
                                 foreach (DataRow dr in datatable.Rows)
@@ -3116,18 +3238,28 @@ namespace DatatracAPIOrder_OrderSettlement
                                     try
                                     {
                                         clsDatatrac objclsDatatrac = new clsDatatrac();
+
+                                        OrderPutRequestParameters objOrderPutRequestParameters = new OrderPutRequestParameters();
                                         string orderputrequest = null;
+                                        if (dr.Table.Columns.Contains("Control Number"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["Control Number"])))
+                                            {
+                                                objOrderPutRequestParameters.control_number = Convert.ToInt32(dr["Control Number"]);
+                                            }
+                                        }
                                         if (dr.Table.Columns.Contains("Company"))
                                         {
                                             if (!string.IsNullOrEmpty(Convert.ToString(dr["Company"])))
                                             {
+                                                objOrderPutRequestParameters.company_number = Convert.ToInt32(dr["Company"]);
                                                 orderputrequest = @"'company_number': " + dr["Company"] + ",";
                                             }
                                             else
                                             {
                                                 strExecutionLogMessage = "OrderPut Error " + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Company Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                strExecutionLogMessage += "For row  number -" + rowindex + System.Environment.NewLine;
+                                                strExecutionLogMessage += "For the Control Number:" + objOrderPutRequestParameters.control_number + System.Environment.NewLine;
                                                 // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
@@ -3135,7 +3267,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 objErrorResponse.error = "Company Number not found for this record";
                                                 objErrorResponse.status = "Error";
                                                 objErrorResponse.code = "Company Value Missing";
-                                                objErrorResponse.reference = "For row  number -" + rowindex;
+                                                objErrorResponse.reference = "For the Control Number:" + objOrderPutRequestParameters.control_number;
                                                 string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
                                                 DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                                                 dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
@@ -3148,8 +3280,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                         else
                                         {
                                             strExecutionLogMessage = "OrderPut Error " + System.Environment.NewLine;
-                                            strExecutionLogMessage += "Company Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            strExecutionLogMessage += "Company Number Colunm Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For the Control Number:" + objOrderPutRequestParameters.control_number + System.Environment.NewLine;
                                             //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
@@ -3157,7 +3289,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                             objErrorResponse.error = "Company column not found for this file record";
                                             objErrorResponse.status = "Error";
                                             objErrorResponse.code = "Company column Missing";
-                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            objErrorResponse.reference = "For the Control Number: " + objOrderPutRequestParameters.control_number;
                                             string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
                                             DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                                             dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
@@ -3170,13 +3302,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                         {
                                             if (!string.IsNullOrEmpty(Convert.ToString(dr["Control Number"])))
                                             {
+                                                objOrderPutRequestParameters.control_number = Convert.ToInt32(dr["Control Number"]);
                                                 orderputrequest = orderputrequest + @"'control_number': " + Convert.ToInt32(dr["Control Number"]) + ",";
                                             }
                                             else
                                             {
                                                 strExecutionLogMessage = "OrderPut Error " + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Control Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                                strExecutionLogMessage += "For the Company Number:" + objOrderPutRequestParameters.company_number + System.Environment.NewLine;
                                                 //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
@@ -3185,7 +3318,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 objErrorResponse.error = "Control Number value not found for this  record";
                                                 objErrorResponse.status = "Error";
                                                 objErrorResponse.code = "Control Number Value Missing";
-                                                objErrorResponse.reference = "For row  number -" + rowindex;
+                                                objErrorResponse.reference = "For the Company Number:" + objOrderPutRequestParameters.company_number;
                                                 string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
                                                 DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                                                 dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
@@ -3199,15 +3332,15 @@ namespace DatatracAPIOrder_OrderSettlement
                                         {
                                             strExecutionLogMessage = "OrderPut Error " + System.Environment.NewLine;
                                             strExecutionLogMessage += "Control Number Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            strExecutionLogMessage += "For the Company Number:" + objOrderPutRequestParameters.company_number + System.Environment.NewLine;
                                             //objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                             objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                             ErrorResponse objErrorResponse = new ErrorResponse();
-                                            objErrorResponse.error = "Control Number column not found for this record";
+                                            objErrorResponse.error = "Control Number Colunm not found for this record";
                                             objErrorResponse.status = "Error";
                                             objErrorResponse.code = "Control Number column Missing";
-                                            objErrorResponse.reference = "For row  number -" + rowindex;
+                                            objErrorResponse.reference = "For the Company Number:" + objOrderPutRequestParameters.company_number;
                                             string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
                                             DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
                                             dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
@@ -3216,7 +3349,6 @@ namespace DatatracAPIOrder_OrderSettlement
                                             rowindex++;
                                             continue;
                                         }
-
 
                                         if (dr.Table.Columns.Contains("Service Type"))
                                         {
@@ -3614,21 +3746,23 @@ namespace DatatracAPIOrder_OrderSettlement
                                         if (status_code != null && status_code.ToUpper() == "C")
                                         {
                                             clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
-                                            UniqueId = objclsDatatrac.GenerateUniqueNumber(Convert.ToInt32(dr["Company"]), Convert.ToInt32(dr["Control Number"]));
-                                            objresponse = objclsDatatrac.CallDataTracOrderCancelAPI(UniqueId);
+                                            objOrderPutRequestParameters.uniqueId = objclsDatatrac.GenerateUniqueNumber(Convert.ToInt32(dr["Company"]), Convert.ToInt32(dr["Control Number"]));
+                                             objresponse = objclsDatatrac.CallDataTracOrderCancelAPI(objOrderPutRequestParameters.uniqueId);
+                                           // objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
+
                                             if (objresponse.ResponseVal)
                                             {
                                                 strExecutionLogMessage = "OrderCancelAPI Success " + System.Environment.NewLine;
-                                                strExecutionLogMessage += "UniqueId -" + UniqueId + System.Environment.NewLine;
+                                                strExecutionLogMessage += "UniqueId -" + objOrderPutRequestParameters.uniqueId + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
-                                                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-
+                                                // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                 DataTable dtsuccess = new DataTable();
                                                 dtsuccess.Clear();
                                                 dtsuccess.Columns.Add("UniqueId");
                                                 dtsuccess.Columns.Add("Status");
                                                 DataRow _newRow = dtsuccess.NewRow();
-                                                _newRow["UniqueId"] = UniqueId;
+                                                _newRow["UniqueId"] = objOrderPutRequestParameters.uniqueId;
                                                 _newRow["Status"] = objresponse.Reason;
                                                 dtsuccess.Rows.Add(_newRow);
                                                 dtsuccess.TableName = "OrderCancelSuccess";
@@ -3639,19 +3773,56 @@ namespace DatatracAPIOrder_OrderSettlement
                                             else
                                             {
                                                 strExecutionLogMessage = "OrderCancelAPI Failed " + System.Environment.NewLine;
-                                                strExecutionLogMessage += "UniqueId -" + UniqueId + System.Environment.NewLine;
+                                                strExecutionLogMessage += "UniqueId -" + objOrderPutRequestParameters.uniqueId + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
-                                                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                                 DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
                                                 dsFailureResponse.Tables[0].TableName = "OrderCancelFailure";
                                                 dsFailureResponse.Tables[0].Columns.Add("UniqueId", typeof(System.String));
                                                 foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                                 {
-                                                    row["UniqueId"] = UniqueId;
+                                                    row["UniqueId"] = objOrderPutRequestParameters.uniqueId;
                                                 }
+
                                                 objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                            strInputFilePath, processingFileName, strDatetime);
+                                                         strInputFilePath, processingFileName, strDatetime);
+
+                                                if (dsFailureResponse.Tables[0].Columns.Contains("code"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"])))
+                                                    {
+                                                        string code = Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"]);
+                                                        if (code.Contains("E.Busy"))
+                                                        {
+                                                            DataRow _newRow = dataTableEBusy.NewRow();
+                                                            _newRow["CompanyNumber"] = objOrderPutRequestParameters.company_number;
+                                                            _newRow["ControlNumber"] = objOrderPutRequestParameters.control_number;
+                                                            dataTableEBusy.Rows.Add(_newRow);
+
+                                                            //if (dtEBusy.Rows.Count > 0)
+                                                            //{
+                                                            //    //DataTable dtBusy = dsExcel.Tables[0].Select("[Company]= '" + objOrderPutRequestParameters.company_number + "' AND [Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    DataTable dtBusy = dsExcel.Tables[0].Select("[Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                            //    {
+                                                            //        DataRow dr1 = dtEBusy.NewRow();
+                                                            //        for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                            //        {
+                                                            //            dr1[column] = dtBusy.Rows[row][column];
+                                                            //        }
+                                                            //        dtEBusy.Rows.Add(dr1.ItemArray);
+                                                            //    }
+                                                            //}
+                                                            //else
+                                                            //{
+                                                            //    dtEBusy = dsExcel.Tables[0].Select("[Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    // dtEBusy = dsExcel.Tables[0].Select("[Company]= '" + objOrderPutRequestParameters.company_number + "' AND [Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //}
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                         else
@@ -3660,11 +3831,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                             string request = jsonobj.ToString();
                                             clsCommon.ReturnResponse objresponse = new clsCommon.ReturnResponse();
                                             UniqueId = objclsDatatrac.GenerateUniqueNumber(Convert.ToInt32(dr["Company"]), Convert.ToInt32(dr["Control Number"]));
-                                            objresponse = objclsDatatrac.CallDataTracOrderPutAPI(UniqueId, orderObject);
+                                            objOrderPutRequestParameters.uniqueId = objclsDatatrac.GenerateUniqueNumber(Convert.ToInt32(dr["Company"]), Convert.ToInt32(dr["Control Number"]));
+                                            objresponse = objclsDatatrac.CallDataTracOrderPutAPI(objOrderPutRequestParameters.uniqueId, orderObject);
                                             //objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                             //objresponse.ResponseVal = false;
                                             // objresponse.Reason = "{\"002018716980\": {\"csr\": \"DX*\", \"cod_text\": \"No\", \"cod\": \"N\", \"edi_acknowledgement_required\": false, \"control_number\": 1871698, \"deliver_requested_arr_time\": \"08:00\", \"return_svc_level\": null, \"pickup_phone_ext\": null, \"customers_etrac_partner_id\": \"96609250\", \"distribution_unique_id\": 0, \"custom_special_instr_long\": null, \"exception_sign_required\": false, \"po_number\": null, \"exception_code\": null, \"add_charge_occur4\": null, \"frequent_caller_id\": null, \"push_services\": null, \"pickup_omw_longitude\": null, \"deliver_special_instructions2\": null, \"deliver_actual_dep_time\": \"08:15\", \"house_airway_bill_number\": null, \"invoice_period_end_date\": null, \"line_items\": [], \"pickup_eta_date\": null, \"dl_arrive_notification_sent\": false, \"hist_inv_date\": null, \"add_charge_occur6\": null, \"add_charge_code12\": null, \"add_charge_occur5\": null, \"pickup_route_seq\": null, \"add_charge_code9\": null, \"callback_time\": null, \"add_charge_amt12\": null, \"add_charge_occur3\": null, \"deliver_eta_date\": null, \"ordered_by\": \"RYDER\", \"deliver_actual_latitude\": null, \"pickup_airport_code\": null, \"rate_buck_amt9\": null, \"deliver_pricing_zone\": 1, \"add_charge_code4\": null, \"rate_buck_amt5\": null, \"total_pages\": 1, \"roundtrip_actual_arrival_time\": null, \"pickup_requested_date\": \"2021-05-10\", \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"pickup_wait_time\": null, \"pickup_special_instructions4\": null, \"deliver_special_instructions1\": null, \"deliver_room\": null, \"roundtrip_actual_date\": null, \"rescheduled_ctrl_number\": null, \"insurance_amount\": null, \"deliver_city\": \"STAFFORD\", \"progress\": [{\"status_text\": \"Entered in carrier's system\", \"status_time\": \"12:27:00\", \"status_date\": \"2021-07-05\"}, {\"status_text\": \"Picked up\", \"status_time\": \"08:30:00\", \"status_date\": \"2021-05-10\"}, {\"status_text\": \"Delivered\", \"status_time\": \"08:15:00\", \"status_date\": \"2021-05-10\"}], \"deliver_eta_time\": null, \"rate_buck_amt2\": null, \"previous_ctrl_number\": null, \"pickup_city\": \"SANDSTON\", \"pickup_special_instructions1\": null, \"deliver_route_sequence\": null, \"pickup_actual_pieces\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"signature_required\": true, \"deliver_actual_date\": \"2021-05-10\", \"callback_userid\": null, \"pickup_requested_dep_time\": \"09:00\", \"cod_accept_cashiers_check\": false, \"signature_images\": [], \"add_charge_amt8\": null, \"add_charge_amt3\": null, \"pickup_zip\": \"23150\", \"original_ctrl_number\": null, \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": \"08:30\", \"pickup_special_instructions3\": null, \"etrac_number\": \"026-1k19-1h0-q08-z93\", \"fuel_plan\": null, \"pickup_address_point_number_text\": \"HUMAN TOUCH\", \"pickup_address_point_number\": 19891, \"pickup_latitude\": 37.53250820, \"add_charge_amt5\": null, \"verified_weight\": null, \"pickup_sign_req\": true, \"exception_timestamp\": null, \"add_charge_occur10\": null, \"deliver_special_instructions3\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"add_charge_code1\": null, \"deliver_name\": \"MICHAEL BROWN\", \"az_equip2\": null, \"rate_buck_amt3\": null, \"bringg_send_sms\": false, \"pickup_actual_date\": \"2021-05-10\", \"page_number\": 1, \"pickup_signature\": \"SOF\", \"bringg_order_id\": null, \"pu_arrive_notification_sent\": false, \"roundtrip_actual_pieces\": null, \"pickup_actual_latitude\": null, \"manual_notepad\": false, \"roundtrip_sign_req\": false, \"deliver_zip\": \"22554\", \"rate_buck_amt8\": null, \"add_charge_occur11\": null, \"holiday_groups\": null, \"delivery_latitude\": 38.37859180, \"rate_buck_amt4\": null, \"pickup_point_customer\": 31025, \"rate_miles\": null, \"pickup_special_instructions2\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"bol_number\": null, \"rate_chart_used\": 0, \"rate_buck_amt6\": null, \"add_charge_occur1\": null, \"deliver_phone\": null, \"rate_buck_amt11\": null, \"deliver_actual_pieces\": null, \"deliver_attention\": null, \"driver1_text\": \"LAVERT KENDALL MORRIS\", \"driver1\": 3001, \"zone_set_used\": 1, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"add_charge_amt4\": null, \"pickup_pricing_zone\": 1, \"pickup_country\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_omw_timestamp\": null, \"weight\": null, \"fuel_price_source\": null, \"pickup_omw_timestamp\": null, \"add_charge_code6\": null, \"photos_exist\": false, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_room\": null, \"deliver_omw_latitude\": null, \"callback_date\": null, \"actual_miles\": null, \"delivery_longitude\": -77.31366340, \"image_sign_req\": false, \"additional_drivers\": false, \"pickup_attention\": null, \"reference_text\": \"DAYA1\", \"reference\": \"DAYA1\", \"roundtrip_wait_time\": null, \"add_charge_code11\": null, \"pickup_special_instr_long\": null, \"add_charge_code3\": null, \"add_charge_amt1\": null, \"callback_to\": null, \"date_order_entered\": \"2021-07-05\", \"rate_special_instructions\": null, \"hist_inv_number\": 0, \"roundtrip_signature\": null, \"bringg_last_loc_sent\": null, \"pickup_route_code\": null, \"pickup_requested_arr_time\": \"07:00\", \"deliver_address\": \"134 CANTERBURY DR\", \"roundtrip_actual_longitude\": null, \"add_charge_occur8\": null, \"delivery_airport_code\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code10\": null, \"customer_name\": \"MXD/RYDER\", \"rate_buck_amt1\": 80.00, \"delivery_address_point_number_text\": \"MICHAEL BROWN\", \"delivery_address_point_number\": 25113, \"cod_amount\": null, \"roundtrip_actual_depart_time\": null, \"pickup_dispatch_zone\": null, \"service_level_text\": \"White Glove Delivery\", \"service_level\": 58, \"deliver_actual_longitude\": null, \"pickup_actual_arr_time\": \"08:00\", \"add_charge_amt6\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_longitude\": -77.33035820, \"driver2\": null, \"distribution_branch_id\": null, \"add_charge_amt9\": null, \"add_charge_code8\": null, \"blocks\": null, \"hazmat\": false, \"add_charge_code7\": null, \"deliver_requested_dep_time\": \"17:00\", \"signature\": \"SOF\", \"master_airway_bill_number\": null, \"cod_accept_company_check\": false, \"delivery_point_customer\": 31025, \"add_charge_occur2\": null, \"quote_amount\": null, \"add_charge_code2\": null, \"deliver_requested_date\": \"2021-05-10\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"record_type\": 0, \"deliver_special_instr_long\": null, \"push_partner_order_id\": null, \"pickup_address\": \"540 EASTPARK CT\", \"add_charge_occur9\": null, \"distribution_shift_id\": null, \"settlements\": [{\"voucher_amount\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket6_pct\": null, \"fuel_price_zone\": null, \"settlement_period_end_date\": null, \"driver_number_text\": \"LAVERT KENDALL MORRIS\", \"driver_number\": 3001, \"fuel_price_source\": null, \"settlement_bucket3_pct\": null, \"agent_etrac_transaction_number\": null, \"voucher_date\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"charge4\": null, \"pay_chart_used\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"adjustment_type\": null, \"voucher_number\": null, \"charge5\": null, \"charge2\": null, \"time_last_updated\": \"11:52\", \"settlement_bucket1_pct\": null, \"settlement_bucket5_pct\": null, \"settlement_bucket4_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"pre_book_percentage\": true, \"date_last_updated\": \"2021-07-05\", \"vendor_invoice_number\": null, \"control_number\": 1871698, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"fuel_plan\": null, \"charge3\": null, \"vendor_employee_numer\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge1\": null, \"order_date\": \"2021-05-10\", \"id\": \"002018716980D1\", \"agents_etrac_partner_id\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"record_type\": 0}], \"hours\": \"15\", \"pu_actual_location_accuracy\": null, \"fuel_price_zone\": null, \"rt_actual_location_accuracy\": null, \"deliver_phone_ext\": null, \"vehicle_type\": null, \"del_actual_location_accuracy\": null, \"ordered_by_phone_number\": null, \"deliver_country\": null, \"az_equip3\": null, \"add_charge_amt7\": null, \"add_charge_amt10\": null, \"notes\": [{\"user_id\": \"DX*\", \"note_line\": \"** Driver #1: 0 -> 3001\", \"control_number\": 1871698, \"note_code\": \"11\", \"id\": \"00201871698020210705125237DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:37\"}, {\"user_id\": \"DX*\", \"note_line\": \"** Driver #1 setl%: .00% -> 100.00%\", \"control_number\": 1871698, \"note_code\": \" 6\", \"id\": \"00201871698020210705125238DX*\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"entry_date\": \"2021-07-05\", \"print_on_ticket\": false, \"show_to_cust\": false, \"entry_time\": \"12:52:38\"}], \"pickup_eta_time\": null, \"deliver_state\": \"VA\", \"add_charge_code5\": null, \"deliver_wait_time\": null, \"pickup_omw_latitude\": null, \"fuel_miles\": null, \"add_charge_occur12\": null, \"deliver_dispatch_zone\": null, \"rate_buck_amt10\": 2.16, \"order_automatically_quoted\": false, \"deliver_actual_arr_time\": \"08:00\", \"deliver_special_instructions4\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"az_equip1\": null, \"time_order_entered\": \"12:27\", \"rate_buck_amt7\": null, \"roundtrip_actual_latitude\": null, \"add_charge_amt2\": null, \"add_charge_occur7\": null, \"pickup_email_notification_sent\": false, \"dispatch_time\": null, \"pickup_actual_longitude\": null, \"add_charge_amt11\": null, \"pickup_name\": \"HUMAN TOUCH\", \"dispatch_id\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"send_new_order_alert\": false, \"id\": \"002018716980\", \"deliver_omw_longitude\": null, \"pickup_state\": \"VA\", \"deliver_route_code\": null, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"pickup_phone\": null, \"number_of_pieces\": 1}}";
                                             //  objresponse.ResponseVal = true;
+                                            //objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
+
                                             if (objresponse.ResponseVal)
                                             {
                                                 strExecutionLogMessage = "OrderPut API Success " + System.Environment.NewLine;
@@ -4597,17 +4771,53 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 strExecutionLogMessage = "OrderPutAPI Failed " + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Request -" + request + System.Environment.NewLine;
                                                 strExecutionLogMessage += "Response -" + objresponse.Reason + System.Environment.NewLine;
-                                                objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-
+                                                //   objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
                                                 DataSet dsFailureResponse = objCommon.jsonToDataSet(objresponse.Reason);
                                                 dsFailureResponse.Tables[0].TableName = "OrderPutFailure";
                                                 dsFailureResponse.Tables[0].Columns.Add("UniqueId", typeof(System.String));
                                                 foreach (DataRow row in dsFailureResponse.Tables[0].Rows)
                                                 {
-                                                    row["UniqueId"] = UniqueId;
+                                                    row["UniqueId"] = objOrderPutRequestParameters.uniqueId;
                                                 }
                                                 objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
                                                             strInputFilePath, processingFileName, strDatetime);
+
+
+
+                                                if (dsFailureResponse.Tables[0].Columns.Contains("code"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"])))
+                                                    {
+                                                        string code = Convert.ToString(dsFailureResponse.Tables[0].Rows[0]["code"]);
+                                                        if (code.Contains("E.Busy"))
+                                                        {
+                                                            DataRow _newRow = dataTableEBusy.NewRow();
+                                                            _newRow["CompanyNumber"] = objOrderPutRequestParameters.company_number;
+                                                            _newRow["ControlNumber"] = objOrderPutRequestParameters.control_number;
+                                                            dataTableEBusy.Rows.Add(_newRow);
+                                                            //if (dtEBusy.Rows.Count > 0)
+                                                            //{
+                                                            //    //DataTable dtBusy = dsExcel.Tables[0].Select("[Company]= '" + objOrderPutRequestParameters.company_number + "' AND [Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    DataTable dtBusy = dsExcel.Tables[0].Select("[Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                                            //    {
+                                                            //        DataRow dr1 = dtEBusy.NewRow();
+                                                            //        for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                                            //        {
+                                                            //            dr1[column] = dtBusy.Rows[row][column];
+                                                            //        }
+                                                            //        dtEBusy.Rows.Add(dr1.ItemArray);
+                                                            //    }
+                                                            //}
+                                                            //else
+                                                            //{
+                                                            //    dtEBusy = dsExcel.Tables[0].Select("[Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //    // dtEBusy = dsExcel.Tables[0].Select("[Company]= '" + objOrderPutRequestParameters.company_number + "' AND [Control Number]= '" + objOrderPutRequestParameters.control_number + "'").CopyToDataTable();
+                                                            //}
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                         rowindex++;
@@ -4650,6 +4860,54 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.MoveMergedOutputFilesToOutputLocation(strInputFilePath);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
 
+                            DataTable dtEBusyOutput = new DataTable();
+                            if (dataTableEBusy.Rows.Count > 0)
+                            {
+                                foreach (DataRow dr in dataTableEBusy.Rows)
+                                {
+                                    if (dtEBusyOutput.Rows.Count > 0)
+                                    {
+                                        DataTable dtBusy = dsExcel.Tables[0].Select("[Company]= '" + dr["CompanyNumber"] + "' AND [Control Number]= '" + dr["ControlNumber"] + "'").CopyToDataTable();
+                                        for (int row = 0; row < dtBusy.Rows.Count; row++)
+                                        {
+                                            DataRow dr1 = dtEBusyOutput.NewRow();
+                                            for (int column = 0; column < dtBusy.Columns.Count; column++)
+                                            {
+                                                dr1[column] = dtBusy.Rows[row][column];
+                                            }
+                                            dtEBusyOutput.Rows.Add(dr1.ItemArray);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dtEBusyOutput = dsExcel.Tables[0].Select("[Company]= '" + dr["CompanyNumber"] + "' AND [Control Number]= '" + dr["ControlNumber"] + "'").CopyToDataTable();
+                                    }
+                                }
+                            }
+                            if (dtEBusyOutput.Rows.Count > 0)
+                            {
+                                dtEBusyOutput.TableName = "Template";
+                                int noofrowsperdatatable = Convert.ToInt16(objCommon.GetConfigValue("DivideEBusyDataIntoMultipleInputFiles"));
+                                List<DataTable> splitdatattable = clsCommon.SplitTable(dtEBusyOutput, noofrowsperdatatable, strFileName, strDatetime);
+                                foreach (DataTable dataTable in splitdatattable)
+                                {
+                                    string strfilename = dataTable.TableName;
+                                    dataTable.TableName = "Template";
+                                    objCommon.ExportDataTableToXLSX(dataTable, strInputFilePath, strfilename);
+                                }
+                            }
+                            //if (dtEBusy.Rows.Count > 0)
+                            //{
+                            //    dtEBusy.TableName = "Template";
+                            //    int noofrowsperdatatable = Convert.ToInt16(objCommon.GetConfigValue("DivideEBusyDataIntoMultipleInputFiles"));
+                            //    List<DataTable> splitdatattable = clsCommon.SplitTable(dtEBusy, noofrowsperdatatable, strFileName, strDatetime);
+                            //    foreach (DataTable dataTable in splitdatattable)
+                            //    {
+                            //        string strfilename = dataTable.TableName;
+                            //        dataTable.TableName = "Template";
+                            //        objCommon.ExportDataTableToXLSX(dataTable, strInputFilePath, strfilename);
+                            //    }
+                            //}
                             strExecutionLogMessage = "Parallelly Processing  finished for the  file : " + strFileName + "." + System.Environment.NewLine;
                             objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
 
@@ -4745,7 +5003,7 @@ namespace DatatracAPIOrder_OrderSettlement
                             }
                             dsExcel.Tables[0].AcceptChanges();
 
-                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DevideToProcessParallelly"));
+                            int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DivideToProcessParallelly"));
                             List<DataTable> splitdt = clsCommon.SplitTable(dsExcel.Tables[0], noofrowspertable, strFileName, strDatetime);
 
                             strExecutionLogMessage = "Parallelly Processing Statred for the  file : " + strFileName + "." + System.Environment.NewLine + "Number of processess are going to exicute is :" + noofrowspertable;

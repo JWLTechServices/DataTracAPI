@@ -668,7 +668,7 @@ namespace DatatracAPIOrder_OrderSettlement
                     {
                         var myTable = ds.Tables["progress"];
 
-                      //  ds.Tables["progress"].Columns.Remove(ds.Tables["progress"].Columns[columntoremove]);
+                        //  ds.Tables["progress"].Columns.Remove(ds.Tables["progress"].Columns[columntoremove]);
 
 
                         ds.Tables["progress"].Columns.Add("id", typeof(System.String));
@@ -924,6 +924,103 @@ namespace DatatracAPIOrder_OrderSettlement
             }
         }
 
+        public void ExportDataTableToXLSX(System.Data.DataTable dt, string strInputFilePath, string fileName)
+        {
+            clsCommon objCommon = new clsCommon();
+            try
+            {
+                string strFilePath;
+
+                if (!System.IO.Directory.Exists(strInputFilePath + @"\"))
+                    System.IO.Directory.CreateDirectory(strInputFilePath + @"\");
+
+                //int fileExtPos = fileName.LastIndexOf(".");
+                //if (fileExtPos >= 0)
+                //    fileName = fileName.Substring(0, fileExtPos);
+
+
+                strFilePath = strInputFilePath + @"\" + fileName + ".xlsx"; // ".csv";
+
+                Application oXL;
+                Workbook oWB;
+                Worksheet oSheet;
+                Range oRange;
+
+                try
+                {
+                    // Start Excel and get Application object. 
+                    oXL = new Microsoft.Office.Interop.Excel.Application();
+
+                    // Set some properties 
+                    oXL.Visible = false;
+                    oXL.DisplayAlerts = false;
+
+                    // Get a new workbook. 
+                    oWB = oXL.Workbooks.Add(Type.Missing);
+
+                    // Get the Active sheet 
+                    oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.ActiveSheet;
+                    oSheet.Name = dt.TableName;
+
+                    //  sda.Fill(dt);
+                    //    System.Data.DataTable dt = ds.Tables[0];
+                    int rowCount = 1;
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        rowCount += 1;
+                        for (int i = 1; i < dt.Columns.Count + 1; i++)
+                        {
+                            // Add the header the first time through 
+                            if (rowCount == 2)
+                            {
+                                oSheet.Cells[1, i] = dt.Columns[i - 1].ColumnName;
+                            }
+                            oSheet.Cells[rowCount, i] = dr[i - 1].ToString();
+                        }
+                    }
+
+                    // Resize the columns 
+                    // Range c1 = oSheet.Cells[1, 1];
+                    // Range c2 = oSheet.Cells[rowCount, dt.Columns.Count];
+                    //  oRange = oSheet.get_Range(c1, c2);
+
+                    oRange = oSheet.get_Range(oSheet.Cells[1, 1],
+                             oSheet.Cells[rowCount, dt.Columns.Count]);
+
+                    oRange.EntireColumn.AutoFit();
+
+                    // Save the sheet and close 
+                    oSheet = null;
+                    oRange = null;
+
+                    oWB.SaveAs(strFilePath, XlFileFormat.xlWorkbookDefault, Type.Missing, Type.Missing,
+    false, false, XlSaveAsAccessMode.xlNoChange,
+    Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+                    oWB.Close(Type.Missing, Type.Missing, Type.Missing);
+                    oWB = null;
+                    oXL.Quit();
+                }
+                catch (Exception ex)
+                {
+                    objCommon.WriteErrorLog(ex, "ExportDataTableToXLSX");
+                    throw;
+                }
+                finally
+                {
+                    // Clean up 
+                    // NOTE: When in release mode, this does the trick 
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                objCommon.WriteErrorLog(ex, "ExportDataTableToXLSX");
+            }
+        }
         public void WriteDataToCsvFileParallely(System.Data.DataTable dataTable, string strInputFilePath, string fileName, string Datetime)
         {
             try
@@ -1323,6 +1420,7 @@ namespace DatatracAPIOrder_OrderSettlement
             return String.Format("{0:D8}", random); //return 8 digit unique id 
         }
 
+        
     }
 
 }

@@ -1082,6 +1082,13 @@ namespace DatatracAPIOrder_OrderSettlement
 
     }
 
+    public struct OrderPutRequestParameters
+    {
+        public int company_number;
+        public int control_number;
+        public string uniqueId;
+    }
+
 
 
 }
