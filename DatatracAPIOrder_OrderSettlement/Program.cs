@@ -56,7 +56,6 @@ namespace DatatracAPIOrder_OrderSettlement
                     try
                     {
                         string Location = Right(subDirectory, (subDirectory.Length - (strInputFilePath.Length + 1)));
-
                         string SubdirLocation = strInputFilePath + @"\" + Location;
 
                         subDirectories = Directory.GetDirectories(SubdirLocation, "*", SearchOption.TopDirectoryOnly);
