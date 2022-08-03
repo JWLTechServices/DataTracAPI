@@ -62,7 +62,6 @@ namespace DatatracAPIOrder_OrderSettlement
                         subDirectories = Directory.GetDirectories(SubdirLocation, "*", SearchOption.TopDirectoryOnly);
                         foreach (var subDirectoryLocation in subDirectories)
                         {
-                            //break;
                             string subDirFolder = Right(subDirectoryLocation, (subDirectoryLocation.Length - (SubdirLocation.Length + 1)));
                             if (subDirFolder.ToUpper() == "ORDER")
                             {
