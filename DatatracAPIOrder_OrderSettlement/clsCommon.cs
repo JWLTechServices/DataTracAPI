@@ -190,6 +190,8 @@ namespace DatatracAPIOrder_OrderSettlement
 
                 mailMsg.Subject = Subject;
 
+                Body = Body.Replace(System.Environment.NewLine, "<br/>");
+
                 Body = Body + "<br/><br/>Regards,<br/>" + AppName + " <br/>Support Team<br/><br/>";
 
                 if (Disclaimer.Trim() != "")

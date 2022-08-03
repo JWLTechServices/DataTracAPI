@@ -516,6 +516,18 @@ namespace DatatracAPIOrder_OrderSettlement
         public double rate_buck_amt1 { get; set; }
         public double rate_buck_amt3 { get; set; }
         public double rate_buck_amt10 { get; set; }
+        
+        // Added new billing rates columns
+        public double rate_buck_amt2 { get; set; }
+        public double rate_buck_amt4 { get; set; }
+        public double rate_buck_amt5 { get; set; }
+        public double rate_buck_amt6 { get; set; }
+        public double rate_buck_amt7 { get; set; }
+        public double rate_buck_amt8 { get; set; }
+        public double rate_buck_amt9{ get; set; }
+        public double rate_buck_amt11 { get; set; }
+
+
         public int rate_miles { get; set; }
         // public double add_charge_amt1 { get; set; }
         // public double add_charge_amt5 { get; set; }
@@ -531,6 +543,8 @@ namespace DatatracAPIOrder_OrderSettlement
         public string pickup_room { get; set; }
         public string pickup_attention { get; set; }
         public string deliver_attention { get; set; }
+        public string pickup_special_instr_long { get; set; }
+        
 
     }
     public class notes
