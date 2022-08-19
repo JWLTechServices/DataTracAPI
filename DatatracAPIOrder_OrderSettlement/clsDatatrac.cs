@@ -257,7 +257,7 @@ namespace DatatracAPIOrder_OrderSettlement
                     client.DefaultRequestHeaders.Add("Authorization", "Basic " + userCredentialsEncoding);
 
                     //JObject jsonobj = JObject.Parse(jsonreq);
-                   // string payload = jsonobj.ToString();
+                    // string payload = jsonobj.ToString();
                     using (var content = new StringContent("", Encoding.UTF8, "application/json"))
                     {
                         content.Headers.ContentType.CharSet = "UTF-8";
@@ -473,6 +473,18 @@ namespace DatatracAPIOrder_OrderSettlement
             }
             return result;
         }
+
+        public string GenerateRouteHeaderUniqueNumber(int company_number, string strlocation, string route_date, string route_code)
+        {
+            string result;
+
+            string strcompany_number = company_number.ToString().PadLeft(3, '0');
+            strlocation = strlocation.PadRight(6, ' ');
+            string strroute_date = route_date.Replace(@"/", string.Empty);
+            result = strcompany_number + strlocation + strroute_date + route_code;
+            return result;
+
+        }
     }
     public class order
     {
@@ -516,7 +528,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public double rate_buck_amt1 { get; set; }
         public double rate_buck_amt3 { get; set; }
         public double rate_buck_amt10 { get; set; }
-        
+
         // Added new billing rates columns
         public double rate_buck_amt2 { get; set; }
         public double rate_buck_amt4 { get; set; }
@@ -524,7 +536,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public double rate_buck_amt6 { get; set; }
         public double rate_buck_amt7 { get; set; }
         public double rate_buck_amt8 { get; set; }
-        public double rate_buck_amt9{ get; set; }
+        public double rate_buck_amt9 { get; set; }
         public double rate_buck_amt11 { get; set; }
 
 
@@ -544,7 +556,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public string pickup_attention { get; set; }
         public string deliver_attention { get; set; }
         public string pickup_special_instr_long { get; set; }
-        
+
 
     }
     public class notes

@@ -58,10 +58,10 @@ namespace DatatracAPIOrder_OrderSettlement
                         {
                             objresponse.ResponseVal = false;
                             objresponse.Reason = response.Content.ReadAsStringAsync().Result;
-                            string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
-                            strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
-                            strExecutionLogMessage += "Response:" + objresponse.Reason;
-                            objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                            //string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Response:" + objresponse.Reason;
+                            //objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
 
                         }
                     }
@@ -121,10 +121,10 @@ namespace DatatracAPIOrder_OrderSettlement
                         {
                             objresponse.ResponseVal = false;
                             objresponse.Reason = response.Content.ReadAsStringAsync().Result;
-                            string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
-                            strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
-                            strExecutionLogMessage += "Response:" + objresponse.Reason;
-                            objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                            //string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Response:" + objresponse.Reason;
+                            //objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
 
                         }
                     }
@@ -153,7 +153,6 @@ namespace DatatracAPIOrder_OrderSettlement
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromMinutes(5);
-                   // string url = objCommon.GetConfigValue("DatatracURL") + "/route_stop";
                     string url = objCommon.GetConfigValue("DatatracURL") + "/route_stop/" + UniqueId;
                     client.DefaultRequestHeaders
                       .Accept
@@ -169,7 +168,6 @@ namespace DatatracAPIOrder_OrderSettlement
                     client.DefaultRequestHeaders.Add("Authorization", "Basic " + userCredentialsEncoding);
                     JObject jsonobj = JObject.Parse(jsonreq);
                     string payload = jsonobj.ToString();
-                    //string payload = JsonConvert.SerializeObject(objheaderdetails);
                     using (var content = new StringContent(payload, Encoding.UTF8, "application/json"))
                     {
                         content.Headers.ContentType.CharSet = "UTF-8";
@@ -186,10 +184,10 @@ namespace DatatracAPIOrder_OrderSettlement
                         {
                             objresponse.ResponseVal = false;
                             objresponse.Reason = response.Content.ReadAsStringAsync().Result;
-                            string strExecutionLogMessage = "Datatrac response failed for the customer reference number ";// + objorderdetails.order.reference + System.Environment.NewLine;
-                            strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
-                            strExecutionLogMessage += "Response:" + objresponse.Reason;
-                            objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                            //string strExecutionLogMessage = "Datatrac response failed for this request ";// + objorderdetails.order.reference + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Response:" + objresponse.Reason;
+                            //objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
 
                         }
                     }
@@ -198,6 +196,69 @@ namespace DatatracAPIOrder_OrderSettlement
             catch (Exception ex)
             {
                 string strExecutionLogMessage = "exception in CallDataTracRouteStopPutAPI " + ex;
+                objresponse.Reason = strExecutionLogMessage;
+                objresponse.ResponseVal = false;
+                objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+            }
+            return objresponse;
+        }
+
+
+        public ReturnResponse CallDataTracRouteHeaderPutAPI(string UniqueId, string jsonreq)
+        {
+            ReturnResponse objresponse = new ReturnResponse();
+
+            string json = string.Empty;
+            clsCommon objCommon = new clsCommon();
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                    string url = objCommon.GetConfigValue("DatatracURL") + "/route_header/" + UniqueId;
+                    client.DefaultRequestHeaders
+                      .Accept
+                      .Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var Username = objCommon.GetConfigValue("DatatracUserName");
+                    var Password = objCommon.GetConfigValue("DatatracPassword");
+
+                    UTF8Encoding utf8 = new UTF8Encoding();
+
+                    byte[] encodedBytes = utf8.GetBytes(Username + ":" + Password);
+                    string userCredentialsEncoding = Convert.ToBase64String(encodedBytes);
+                    client.DefaultRequestHeaders.Add("Authorization", "Basic " + userCredentialsEncoding);
+                    JObject jsonobj = JObject.Parse(jsonreq);
+                    string payload = jsonobj.ToString();
+                    using (var content = new StringContent(payload, Encoding.UTF8, "application/json"))
+                    {
+                        content.Headers.ContentType.CharSet = "UTF-8";
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                        var response = client.PutAsync(url, content).Result;
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            objresponse.Reason = response.Content.ReadAsStringAsync().Result;
+                            objresponse.ResponseVal = true;
+                        }
+                        else
+                        {
+                            objresponse.ResponseVal = false;
+                            objresponse.Reason = response.Content.ReadAsStringAsync().Result;
+                            //string strExecutionLogMessage = "Datatrac response failed for this request" + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Request:" + payload + System.Environment.NewLine;
+                            //strExecutionLogMessage += "Response:" + objresponse.Reason;
+                            //objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string strExecutionLogMessage = "exception in CallDataTracRouteHeaderPutAPI " + ex;
                 objresponse.Reason = strExecutionLogMessage;
                 objresponse.ResponseVal = false;
                 objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
@@ -222,8 +283,6 @@ namespace DatatracAPIOrder_OrderSettlement
                 SqlParameter paramProductCode = new SqlParameter("@ProductCode", SqlDbType.VarChar);
                 paramProductCode.Value = ProductCode;
 
-                //SqlParameter paramServiceType = new SqlParameter("@ServiceType", SqlDbType.VarChar);
-                //paramServiceType.Value = ServiceType;
 
                 dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_ROUTESTOP_CUSTOMERMAPPING",
                     paramCustomerName, paramLocationCode, paramProductCode);
@@ -259,7 +318,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                 SqlParameter paramCustomerNumber = new SqlParameter("@CustomerNumber", SqlDbType.VarChar);
                 paramCustomerNumber.Value = CustomerNumber;
-                
+
                 dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_SERVICETYPE_CUSTOMERMAPPING",
                     paramCompanyNumber, paramCustomerNumber);
                 if (dsDtls.Tables[0].Rows.Count > 0)
@@ -280,6 +339,688 @@ namespace DatatracAPIOrder_OrderSettlement
                 LogEvents(ex, "GetServiceTypeDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
             }
             return objResponse;
+        }
+
+
+        public DSResponse GetRouteHeaderDetails(string CustomerName, string LocationCode, string ProductCode)
+        {
+            DSResponse objResponse = new DSResponse();
+            try
+            {
+                DataSet dsDtls = new DataSet();
+
+                SqlParameter paramCustomerName = new SqlParameter("@CustomerName", SqlDbType.VarChar);
+                paramCustomerName.Value = CustomerName;
+
+                SqlParameter paramLocationCode = new SqlParameter("@LocationCode", SqlDbType.VarChar);
+                paramLocationCode.Value = LocationCode;
+
+                SqlParameter paramProductCode = new SqlParameter("@ProductCode", SqlDbType.VarChar);
+                paramProductCode.Value = ProductCode;
+
+
+                dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_ROUTEHEADER_CUSTOMERMAPPING",
+                    paramCustomerName, paramLocationCode, paramProductCode);
+                if (dsDtls.Tables[0].Rows.Count > 0)
+                {
+                    objResponse.DS = dsDtls;
+                    objResponse.dsResp.ResponseVal = true;
+                }
+                else
+                {
+                    objResponse.dsResp.ResponseVal = false;
+                    objResponse.dsResp.Reason = "No Customer Details Found";
+                }
+            }
+            catch (Exception ex)
+            {
+                objResponse.dsResp.ResponseVal = false;
+                WriteErrorLog(ex, "GetRouteHeaderDetails");
+                LogEvents(ex, "GetRouteHeaderDetails", System.Diagnostics.EventLogEntryType.Error, 0, 1);
+            }
+            return objResponse;
+        }
+
+        public static String StripUnicodeCharactersFromString(string inputValue)
+        {
+            return Encoding.ASCII.GetString(Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(Encoding.ASCII.EncodingName, new EncoderReplacementFallback(String.Empty), new DecoderExceptionFallback()), Encoding.UTF8.GetBytes(inputValue)));
+        }
+
+        public static route_stop generate_route_stop_object(DataTable dtdistinctValues, DataTable dtDataTable, int service_level,
+            DataTable dtCustomerMapping, DataRow[] drresult)
+        {
+            route_stop objroute_stop = new route_stop();
+            clsCommon objCommon = new clsCommon();
+            try
+            {
+                // route_stopdetails objroute_stopdetails = new route_stopdetails();
+                //route_stop objroute_stop = new route_stop();
+
+                Boolean boolReturn = false;
+                DateTime? dtValue = null;
+
+
+                List<items> objitemsList = new List<items>();
+                foreach (DataRow drItems in drresult)
+                {
+                    items objitems = new items();
+                    objitems.company_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["Company"]);
+                    // objitems.unique_id = Convert.ToInt32(dr["unique_id"]);
+                    objitems.actual_cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_type"]);
+
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["barcodes_unique"])))
+                        objitems.barcodes_unique = Convert.ToString(dtCustomerMapping.Rows[0]["barcodes_unique"]);
+
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
+                        objitems.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
+
+                    objitems.photos_exist = Convert.ToString(dtCustomerMapping.Rows[0]["photos_exist"]);
+                    //objitems.@return = Convert.ToString(drItems["Return"]);
+                    objitems.expected_pieces = Convert.ToInt32(drItems["Pieces"]);
+                    //   objitems.expected_weight = Convert.ToInt32(drItems["Weight"]);
+                    if (drItems.Table.Columns.Contains("Weight"))
+                    {
+                        if (!String.IsNullOrEmpty(Convert.ToString(drItems["Weight"])))
+                        {
+                            objitems.expected_weight = Convert.ToInt32(Convert.ToDouble(drItems["Weight"]));
+                        }
+                        else
+                        {
+                            if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["item_expected_weight"])))
+                                objitems.expected_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["item_expected_weight"]);
+                        }
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["item_expected_weight"])))
+                            objitems.expected_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["item_expected_weight"]);
+                    }
+
+                    objitems.item_description = StripUnicodeCharactersFromString(Convert.ToString(drItems["Item Description"]));
+                    objitems.item_number = Convert.ToString(drItems["Item Number"]);
+                    //  objitems.container_id = Convert.ToString(drItems["Container Id"]);
+                    objitems.reference = Convert.ToString(drItems["Customer_Reference"]);
+
+                    if (drItems.Table.Columns.Contains("Return"))
+                    {
+                        if (!String.IsNullOrEmpty(Convert.ToString(drItems["Return"])))
+                        {
+                            string str = Convert.ToString(drItems["Return"]);
+                            if (Convert.ToString(drItems["Return"]).ToUpper() == "YES")
+                            {
+                                str = "Y";
+                                if (!boolReturn)
+                                    boolReturn = true;
+                            }
+                            else if (Convert.ToString(drItems["Return"]).ToUpper() == "Y")
+                            {
+                                str = "Y";
+                                if (!boolReturn)
+                                    boolReturn = true;
+                            }
+                            else if (Convert.ToString(drItems["Return"]) == "1")
+                            {
+                                str = "Y";
+                                if (!boolReturn)
+                                    boolReturn = true;
+                            }
+                            else
+                            {
+                                str = "N";
+                            }
+                            objitems.@return = str;
+                        }
+                    }
+
+
+
+
+                    objitemsList.Add(objitems);
+                }
+
+                objroute_stop.items = objitemsList;
+
+                // objroute_stop.service_level = Convert.ToInt32(objDsServviceTypeResponse.DS.Tables[0].Rows[0]["service_type"]);
+                objroute_stop.service_level = Convert.ToInt32(service_level);
+                objroute_stop.address_name = StripUnicodeCharactersFromString(Convert.ToString(drresult[0]["Delivery Name"]));
+                objroute_stop.address = StripUnicodeCharactersFromString(Convert.ToString(drresult[0]["Delivery Address"]));
+                objroute_stop.city = StripUnicodeCharactersFromString(Convert.ToString(drresult[0]["Delivery City"]));
+                objroute_stop.state = Convert.ToString(drresult[0]["Delivery State"]);
+                objroute_stop.zip_code = Convert.ToString(drresult[0]["Delivery Zip"]);
+                objroute_stop.reference = Convert.ToString(drresult[0]["Customer_Reference"]);
+
+                // we need to check is is column exist bcs it not mandotory
+                objroute_stop.phone = Convert.ToString(drresult[0]["Delivery Phone Number"]);
+
+                objroute_stop.company_number = Convert.ToString(dtCustomerMapping.Rows[0]["Company"]);
+                //objroute_stop.unique_id = Convert.ToInt32(objCommon.GeneareteUnigueId()); // Convert.ToInt32(dr["Unique Id"]);
+                objroute_stop.actual_cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_type"]);
+                objroute_stop.callback_required = Convert.ToString(dtCustomerMapping.Rows[0]["callback_required"]);
+
+                objroute_stop.customer_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["CustomerNumber"]);
+                objroute_stop.origin_code = Convert.ToString(dtCustomerMapping.Rows[0]["origin_code"]);
+                objroute_stop.photos_exist = Convert.ToString(dtCustomerMapping.Rows[0]["photos_exist"]);
+                objroute_stop.posted_status = Convert.ToString(dtCustomerMapping.Rows[0]["posted_status"]);
+                objroute_stop.required_signature_type = Convert.ToString(dtCustomerMapping.Rows[0]["required_signature_type"]);
+
+                if (dtDataTable.Columns.Contains("RequestedDeliveryDate"))
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["RequestedDeliveryDate"])))
+                    {
+                        dtValue = Convert.ToDateTime(drresult[0]["RequestedDeliveryDate"]);
+                    }
+                }
+                else
+                {
+                    dtValue = System.DateTime.Now.AddDays(Convert.ToDouble(dtCustomerMapping.Rows[0]["route_date_DaysAddInToDay"]));
+                }
+
+                objroute_stop.route_date = Convert.ToDateTime(dtValue).ToString("yyyy-MM-dd");
+                objroute_stop.sent_to_phone = Convert.ToString(dtCustomerMapping.Rows[0]["required_signature_type"]);
+                if (boolReturn)
+                {
+                    objroute_stop.stop_type = "P";
+                }
+                else
+                {
+                    objroute_stop.stop_type = Convert.ToString(dtCustomerMapping.Rows[0]["stop_type"]);
+                }
+                objroute_stop.verification_id_type = Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_type"]);
+
+
+                objroute_stop.branch_id = Convert.ToString(dtCustomerMapping.Rows[0]["LocationCode"]);
+
+
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["route_code"])))
+                    objroute_stop.route_code = Convert.ToString(dtCustomerMapping.Rows[0]["route_code"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
+                    objroute_stop.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
+
+                if (dtDataTable.Columns.Contains("Bol Number"))
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Bol Number"])))
+                    {
+                        objroute_stop.bol_number = StripUnicodeCharactersFromString(Convert.ToString(drresult[0]["Bol Number"]));
+                    }
+                }
+                else
+                {
+
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"])))
+                    {
+                        objroute_stop.bol_number = Convert.ToString(dtCustomerMapping.Rows[0]["bol_number"]);
+                    }
+                }
+                if (dtDataTable.Columns.Contains("Arrival Time"))
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Arrival Time"])))
+                    {
+                        objroute_stop.arrival_time = (Convert.ToString(drresult[0]["Arrival Time"]));
+                    }
+                }
+                else
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_arrival_time"])))
+                    {
+                        objroute_stop.actual_arrival_time = Convert.ToString(dtCustomerMapping.Rows[0]["actual_arrival_time"]);
+                    }
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_billing_amt"])))
+                {
+                    objroute_stop.actual_billing_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_billing_amt"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_cod_amt"])))
+                {
+                    objroute_stop.actual_cod_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_cod_amt"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_delivery_date"])))
+                {
+                    objroute_stop.actual_delivery_date = Convert.ToString(dtCustomerMapping.Rows[0]["actual_delivery_date"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_depart_time"])))
+                {
+                    objroute_stop.actual_depart_time = Convert.ToString(dtCustomerMapping.Rows[0]["actual_depart_time"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_latitude"])))
+                {
+                    objroute_stop.actual_latitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_latitude"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_longitude"])))
+                {
+                    objroute_stop.actual_longitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_longitude"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_pieces"])))
+                {
+                    objroute_stop.actual_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["actual_pieces"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_settlement_amt"])))
+                {
+                    objroute_stop.actual_settlement_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["actual_settlement_amt"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["actual_weight"])))
+                {
+                    objroute_stop.actual_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["actual_weight"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["additional_instructions"])))
+                {
+                    objroute_stop.additional_instructions = Convert.ToString(dtCustomerMapping.Rows[0]["additional_instructions"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code1"])))
+                {
+                    objroute_stop.addl_charge_code1 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code1"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code2"])))
+                {
+                    objroute_stop.addl_charge_code2 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code2"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code3"])))
+                {
+                    objroute_stop.addl_charge_code3 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code3"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code4"])))
+                {
+                    objroute_stop.addl_charge_code4 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code4"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code5"])))
+                {
+                    objroute_stop.addl_charge_code5 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code5"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code6"])))
+                {
+                    objroute_stop.addl_charge_code6 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code6"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code7"])))
+                {
+                    objroute_stop.addl_charge_code7 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code7"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code8"])))
+                {
+                    objroute_stop.addl_charge_code8 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code8"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code9"])))
+                {
+                    objroute_stop.addl_charge_code9 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code9"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code10"])))
+                {
+                    objroute_stop.addl_charge_code10 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code10"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code11"])))
+                {
+                    objroute_stop.addl_charge_code11 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code11"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code12"])))
+                {
+                    objroute_stop.addl_charge_code12 = Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_code12"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur1"])))
+                {
+                    objroute_stop.addl_charge_occur1 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur1"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur2"])))
+                {
+                    objroute_stop.addl_charge_occur2 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur2"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur3"])))
+                {
+                    objroute_stop.addl_charge_occur3 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur3"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur4"])))
+                {
+                    objroute_stop.addl_charge_occur4 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur4"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur5"])))
+                {
+                    objroute_stop.addl_charge_occur5 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur5"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur6"])))
+                {
+                    objroute_stop.addl_charge_occur6 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur6"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur7"])))
+                {
+                    objroute_stop.addl_charge_occur7 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur7"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur8"])))
+                {
+
+                    objroute_stop.addl_charge_occur8 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur8"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur9"])))
+                {
+                    objroute_stop.addl_charge_occur9 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur9"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur10"])))
+                {
+                    objroute_stop.addl_charge_occur10 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur10"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur11"])))
+                {
+                    objroute_stop.addl_charge_occur11 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur11"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addl_charge_occur12"])))
+                {
+                    objroute_stop.addl_charge_occur12 = Convert.ToInt32(dtCustomerMapping.Rows[0]["addl_charge_occur12"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["addon_billing_amt"])))
+                {
+                    objroute_stop.addon_billing_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["addon_billing_amt"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["address_point"])))
+                {
+                    objroute_stop.address_point = Convert.ToInt32(dtCustomerMapping.Rows[0]["address_point"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["address_point_customer"])))
+                {
+                    objroute_stop.address_point_customer = Convert.ToInt32(dtCustomerMapping.Rows[0]["address_point_customer"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["alt_lookup"])))
+                {
+                    objroute_stop.alt_lookup = Convert.ToString(dtCustomerMapping.Rows[0]["alt_lookup"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["arrival_time"])))
+                {
+                    objroute_stop.arrival_time = Convert.ToString(dtCustomerMapping.Rows[0]["arrival_time"]);
+                }
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["asn_sent"])))
+                //{
+                //    objroute_stop.asn_sent = Convert.ToInt32(dtCustomerMapping.Rows[0]["asn_sent"]);
+                //}
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["attention"])))
+                {
+                    objroute_stop.attention = Convert.ToString(dtCustomerMapping.Rows[0]["attention"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["billing_override_amt"])))
+                {
+                    objroute_stop.billing_override_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["billing_override_amt"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["c2_paperwork"])))
+                {
+                    objroute_stop.c2_paperwork = Convert.ToString(dtCustomerMapping.Rows[0]["c2_paperwork"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cases"])))
+                {
+                    objroute_stop.cases = Convert.ToInt32(dtCustomerMapping.Rows[0]["cases"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_amount"])))
+                {
+                    objroute_stop.cod_amount = Convert.ToDouble(dtCustomerMapping.Rows[0]["cod_amount"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_check_no"])))
+                {
+                    objroute_stop.cod_check_no = Convert.ToString(dtCustomerMapping.Rows[0]["cod_check_no"]);
+                }
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["combine_data"])))
+                    objroute_stop.combine_data = Convert.ToString(dtCustomerMapping.Rows[0]["combine_data"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["comments"])))
+                    objroute_stop.comments = Convert.ToString(dtCustomerMapping.Rows[0]["comments"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_by"])))
+                //    objroute_stop.created_by = Convert.ToString(dtCustomerMapping.Rows[0]["created_by"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_date"])))
+                //    objroute_stop.created_date = Convert.ToString(dtCustomerMapping.Rows[0]["created_date"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["created_time"])))
+                //    objroute_stop.created_time = Convert.ToString(dtCustomerMapping.Rows[0]["created_time"]);
+
+                if (dtDataTable.Columns.Contains("Departure Time"))
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Departure Time"])))
+                    {
+                        objroute_stop.departure_time = (Convert.ToString(drresult[0]["Departure Time"]));
+                    }
+                }
+                else
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["departure_time"])))
+                        objroute_stop.departure_time = Convert.ToString(dtCustomerMapping.Rows[0]["departure_time"]);
+                }
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["dispatch_zone"])))
+                    objroute_stop.dispatch_zone = Convert.ToString(dtCustomerMapping.Rows[0]["dispatch_zone"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["driver_app_status"])))
+                    objroute_stop.driver_app_status = Convert.ToString(dtCustomerMapping.Rows[0]["driver_app_status"]);
+
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["eta"])))
+                    objroute_stop.eta = Convert.ToString(dtCustomerMapping.Rows[0]["eta"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["eta_date"])))
+                    objroute_stop.eta_date = Convert.ToString(dtCustomerMapping.Rows[0]["eta_date"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["exception_code"])))
+                    objroute_stop.exception_code = Convert.ToString(dtCustomerMapping.Rows[0]["exception_code"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["expected_pieces"])))
+                    objroute_stop.expected_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["expected_pieces"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["expected_weight"])))
+                    objroute_stop.expected_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["expected_weight"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["height"])))
+                    objroute_stop.height = Convert.ToInt32(dtCustomerMapping.Rows[0]["height"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["image_sign_req"])))
+                    objroute_stop.image_sign_req = Convert.ToString(dtCustomerMapping.Rows[0]["image_sign_req"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["insurance_value"])))
+                    objroute_stop.insurance_value = Convert.ToInt32(dtCustomerMapping.Rows[0]["insurance_value"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["invoice_number"])))
+                    objroute_stop.invoice_number = Convert.ToString(dtCustomerMapping.Rows[0]["invoice_number"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["item_scans_required"])))
+                    objroute_stop.item_scans_required = Convert.ToString(dtCustomerMapping.Rows[0]["item_scans_required"]);
+
+
+                //// objroute_stop.items = Convert.ToString(dtCustomerMapping.Rows[0]["items"]); // already added
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_date"])))
+                    objroute_stop.late_notice_date = Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_date"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_time"])))
+                    objroute_stop.late_notice_time = Convert.ToString(dtCustomerMapping.Rows[0]["late_notice_time"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["latitude"])))
+                    objroute_stop.latitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["latitude"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["length"])))
+                    objroute_stop.length = Convert.ToInt32(dtCustomerMapping.Rows[0]["length"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["loaded_pieces"])))
+                    objroute_stop.loaded_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["loaded_pieces"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["location_accuracy"])))
+                    objroute_stop.location_accuracy = Convert.ToInt32(dtCustomerMapping.Rows[0]["location_accuracy"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["longitude"])))
+                    objroute_stop.longitude = Convert.ToDouble(dtCustomerMapping.Rows[0]["longitude"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["minutes_late"])))
+                    objroute_stop.minutes_late = Convert.ToInt32(dtCustomerMapping.Rows[0]["minutes_late"]);
+
+                ////  objroute_stop.notes = Convert.ToString(dtCustomerMapping.Rows[0]["notes"]);
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["ordered_by"])))
+                    objroute_stop.ordered_by = Convert.ToString(dtCustomerMapping.Rows[0]["ordered_by"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["orig_order_number"])))
+                //    objroute_stop.orig_order_number = Convert.ToInt32(dtCustomerMapping.Rows[0]["orig_order_number"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["original_id"])))
+                //    objroute_stop.original_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["original_id"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["override_settle_percent"])))
+                    objroute_stop.override_settle_percent = Convert.ToDouble(dtCustomerMapping.Rows[0]["override_settle_percent"]);
+
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["phone_ext"])))
+                    objroute_stop.phone_ext = Convert.ToInt32(dtCustomerMapping.Rows[0]["phone_ext"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_by"])))
+                //    objroute_stop.posted_by = Convert.ToString(dtCustomerMapping.Rows[0]["posted_by"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_date"])))
+                //    objroute_stop.posted_date = Convert.ToString(dtCustomerMapping.Rows[0]["posted_date"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["posted_time"])))
+                    objroute_stop.posted_time = Convert.ToString(dtCustomerMapping.Rows[0]["posted_time"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["pricing_zone"])))
+                    objroute_stop.pricing_zone = Convert.ToInt32(dtCustomerMapping.Rows[0]["pricing_zone"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["progress"])))   
+                //    objroute_stop.progress = Convert.ToString(dtCustomerMapping.Rows[0]["progress"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_branch"])))
+                //    objroute_stop.received_branch = Convert.ToString(dtCustomerMapping.Rows[0]["received_branch"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_company"])))
+                //    objroute_stop.received_company = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_company"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_pieces"])))
+                    objroute_stop.received_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_pieces"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_route"])))
+                //    objroute_stop.received_route = Convert.ToString(dtCustomerMapping.Rows[0]["received_route"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_sequence"])))
+                //    objroute_stop.received_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["received_sequence"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_shift"])))
+                //    objroute_stop.received_shift = Convert.ToString(dtCustomerMapping.Rows[0]["received_shift"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["received_unique_id"])))
+                //    objroute_stop.received_unique_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["received_unique_id"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["redelivery"])))
+                //    objroute_stop.redelivery = Convert.ToString(dtCustomerMapping.Rows[0]["redelivery"]);
+
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return"])))
+                //    objroute_stop.@return= Convert.ToString(dtCustomerMapping.Rows[0]["return"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redel_id"])))
+                    objroute_stop.return_redel_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["return_redel_id"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_date"])))
+                    objroute_stop.return_redelivery_date = Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_date"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_flag"])))
+                    objroute_stop.return_redelivery_flag = Convert.ToString(dtCustomerMapping.Rows[0]["return_redelivery_flag"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["room"])))
+                    objroute_stop.room = Convert.ToString(dtCustomerMapping.Rows[0]["room"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["schedule_stop_id"])))
+                    objroute_stop.schedule_stop_id = Convert.ToInt32(dtCustomerMapping.Rows[0]["schedule_stop_id"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["service_time"])))
+                    objroute_stop.service_time = Convert.ToInt32(dtCustomerMapping.Rows[0]["service_time"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["settlement_override_amt"])))
+                    objroute_stop.settlement_override_amt = Convert.ToDouble(dtCustomerMapping.Rows[0]["settlement_override_amt"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["shift_id"])))
+                    objroute_stop.shift_id = Convert.ToString(dtCustomerMapping.Rows[0]["shift_id"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature"])))
+                    objroute_stop.signature = Convert.ToString(dtCustomerMapping.Rows[0]["signature"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature_filename"])))
+                    objroute_stop.signature_filename = Convert.ToString(dtCustomerMapping.Rows[0]["signature_filename"]);
+
+
+                //  objroute_stop.signature_images = Convert.ToString(dtCustomerMapping.Rows[0]["signature_images"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["signature_required"])))
+                    objroute_stop.signature_required = Convert.ToString(dtCustomerMapping.Rows[0]["signature_required"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions1"])))
+                    objroute_stop.special_instructions1 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions1"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions2"])))
+                    objroute_stop.special_instructions2 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions2"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions3"])))
+                    objroute_stop.special_instructions3 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions3"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions4"])))
+                    objroute_stop.special_instructions4 = Convert.ToString(dtCustomerMapping.Rows[0]["special_instructions4"]);
+
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["stop_sequence"])))
+                    objroute_stop.stop_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["stop_sequence"]);
+
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["times_sent"])))
+                    objroute_stop.times_sent = Convert.ToInt32(dtCustomerMapping.Rows[0]["times_sent"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["totes"])))
+                    objroute_stop.totes = Convert.ToInt32(dtCustomerMapping.Rows[0]["totes"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_route"])))
+                    objroute_stop.transfer_to_route = Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_route"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_sequence"])))
+                    objroute_stop.transfer_to_sequence = Convert.ToString(dtCustomerMapping.Rows[0]["transfer_to_sequence"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_by"])))
+                //    objroute_stop.updated_by = Convert.ToString(dtCustomerMapping.Rows[0]["updated_by"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_by_scanner"])))
+                    objroute_stop.updated_by_scanner = Convert.ToString(dtCustomerMapping.Rows[0]["updated_by_scanner"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_date"])))
+                //    objroute_stop.updated_date = Convert.ToString(dtCustomerMapping.Rows[0]["updated_date"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["updated_time"])))
+                //    objroute_stop.updated_time = Convert.ToString(dtCustomerMapping.Rows[0]["updated_time"]);
+
+                //if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["upload_time"])))
+                //    objroute_stop.upload_time = Convert.ToString(dtCustomerMapping.Rows[0]["upload_time"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["vehicle"])))
+                    objroute_stop.vehicle = Convert.ToString(dtCustomerMapping.Rows[0]["vehicle"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_details"])))
+                    objroute_stop.verification_id_details = Convert.ToString(dtCustomerMapping.Rows[0]["verification_id_details"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["width"])))
+                    objroute_stop.width = Convert.ToInt32(dtCustomerMapping.Rows[0]["width"]);
+
+                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["zip_code"])))
+                    objroute_stop.zip_code = Convert.ToString(dtCustomerMapping.Rows[0]["zip_code"]);
+
+
+                //objroute_stopdetails.route_stop = objroute_stop;
+
+            }
+            catch (Exception ex)
+            {
+                string strExecutionLogMessage = "exception in generateroute_headerdetails " + ex;
+                objCommon.WriteExecutionLog(objCommon.GetConfigValue("ExecutionLogFileLocation"), strExecutionLogMessage);
+                objCommon.WriteErrorLog(ex, strExecutionLogMessage);
+            }
+            return objroute_stop;
         }
     }
 
@@ -302,10 +1043,12 @@ namespace DatatracAPIOrder_OrderSettlement
         public string shipper_type { get; set; }
         public string vehicle_allocation_method { get; set; }
 
+        public route_stop route_stop { get; set; }
 
         //public double actual_billing_amount { get; set; }
         //public double actual_cost_allocation { get; set; }
-        //public int actual_driver_agent { get; set; }
+        public int actual_driver_agent { get; set; }
+
         //public int actual_miles { get; set; }
         //public double actual_settlement_amount { get; set; }
         //public int actual_stops { get; set; }
@@ -572,7 +1315,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public int address_point_customer { get; set; }
         public string alt_lookup { get; set; }
         public string arrival_time { get; set; }
-      //  public int asn_sent { get; set; }
+        //  public int asn_sent { get; set; }
         public string attention { get; set; }
         public double billing_override_amt { get; set; }
 
@@ -584,9 +1327,9 @@ namespace DatatracAPIOrder_OrderSettlement
         public string cod_check_no { get; set; }
         public string combine_data { get; set; }
         public string comments { get; set; }
-      //  public string created_by { get; set; }
-       // public string created_date { get; set; }
-     //   public string created_time { get; set; }
+        //  public string created_by { get; set; }
+        // public string created_date { get; set; }
+        //   public string created_time { get; set; }
         public string departure_time { get; set; }
         public string dispatch_zone { get; set; }
         public string driver_app_status { get; set; }
@@ -612,24 +1355,24 @@ namespace DatatracAPIOrder_OrderSettlement
         // public List<notes> notes { get; set; }
         public string ordered_by { get; set; }
         //public int orig_order_number { get; set; }
-       // public int original_id { get; set; }
+        // public int original_id { get; set; }
         public double override_settle_percent { get; set; }
 
         public int phone_ext { get; set; }
-       // public string posted_by { get; set; }
-     //   public string posted_date { get; set; }
+        // public string posted_by { get; set; }
+        //   public string posted_date { get; set; }
         public string posted_time { get; set; }
         public int pricing_zone { get; set; }
         // public List<progress> progress { get; set; } // read only
-     //   public string received_branch { get; set; }
+        //   public string received_branch { get; set; }
         //public int received_company { get; set; }
         public int received_pieces { get; set; }
-       // public string received_route { get; set; }
-       // public string received_sequence { get; set; }
-      //  public string received_shift { get; set; }
-       // public int received_unique_id { get; set; }
-      //  public string redelivery { get; set; }
-      //  public string @return { get; set; }
+        // public string received_route { get; set; }
+        // public string received_sequence { get; set; }
+        //  public string received_shift { get; set; }
+        // public int received_unique_id { get; set; }
+        //  public string redelivery { get; set; }
+        //  public string @return { get; set; }
         public int return_redel_id { get; set; }
         public string return_redelivery_date { get; set; }
         public string return_redelivery_flag { get; set; }
@@ -643,23 +1386,23 @@ namespace DatatracAPIOrder_OrderSettlement
         public string shift_id { get; set; }
         public string signature { get; set; }
         public string signature_filename { get; set; }
-       // public List<signature_images> signature_images { get; set; }
+        // public List<signature_images> signature_images { get; set; }
         public string signature_required { get; set; }
         public string special_instructions1 { get; set; }
         public string special_instructions2 { get; set; }
         public string special_instructions3 { get; set; }
         public string special_instructions4 { get; set; }
 
-         public string stop_sequence { get; set; }
+        public string stop_sequence { get; set; }
         public int times_sent { get; set; }
         public int totes { get; set; }
         public string transfer_to_route { get; set; }
         public string transfer_to_sequence { get; set; }
-      //  public string updated_by { get; set; }
+        //  public string updated_by { get; set; }
         public string updated_by_scanner { get; set; }
-      //  public string updated_date { get; set; }
-      //  public string updated_time { get; set; }
-      //  public string upload_time { get; set; }
+        //  public string updated_date { get; set; }
+        //  public string updated_time { get; set; }
+        //  public string upload_time { get; set; }
         public string vehicle { get; set; }
         public string verification_id_details { get; set; }
         public int width { get; set; }
