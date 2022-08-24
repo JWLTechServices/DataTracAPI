@@ -7186,7 +7186,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                         objroute_stop.reference = Convert.ToString(drresult[0]["Customer_Reference"]);
 
                                         // we need to check is is column exist bcs it not mandotory
-                                        objroute_stop.phone = Convert.ToString(drresult[0]["Delivery Phone Number"]);
+
+                                        if (String.IsNullOrEmpty(Convert.ToString(drresult[0]["Delivery Phone Number"])))
+                                        {
+                                            if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Delivery Phone Number"])))
+                                            {
+                                                objroute_stop.phone = Convert.ToString(drresult[0]["Delivery Phone Number"]);
+                                            }
+                                        }
 
                                         objroute_stop.company_number = Convert.ToString(dtCustomerMapping.Rows[0]["Company"]);
                                         //objroute_stop.unique_id = Convert.ToInt32(objCommon.GeneareteUnigueId()); // Convert.ToInt32(dr["Unique Id"]);
