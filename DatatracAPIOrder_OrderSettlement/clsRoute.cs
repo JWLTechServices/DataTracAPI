@@ -530,10 +530,24 @@ namespace DatatracAPIOrder_OrderSettlement
 
                 objroute_stop.branch_id = Convert.ToString(dtCustomerMapping.Rows[0]["LocationCode"]);
 
+                if (dtDataTable.Columns.Contains("Route Code"))
+                {
+                    if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Route Code"])))
+                    {
+                        objroute_stop.route_code = Convert.ToString(drresult[0]["Route Code"]);
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["route_code"])))
+                            objroute_stop.route_code = Convert.ToString(dtCustomerMapping.Rows[0]["route_code"]);
+                    }
+                }
+                else
+                {
 
-
-                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["route_code"])))
-                    objroute_stop.route_code = Convert.ToString(dtCustomerMapping.Rows[0]["route_code"]);
+                    if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["route_code"])))
+                        objroute_stop.route_code = Convert.ToString(dtCustomerMapping.Rows[0]["route_code"]);
+                }
 
                 if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"])))
                     objroute_stop.cod_type = Convert.ToString(dtCustomerMapping.Rows[0]["cod_type"]);
