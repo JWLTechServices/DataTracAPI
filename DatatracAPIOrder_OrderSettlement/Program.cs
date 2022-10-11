@@ -410,498 +410,537 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                     foreach (DataRow drow in datatable1.Rows)
                                                     {
-                                                        ReferenceId = Convert.ToString(drow["Customer Reference"]);
-                                                        DataRow[] drItemresult = curDatatable.Select("[Customer Reference]= '" + drow["Customer Reference"] + "'");
-                                                        foreach (DataRow drItems in drItemresult)
+                                                        try
                                                         {
-                                                            order_line_item objitems = new order_line_item();
-                                                            if (drItems.Table.Columns.Contains("Item Number"))
+                                                            ReferenceId = Convert.ToString(drow["Customer Reference"]);
+                                                            objOrder.reference = Convert.ToString(drow["Customer Reference"]);
+                                                            DataRow[] drItemresult = curDatatable.Select("[Customer Reference]= '" + drow["Customer Reference"] + "'");
+                                                            foreach (DataRow drItems in drItemresult)
                                                             {
-                                                                objitems.item_number = Convert.ToString(drItems["Item Number"]);
-                                                            }
-                                                            if (drItems.Table.Columns.Contains("Item Description"))
-                                                            {
-                                                                objitems.item_description = Convert.ToString(drItems["Item Description"]);
-                                                            }
-                                                            if (drItems.Table.Columns.Contains("Dim Height"))
-                                                            {
-                                                                objitems.dim_height = Convert.ToInt32(Convert.ToDouble(drItems["Dim Height"]));
-                                                            }
-                                                            if (drItems.Table.Columns.Contains("Dim Length"))
-                                                            {
-                                                                objitems.dim_length = Convert.ToInt32(Convert.ToDouble(drItems["Dim Length"]));
-                                                            }
-                                                            if (drItems.Table.Columns.Contains("Dim Width"))
-                                                            {
-                                                                objitems.dim_width = Convert.ToInt32(Convert.ToDouble(drItems["Dim Width"]));
-                                                            }
-                                                            objorder_line_itemList.Add(objitems);
-                                                        }
-                                                        objOrder.number_of_pieces = Convert.ToInt32(drItemresult.Length);
-
-                                                        objOrder.line_items = objorder_line_itemList;
-
-                                                        objOrder.company_number = Convert.ToInt32(drow["Company"]);
-                                                        objOrder.service_level = Convert.ToInt32(drow["Service Type"]);
-                                                        objOrder.customer_number = Convert.ToInt32(drow["Billing Customer Number"]);
-                                                        objOrder.reference = Convert.ToString(drow["Customer Reference"]);
-                                                        //  DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
-
-                                                        if (drow.Table.Columns.Contains("BOL Number"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["BOL Number"])))
-                                                            {
-                                                                objOrder.bol_number = Convert.ToString(drow["BOL Number"]);
-                                                            }
-                                                        }
-
-                                                        if (drow.Table.Columns.Contains("Delivery Date"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery Date"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Delivery Date"]);
-                                                                objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
-                                                                objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
-                                                                objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
-                                                                objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup actual arrival time"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual arrival time"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Pickup actual arrival time"]);
-                                                                objOrder.pickup_actual_arr_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup actual depart time"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual depart time"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Pickup actual depart time"]);
-                                                                objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        //    dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
-                                                        //  objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
-                                                        if (drow.Table.Columns.Contains("Pickup no later than"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup no later than"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Pickup no later than"]);
-                                                                objOrder.pickup_requested_dep_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup name"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup name"])))
-                                                            {
-                                                                objOrder.pickup_name = Convert.ToString(drow["Pickup name"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup address"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup address"])))
-                                                            {
-                                                                objOrder.pickup_address = Convert.ToString(drow["Pickup address"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup city"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup city"])))
-                                                            {
-                                                                objOrder.pickup_city = Convert.ToString(drow["Pickup city"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup state/province"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup state/province"])))
-                                                            {
-                                                                objOrder.pickup_state = Convert.ToString(drow["Pickup state/province"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup zip/postal code"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup zip/postal code"])))
-                                                            {
-                                                                // objOrder.pickup_zip = Convert.ToString(dr["Pickup zip/postal code"]);
-
-                                                                string strZip = Convert.ToString(drow["Pickup zip/postal code"]);
-                                                                strZip = Regex.Replace(strZip, @"\t", "");
-                                                                if (strZip.Length > 5)
+                                                                order_line_item objitems = new order_line_item();
+                                                                if (drItems.Table.Columns.Contains("Item Number"))
                                                                 {
-                                                                    objOrder.pickup_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
+                                                                    objitems.item_number = Convert.ToString(drItems["Item Number"]);
+                                                                }
+                                                                if (drItems.Table.Columns.Contains("Item Description"))
+                                                                {
+                                                                    objitems.item_description = Convert.ToString(drItems["Item Description"]);
+                                                                }
+                                                                if (drItems.Table.Columns.Contains("Dim Height"))
+                                                                {
+                                                                    objitems.dim_height = Convert.ToInt32(Convert.ToDouble(drItems["Dim Height"]));
+                                                                }
+                                                                if (drItems.Table.Columns.Contains("Dim Length"))
+                                                                {
+                                                                    objitems.dim_length = Convert.ToInt32(Convert.ToDouble(drItems["Dim Length"]));
+                                                                }
+                                                                if (drItems.Table.Columns.Contains("Dim Width"))
+                                                                {
+                                                                    objitems.dim_width = Convert.ToInt32(Convert.ToDouble(drItems["Dim Width"]));
+                                                                }
+                                                                objorder_line_itemList.Add(objitems);
+                                                            }
+                                                            objOrder.number_of_pieces = Convert.ToInt32(drItemresult.Length);
+
+                                                            objOrder.line_items = objorder_line_itemList;
+
+                                                            objOrder.company_number = Convert.ToInt32(drow["Company"]);
+                                                            objOrder.service_level = Convert.ToInt32(drow["Service Type"]);
+                                                            objOrder.customer_number = Convert.ToInt32(drow["Billing Customer Number"]);
+
+                                                            //  DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
+
+                                                            if (drow.Table.Columns.Contains("BOL Number"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["BOL Number"])))
+                                                                {
+                                                                    objOrder.bol_number = Convert.ToString(drow["BOL Number"]);
+                                                                }
+                                                            }
+
+                                                            if (drow.Table.Columns.Contains("Delivery Date"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery Date"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Delivery Date"]);
+                                                                    objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                                    objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                                    objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                                    objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup actual arrival time"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual arrival time"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Pickup actual arrival time"]);
+                                                                    objOrder.pickup_actual_arr_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup actual depart time"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual depart time"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Pickup actual depart time"]);
+                                                                    objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            //    dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
+                                                            //  objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
+                                                            if (drow.Table.Columns.Contains("Pickup no later than"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup no later than"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Pickup no later than"]);
+                                                                    objOrder.pickup_requested_dep_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup name"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup name"])))
+                                                                {
+                                                                    objOrder.pickup_name = Convert.ToString(drow["Pickup name"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup address"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup address"])))
+                                                                {
+                                                                    objOrder.pickup_address = Convert.ToString(drow["Pickup address"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup city"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup city"])))
+                                                                {
+                                                                    objOrder.pickup_city = Convert.ToString(drow["Pickup city"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup state/province"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup state/province"])))
+                                                                {
+                                                                    objOrder.pickup_state = Convert.ToString(drow["Pickup state/province"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pickup zip/postal code"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup zip/postal code"])))
+                                                                {
+                                                                    // objOrder.pickup_zip = Convert.ToString(dr["Pickup zip/postal code"]);
+
+                                                                    string strZip = Convert.ToString(drow["Pickup zip/postal code"]);
+                                                                    strZip = Regex.Replace(strZip, @"\t", "");
+                                                                    if (strZip.Length > 5)
+                                                                    {
+                                                                        if (strZip.Contains("-"))
+                                                                        {
+                                                                            objOrder.pickup_zip = strZip;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            objOrder.pickup_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        objOrder.pickup_zip = strZip;
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Deliver no earlier than"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver no earlier than"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Deliver no earlier than"]);
+                                                                    objOrder.deliver_requested_arr_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Deliver no later than"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver no later than"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Deliver no later than"]);
+                                                                    objOrder.deliver_requested_dep_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Delivery actual arrive time"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery actual arrive time"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Delivery actual arrive time"]);
+                                                                    objOrder.deliver_actual_arr_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Delivery actual depart time"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery actual depart time"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Delivery actual depart time"]);
+                                                                    objOrder.deliver_actual_dep_time = dtValue.ToString("HH:mm");
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Customer Name"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Customer Name"])))
+                                                                {
+                                                                    objOrder.deliver_name = Convert.ToString(drow["Customer Name"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Address"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Address"])))
+                                                                {
+                                                                    objOrder.deliver_address = Convert.ToString(drow["Address"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("City"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["City"])))
+                                                                {
+                                                                    objOrder.deliver_city = Convert.ToString(drow["City"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("State"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["State"])))
+                                                                {
+                                                                    objOrder.deliver_state = Convert.ToString(drow["State"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Zip"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Zip"])))
+                                                                {
+                                                                    string strZip = Convert.ToString(drow["Zip"]);
+                                                                    strZip = Regex.Replace(strZip, @"\t", "");
+                                                                    if (strZip.Length > 5)
+                                                                    {
+                                                                        if (strZip.Contains("-"))
+                                                                        {
+                                                                            objOrder.deliver_zip = strZip;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            objOrder.deliver_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        objOrder.deliver_zip = strZip;
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Delivery text signature"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery text signature"])))
+                                                                {
+                                                                    objOrder.signature = Convert.ToString(drow["Delivery text signature"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Bill Rate"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt1 = Convert.ToDouble(drow["Bill Rate"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pieces ACC"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces ACC"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt3 = Convert.ToDouble(drow["Pieces ACC"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("FSC"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt10 = Convert.ToDouble(drow["FSC"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt2"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt2"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt2 = Convert.ToDouble(drow["rate_buck_amt2"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt4"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt4"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt4 = Convert.ToDouble(drow["rate_buck_amt4"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt5"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt5"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt5 = Convert.ToDouble(drow["rate_buck_amt5"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt6"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt6"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt6 = Convert.ToDouble(drow["rate_buck_amt6"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt7"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt7"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt7 = Convert.ToDouble(drow["rate_buck_amt7"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt8"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt8"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt8 = Convert.ToDouble(drow["rate_buck_amt8"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt9"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt9"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt9 = Convert.ToDouble(drow["rate_buck_amt9"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("rate_buck_amt11"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt11"])))
+                                                                {
+                                                                    objOrder.rate_buck_amt11 = Convert.ToDouble(drow["rate_buck_amt11"]);
+                                                                }
+                                                            }
+                                                            if (drow.Table.Columns.Contains("Pieces"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
+                                                                {
+                                                                    objOrder.number_of_pieces = Convert.ToInt32(drow["Pieces"]);
                                                                 }
                                                                 else
                                                                 {
-                                                                    objOrder.pickup_zip = Convert.ToString(drow["Pickup zip/postal code"]);
+                                                                    // to set billing rates in case of detailed data
+                                                                    if (drow.Table.Columns.Contains("Bill Rate"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt1 = objOrder.number_of_pieces * Convert.ToDouble(drow["Bill Rate"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("Pieces ACC"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces ACC"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt3 = objOrder.number_of_pieces * Convert.ToDouble(drow["Pieces ACC"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("FSC"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt10 = objOrder.number_of_pieces * Convert.ToDouble(drow["FSC"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt2"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt2"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt2 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt2"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt4"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt4"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt4 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt4"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt5"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt5"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt5 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt5"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt6"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt6"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt6 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt6"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt7"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt7"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt7 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt7"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt8"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt8"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt8 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt8"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt9"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt9"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt9 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt9"]);
+                                                                        }
+                                                                    }
+                                                                    if (drow.Table.Columns.Contains("rate_buck_amt11"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt11"])))
+                                                                        {
+                                                                            objOrder.rate_buck_amt11 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt11"]);
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Deliver no earlier than"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver no earlier than"])))
+                                                            if (drow.Table.Columns.Contains("Miles"))
                                                             {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Deliver no earlier than"]);
-                                                                objOrder.deliver_requested_arr_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Deliver no later than"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver no later than"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Deliver no later than"]);
-                                                                objOrder.deliver_requested_dep_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Delivery actual arrive time"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery actual arrive time"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Delivery actual arrive time"]);
-                                                                objOrder.deliver_actual_arr_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Delivery actual depart time"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery actual depart time"])))
-                                                            {
-                                                                DateTime dtValue = Convert.ToDateTime(drow["Delivery actual depart time"]);
-                                                                objOrder.deliver_actual_dep_time = dtValue.ToString("HH:mm");
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Customer Name"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Customer Name"])))
-                                                            {
-                                                                objOrder.deliver_name = Convert.ToString(drow["Customer Name"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Address"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Address"])))
-                                                            {
-                                                                objOrder.deliver_address = Convert.ToString(drow["Address"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("City"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["City"])))
-                                                            {
-                                                                objOrder.deliver_city = Convert.ToString(drow["City"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("State"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["State"])))
-                                                            {
-                                                                objOrder.deliver_state = Convert.ToString(drow["State"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Zip"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Zip"])))
-                                                            {
-                                                                string strZip = Convert.ToString(drow["Zip"]);
-                                                                strZip = Regex.Replace(strZip, @"\t", "");
-                                                                if (strZip.Length > 5)
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Miles"])))
                                                                 {
-                                                                    objOrder.deliver_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
+                                                                    objOrder.rate_miles = Convert.ToInt32(Convert.ToDouble(drow["Miles"]));
                                                                 }
-                                                                else
+                                                            }
+                                                            //    string driver1 = null;
+                                                            if (drow.Table.Columns.Contains("Correct Driver Number"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Correct Driver Number"])))
                                                                 {
-                                                                    objOrder.deliver_zip = Convert.ToString(drow["Zip"]);
+                                                                    objOrder.driver1 = Convert.ToInt32(drow["Correct Driver Number"]);
+                                                                    //driver1 = Convert.ToString(dr["Correct Driver Number"]);
                                                                 }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Delivery text signature"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery text signature"])))
+                                                            //if (dr.Table.Columns.Contains("Requested by"))
+                                                            //{
+                                                            //    if (!string.IsNullOrEmpty(Convert.ToString(dr["Requested by"])))
+                                                            //    {
+                                                            //        objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
+                                                            //    }
+                                                            //}
+
+                                                            objOrder.ordered_by = Convert.ToString(drow["Requested by"]);
+                                                            objOrder.csr = Convert.ToString(drow["Entered by"]);
+                                                            if (drow.Table.Columns.Contains("Pickup Delivery Transfer Flag"))
                                                             {
-                                                                objOrder.signature = Convert.ToString(drow["Delivery text signature"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Delivery Transfer Flag"])))
+                                                                {
+                                                                    objOrder.pick_del_trans_flag = Convert.ToString(drow["Pickup Delivery Transfer Flag"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Bill Rate"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
+                                                            if (drow.Table.Columns.Contains("Pickup text signature"))
                                                             {
-                                                                objOrder.rate_buck_amt1 = Convert.ToDouble(drow["Bill Rate"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup text signature"])))
+                                                                {
+                                                                    objOrder.pickup_signature = Convert.ToString(drow["Pickup text signature"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pieces ACC"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces ACC"])))
+                                                            if (drow.Table.Columns.Contains("Weight"))
                                                             {
-                                                                objOrder.rate_buck_amt3 = Convert.ToDouble(drow["Pieces ACC"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Weight"])))
+                                                                {
+                                                                    objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("FSC"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
+                                                            if (drow.Table.Columns.Contains("Insurance Amount"))
                                                             {
-                                                                objOrder.rate_buck_amt10 = Convert.ToDouble(drow["FSC"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Insurance Amount"])))
+                                                                {
+                                                                    objOrder.insurance_amount = Convert.ToInt32(Convert.ToDouble(drow["Insurance Amount"]));
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt2"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt2"])))
+                                                            if (drow.Table.Columns.Contains("Master airway bill number"))
                                                             {
-                                                                objOrder.rate_buck_amt2 = Convert.ToDouble(drow["rate_buck_amt2"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Master airway bill number"])))
+                                                                {
+                                                                    objOrder.master_airway_bill_number = Convert.ToString(drow["Master airway bill number"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt4"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt4"])))
+                                                            if (drow.Table.Columns.Contains("PO Number"))
                                                             {
-                                                                objOrder.rate_buck_amt4 = Convert.ToDouble(drow["rate_buck_amt4"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["PO Number"])))
+                                                                {
+                                                                    objOrder.po_number = Convert.ToString(drow["PO Number"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt5"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt5"])))
+                                                            if (drow.Table.Columns.Contains("House airway bill number"))
                                                             {
-                                                                objOrder.rate_buck_amt5 = Convert.ToDouble(drow["rate_buck_amt5"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["House airway bill number"])))
+                                                                {
+                                                                    objOrder.house_airway_bill_number = Convert.ToString(drow["House airway bill number"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt6"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt6"])))
+
+                                                            if (drow.Table.Columns.Contains("Delivery Phone"))
                                                             {
-                                                                objOrder.rate_buck_amt6 = Convert.ToDouble(drow["rate_buck_amt6"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery Phone"])))
+                                                                {
+                                                                    objOrder.deliver_phone = Convert.ToString(drow["Delivery Phone"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt7"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt7"])))
+                                                            if (drow.Table.Columns.Contains("Pickup Room"))
                                                             {
-                                                                objOrder.rate_buck_amt7 = Convert.ToDouble(drow["rate_buck_amt7"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Room"])))
+                                                                {
+                                                                    objOrder.pickup_room = Convert.ToString(drow["Pickup Room"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt8"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt8"])))
+                                                            if (drow.Table.Columns.Contains("Pickup Attention"))
                                                             {
-                                                                objOrder.rate_buck_amt8 = Convert.ToDouble(drow["rate_buck_amt8"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Attention"])))
+                                                                {
+                                                                    objOrder.pickup_attention = Convert.ToString(drow["Pickup Attention"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt9"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt9"])))
+                                                            if (drow.Table.Columns.Contains("Deliver Attention"))
                                                             {
-                                                                objOrder.rate_buck_amt9 = Convert.ToDouble(drow["rate_buck_amt9"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver Attention"])))
+                                                                {
+                                                                    objOrder.deliver_attention = Convert.ToString(drow["Deliver Attention"]);
+                                                                }
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("rate_buck_amt11"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt11"])))
+
+                                                            if (drow.Table.Columns.Contains("Pickup special instr long"))
                                                             {
-                                                                objOrder.rate_buck_amt11 = Convert.ToDouble(drow["rate_buck_amt11"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pieces"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
-                                                            {
-                                                                objOrder.number_of_pieces = Convert.ToInt32(drow["Pieces"]);
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup special instr long"])))
+                                                                {
+                                                                    string strpickup_special_instr_long = Convert.ToString(drow["Pickup actual depart time"]);
+                                                                    objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                                }
                                                             }
                                                             else
                                                             {
-                                                                // to set billing rates in case of detailed data
-                                                                if (drow.Table.Columns.Contains("Bill Rate"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt1 = objOrder.number_of_pieces * Convert.ToDouble(drow["Bill Rate"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("Pieces ACC"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces ACC"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt3 = objOrder.number_of_pieces * Convert.ToDouble(drow["Pieces ACC"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("FSC"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt10 = objOrder.number_of_pieces * Convert.ToDouble(drow["FSC"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt2"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt2"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt2 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt2"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt4"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt4"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt4 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt4"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt5"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt5"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt5 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt5"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt6"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt6"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt6 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt6"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt7"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt7"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt7 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt7"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt8"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt8"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt8 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt8"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt9"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt9"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt9 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt9"]);
-                                                                    }
-                                                                }
-                                                                if (drow.Table.Columns.Contains("rate_buck_amt11"))
-                                                                {
-                                                                    if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt11"])))
-                                                                    {
-                                                                        objOrder.rate_buck_amt11 = objOrder.number_of_pieces * Convert.ToDouble(drow["rate_buck_amt11"]);
-                                                                    }
-                                                                }
+                                                                objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
                                                             }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Miles"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Miles"])))
-                                                            {
-                                                                objOrder.rate_miles = Convert.ToInt32(Convert.ToDouble(drow["Miles"]));
-                                                            }
-                                                        }
-                                                        //    string driver1 = null;
-                                                        if (drow.Table.Columns.Contains("Correct Driver Number"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Correct Driver Number"])))
-                                                            {
-                                                                objOrder.driver1 = Convert.ToInt32(drow["Correct Driver Number"]);
-                                                                //driver1 = Convert.ToString(dr["Correct Driver Number"]);
-                                                            }
-                                                        }
-                                                        //if (dr.Table.Columns.Contains("Requested by"))
-                                                        //{
-                                                        //    if (!string.IsNullOrEmpty(Convert.ToString(dr["Requested by"])))
-                                                        //    {
-                                                        //        objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
-                                                        //    }
-                                                        //}
 
-                                                        objOrder.ordered_by = Convert.ToString(drow["Requested by"]);
-                                                        objOrder.csr = Convert.ToString(drow["Entered by"]);
-                                                        if (drow.Table.Columns.Contains("Pickup Delivery Transfer Flag"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Delivery Transfer Flag"])))
-                                                            {
-                                                                objOrder.pick_del_trans_flag = Convert.ToString(drow["Pickup Delivery Transfer Flag"]);
-                                                            }
                                                         }
-                                                        if (drow.Table.Columns.Contains("Pickup text signature"))
+                                                        catch (Exception ex)
                                                         {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup text signature"])))
-                                                            {
-                                                                objOrder.pickup_signature = Convert.ToString(drow["Pickup text signature"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Weight"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Weight"])))
-                                                            {
-                                                                objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Insurance Amount"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Insurance Amount"])))
-                                                            {
-                                                                objOrder.insurance_amount = Convert.ToInt32(Convert.ToDouble(drow["Insurance Amount"]));
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Master airway bill number"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Master airway bill number"])))
-                                                            {
-                                                                objOrder.master_airway_bill_number = Convert.ToString(drow["Master airway bill number"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("PO Number"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["PO Number"])))
-                                                            {
-                                                                objOrder.po_number = Convert.ToString(drow["PO Number"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("House airway bill number"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["House airway bill number"])))
-                                                            {
-                                                                objOrder.house_airway_bill_number = Convert.ToString(drow["House airway bill number"]);
-                                                            }
-                                                        }
+                                                            strExecutionLogMessage = "ProcessAddOrderFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "Found exception while generating the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "For Customer Reference -" + objOrder.reference + System.Environment.NewLine;
+                                                            objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
 
-                                                        if (drow.Table.Columns.Contains("Delivery Phone"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery Phone"])))
-                                                            {
-                                                                objOrder.deliver_phone = Convert.ToString(drow["Delivery Phone"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup Room"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Room"])))
-                                                            {
-                                                                objOrder.pickup_room = Convert.ToString(drow["Pickup Room"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Pickup Attention"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup Attention"])))
-                                                            {
-                                                                objOrder.pickup_attention = Convert.ToString(drow["Pickup Attention"]);
-                                                            }
-                                                        }
-                                                        if (drow.Table.Columns.Contains("Deliver Attention"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Deliver Attention"])))
-                                                            {
-                                                                objOrder.deliver_attention = Convert.ToString(drow["Deliver Attention"]);
-                                                            }
-                                                        }
-
-                                                        if (drow.Table.Columns.Contains("Pickup special instr long"))
-                                                        {
-                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup special instr long"])))
-                                                            {
-                                                                string strpickup_special_instr_long = Convert.ToString(drow["Pickup actual depart time"]);
-                                                                objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
+                                                            ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            objErrorResponse.error = ex.Message;
+                                                            objErrorResponse.status = "Error";
+                                                            objErrorResponse.code = "Exception while generating the Order Post Request";
+                                                            objErrorResponse.reference = objOrder.reference;
+                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            dsFailureResponse.Tables[0].TableName = "OrderFailure";
+                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        strInputFilePath, processingFileName, strDatetime);
+                                                            continue;
                                                         }
 
                                                         objorderdetails.order = objOrder;
@@ -915,7 +954,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         // objresponse.Reason = "{\"002018775030\": {\"verified_weight\": null, \"roundtrip_actual_latitude\": null, \"pickup_special_instructions4\": null, \"fuel_miles\": null, \"pickup_dispatch_zone\": null, \"pickup_zip\": \"23150\", \"pickup_actual_arr_time\": \"08:00\", \"cod_accept_company_check\": false, \"add_charge_occur9\": null, \"pickup_omw_latitude\": null, \"service_level_text\": \"Threshold Delivery\", \"service_level\": 57, \"exception_sign_required\": false, \"pickup_phone_ext\": null, \"roundtrip_actual_pieces\": null, \"bringg_send_sms\": false, \"az_equip2\": null, \"hist_inv_date\": null, \"date_order_entered\": \"2021-07-21\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_city\": \"SANDSTON\", \"pickup_phone\": null, \"pickup_sign_req\": true, \"deliver_route_sequence\": null, \"deliver_phone\": null, \"deliver_omw_longitude\": null, \"roundtrip_actual_longitude\": null, \"page_number\": 1, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code9\": null, \"pickup_eta_time\": null, \"record_type\": 0, \"add_charge_occur11\": null, \"push_partner_order_id\": null, \"deliver_country\": null, \"customer_name\": \"MXD/RYDER\", \"bol_number\": null, \"pickup_latitude\": 37.53250820, \"add_charge_code4\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pu_arrive_notification_sent\": false, \"distribution_shift_id\": null, \"pickup_special_instr_long\": null, \"id\": \"002018775030\", \"callback_to\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"ordered_by\": \"RYDER\", \"add_charge_code12\": null, \"pickup_route_seq\": null, \"deliver_city\": \"HANOVER\", \"add_charge_occur5\": null, \"edi_acknowledgement_required\": false, \"rescheduled_ctrl_number\": null, \"driver2\": null, \"deliver_room\": null, \"deliver_actual_arr_time\": \"08:00\", \"fuel_price_zone\": null, \"add_charge_amt9\": null, \"add_charge_amt4\": null, \"delivery_address_point_number_text\": \"PAMELA YORK\", \"delivery_address_point_number\": 24254, \"deliver_actual_longitude\": null, \"add_charge_amt2\": null, \"additional_drivers\": false, \"pickup_pricing_zone\": 1, \"hazmat\": false, \"pickup_address\": \"540 EASTPARK CT\", \"pickup_route_code\": null, \"callback_userid\": null, \"pickup_point_customer\": 31025, \"rate_buck_amt1\": 52.00, \"add_charge_amt8\": null, \"callback_time\": null, \"csr\": \"DX*\", \"roundtrip_actual_depart_time\": null, \"customers_etrac_partner_id\": \"96609250\", \"manual_notepad\": false, \"add_charge_code8\": null, \"bringg_order_id\": null, \"deliver_omw_latitude\": null, \"pickup_longitude\": -77.33035820, \"etrac_number\": null, \"distribution_unique_id\": 0, \"vehicle_type\": null, \"roundtrip_actual_arrival_time\": null, \"delivery_longitude\": -77.28769600, \"pu_actual_location_accuracy\": null, \"deliver_actual_date\": \"2021-07-14\", \"exception_timestamp\": null, \"deliver_zip\": \"23069\", \"roundtrip_wait_time\": null, \"add_charge_occur8\": null, \"dl_arrive_notification_sent\": false, \"pickup_special_instructions1\": null, \"ordered_by_phone_number\": null, \"deliver_requested_arr_time\": \"08:00\", \"rate_miles\": null, \"holiday_groups\": null, \"pickup_email_notification_sent\": false, \"add_charge_code3\": null, \"dispatch_id\": null, \"add_charge_occur10\": null, \"dispatch_time\": null, \"deliver_wait_time\": null, \"invoice_period_end_date\": null, \"add_charge_occur12\": null, \"fuel_plan\": null, \"return_svc_level\": null, \"pickup_actual_date\": \"2021-07-14\", \"send_new_order_alert\": false, \"pickup_room\": null, \"rate_buck_amt8\": null, \"add_charge_amt10\": null, \"insurance_amount\": null, \"add_charge_amt3\": null, \"add_charge_amt6\": null, \"pickup_special_instructions3\": null, \"pickup_requested_date\": \"2021-07-14\", \"roundtrip_sign_req\": false, \"actual_miles\": null, \"pickup_address_point_number_text\": \"1STOPBEDROOMS\", \"pickup_address_point_number\": 19845, \"deliver_actual_latitude\": null, \"deliver_phone_ext\": null, \"deliver_route_code\": null, \"add_charge_code10\": null, \"delivery_airport_code\": null, \"reference\": null, \"photos_exist\": false, \"master_airway_bill_number\": null, \"control_number\": 1877503, \"cod_text\": \"No\", \"cod\": \"N\", \"rate_buck_amt11\": null, \"cod_amount\": null, \"pickup_omw_timestamp\": null, \"signature_images\": [], \"deliver_special_instructions1\": null, \"quote_amount\": null, \"total_pages\": 1, \"rate_buck_amt4\": null, \"line_items\": [], \"delivery_latitude\": 37.80844290, \"progress\": [{\"status_time\": \"15:57:00\", \"status_date\": \"2021-07-21\", \"status_text\": \"Entered in carrier's system\"}, {\"status_time\": \"08:30:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Picked up\"}, {\"status_time\": \"08:15:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Delivered\"}], \"add_charge_code1\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_special_instr_long\": null, \"deliver_address\": \"205 HARDWOOD LN\", \"add_charge_occur4\": null, \"deliver_eta_date\": null, \"pickup_actual_dep_time\": \"08:30\", \"deliver_requested_dep_time\": \"17:00\", \"add_charge_code7\": null, \"deliver_actual_dep_time\": \"08:15\", \"cod_accept_cashiers_check\": false, \"bringg_last_loc_sent\": null, \"az_equip3\": null, \"driver1_text\": \"WALT DARBY\", \"driver1\": 3215, \"pickup_actual_latitude\": null, \"add_charge_occur2\": null, \"order_automatically_quoted\": false, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"hours\": \"15\", \"frequent_caller_id\": null, \"rate_buck_amt6\": null, \"rate_chart_used\": 0, \"deliver_actual_pieces\": null, \"add_charge_code5\": null, \"pickup_omw_longitude\": null, \"notes\": [], \"delivery_point_customer\": 31025, \"add_charge_occur7\": null, \"rate_buck_amt5\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"add_charge_code11\": null, \"pickup_name\": \"1STOPBEDROOMS\", \"callback_date\": null, \"add_charge_code2\": null, \"house_airway_bill_number\": null, \"deliver_name\": \"PAMELA YORK\", \"number_of_pieces\": 1, \"deliver_eta_time\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"rate_special_instructions\": null, \"add_charge_occur3\": null, \"pickup_eta_date\": null, \"deliver_special_instructions4\": null, \"custom_special_instr_long\": null, \"deliver_special_instructions2\": null, \"pickup_signature\": \"SOF\", \"az_equip1\": null, \"add_charge_amt12\": null, \"settlements\": [{\"vendor_invoice_number\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"voucher_date\": null, \"voucher_amount\": null, \"fuel_price_source\": null, \"settlement_bucket6_pct\": null, \"pre_book_percentage\": true, \"settlement_bucket4_pct\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"settlement_bucket5_pct\": null, \"voucher_number\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"vendor_employee_numer\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"driver_number_text\": \"WALT DARBY\", \"driver_number\": 3215, \"fuel_plan\": null, \"agents_etrac_partner_id\": null, \"charge2\": null, \"charge3\": null, \"settlement_bucket1_pct\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"id\": \"002018775030D1\", \"record_type\": 0, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"pay_chart_used\": null, \"fuel_price_zone\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"charge1\": null, \"control_number\": 1877503, \"adjustment_type\": null, \"order_date\": \"2021-07-14\", \"time_last_updated\": \"14:57\", \"agent_etrac_transaction_number\": null, \"date_last_updated\": \"2021-07-21\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket3_pct\": null}], \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"blocks\": null, \"del_actual_location_accuracy\": null, \"zone_set_used\": 1, \"pickup_country\": null, \"pickup_state\": \"VA\", \"add_charge_amt7\": null, \"email_addresses\": null, \"add_charge_occur1\": null, \"pickup_wait_time\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"distribution_branch_id\": null, \"rate_buck_amt9\": null, \"add_charge_amt1\": null, \"pickup_requested_dep_time\": \"09:00\", \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"deliver_state\": \"VA\", \"deliver_dispatch_zone\": null, \"image_sign_req\": false, \"add_charge_code6\": null, \"deliver_requested_date\": \"2021-07-14\", \"add_charge_amt5\": null, \"time_order_entered\": \"15:57\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_attention\": null, \"rate_buck_amt7\": null, \"add_charge_occur6\": null, \"fuel_price_source\": null, \"pickup_airport_code\": null, \"rate_buck_amt2\": null, \"rate_buck_amt3\": null, \"deliver_omw_timestamp\": null, \"exception_code\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"weight\": null, \"signature_required\": true, \"rate_buck_amt10\": null, \"hist_inv_number\": 0, \"deliver_pricing_zone\": 1, \"pickup_actual_longitude\": null, \"push_services\": null, \"add_charge_amt11\": null, \"rt_actual_location_accuracy\": null, \"roundtrip_actual_date\": null, \"pickup_requested_arr_time\": null, \"deliver_attention\": null, \"deliver_special_instructions3\": null, \"pickup_actual_pieces\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"roundtrip_signature\": null, \"po_number\": null, \"signature\": \"SOF\", \"pickup_special_instructions2\": null, \"original_ctrl_number\": null, \"previous_ctrl_number\": null}}";
                                                         // objresponse.Reason = "{\"002018724440\": {\"verified_weight\": null, \"roundtrip_actual_latitude\": null, \"pickup_special_instructions4\": null, \"fuel_miles\": null, \"pickup_dispatch_zone\": null, \"pickup_zip\": \"23150\", \"pickup_actual_arr_time\": \"08:00\", \"cod_accept_company_check\": false, \"add_charge_occur9\": null, \"pickup_omw_latitude\": null, \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"exception_sign_required\": false, \"pickup_phone_ext\": null, \"roundtrip_actual_pieces\": null, \"bringg_send_sms\": false, \"az_equip2\": null, \"hist_inv_date\": null, \"date_order_entered\": \"2021-07-08\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_city\": \"SANDSTON\", \"pickup_phone\": null, \"pickup_sign_req\": true, \"deliver_route_sequence\": null, \"deliver_phone\": null, \"deliver_omw_longitude\": null, \"roundtrip_actual_longitude\": null, \"page_number\": 1, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code9\": null, \"pickup_eta_time\": null, \"record_type\": 0, \"add_charge_occur11\": null, \"push_partner_order_id\": null, \"deliver_country\": null, \"customer_name\": \"MXD/RYDER\", \"bol_number\": null, \"pickup_latitude\": 37.53250820, \"add_charge_code4\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pu_arrive_notification_sent\": false, \"distribution_shift_id\": null, \"pickup_special_instr_long\": null, \"id\": \"002018724440\", \"callback_to\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"ordered_by\": \"RYDER\", \"add_charge_code12\": null, \"pickup_route_seq\": null, \"deliver_city\": \"CHESAPEAKE\", \"add_charge_occur5\": null, \"edi_acknowledgement_required\": false, \"rescheduled_ctrl_number\": null, \"driver2\": null, \"deliver_room\": null, \"deliver_actual_arr_time\": \"08:00\", \"fuel_price_zone\": null, \"add_charge_amt9\": null, \"add_charge_amt4\": null, \"delivery_address_point_number_text\": \"ANNE BAILEY\", \"delivery_address_point_number\": 26312, \"deliver_actual_longitude\": null, \"add_charge_amt2\": null, \"additional_drivers\": false, \"pickup_pricing_zone\": 1, \"hazmat\": false, \"pickup_address\": \"540 EASTPARK CT\", \"pickup_route_code\": null, \"callback_userid\": null, \"pickup_point_customer\": 31025, \"rate_buck_amt1\": 57.00, \"add_charge_amt8\": null, \"callback_time\": null, \"csr\": \"DX*\", \"roundtrip_actual_depart_time\": null, \"customers_etrac_partner_id\": \"96609250\", \"manual_notepad\": false, \"add_charge_code8\": null, \"bringg_order_id\": null, \"deliver_omw_latitude\": null, \"pickup_longitude\": -77.33035820, \"etrac_number\": null, \"distribution_unique_id\": 0, \"vehicle_type\": null, \"roundtrip_actual_arrival_time\": null, \"delivery_longitude\": -76.34760620, \"pu_actual_location_accuracy\": null, \"deliver_actual_date\": \"2021-06-28\", \"exception_timestamp\": null, \"deliver_zip\": \"23323\", \"roundtrip_wait_time\": null, \"add_charge_occur8\": null, \"dl_arrive_notification_sent\": false, \"pickup_special_instructions1\": null, \"ordered_by_phone_number\": null, \"deliver_requested_arr_time\": \"08:00\", \"rate_miles\": null, \"holiday_groups\": null, \"pickup_email_notification_sent\": false, \"add_charge_code3\": null, \"dispatch_id\": null, \"add_charge_occur10\": null, \"dispatch_time\": null, \"deliver_wait_time\": null, \"invoice_period_end_date\": null, \"add_charge_occur12\": null, \"fuel_plan\": null, \"return_svc_level\": null, \"pickup_actual_date\": \"2021-06-28\", \"send_new_order_alert\": false, \"pickup_room\": null, \"rate_buck_amt8\": null, \"add_charge_amt10\": null, \"insurance_amount\": null, \"add_charge_amt3\": null, \"add_charge_amt6\": null, \"pickup_special_instructions3\": null, \"pickup_requested_date\": \"2021-06-28\", \"roundtrip_sign_req\": false, \"actual_miles\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"deliver_actual_latitude\": null, \"deliver_phone_ext\": null, \"deliver_route_code\": null, \"add_charge_code10\": null, \"delivery_airport_code\": null, \"reference_text\": \"2125095801\", \"reference\": \"2125095801\", \"photos_exist\": false, \"master_airway_bill_number\": null, \"control_number\": 1872444, \"cod_text\": \"No\", \"cod\": \"N\", \"rate_buck_amt11\": null, \"cod_amount\": null, \"pickup_omw_timestamp\": null, \"signature_images\": [], \"deliver_special_instructions1\": null, \"quote_amount\": null, \"total_pages\": 1, \"rate_buck_amt4\": null, \"line_items\": [], \"delivery_latitude\": 36.78396970, \"progress\": [{\"status_time\": \"06:02:00\", \"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\"}, {\"status_time\": \"08:30:00\", \"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\"}, {\"status_time\": \"08:15:00\", \"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\"}], \"add_charge_code1\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_special_instr_long\": null, \"deliver_address\": \"2920 AARON DR\", \"add_charge_occur4\": null, \"deliver_eta_date\": null, \"pickup_actual_dep_time\": \"08:30\", \"deliver_requested_dep_time\": \"17:00\", \"add_charge_code7\": null, \"deliver_actual_dep_time\": \"08:15\", \"cod_accept_cashiers_check\": false, \"bringg_last_loc_sent\": null, \"az_equip3\": null, \"driver1_text\": \"LAVERT KENDALL MORRIS\", \"driver1\": 3001, \"pickup_actual_latitude\": null, \"add_charge_occur2\": null, \"order_automatically_quoted\": false, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"hours\": \"15\", \"frequent_caller_id\": null, \"rate_buck_amt6\": null, \"rate_chart_used\": 0, \"deliver_actual_pieces\": null, \"add_charge_code5\": null, \"pickup_omw_longitude\": null, \"notes\": [], \"delivery_point_customer\": 31025, \"add_charge_occur7\": null, \"rate_buck_amt5\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"add_charge_code11\": null, \"pickup_name\": \"BIG LOTS\", \"callback_date\": null, \"add_charge_code2\": null, \"house_airway_bill_number\": null, \"deliver_name\": \"ANNE BAILEY\", \"number_of_pieces\": 3, \"deliver_eta_time\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"rate_special_instructions\": null, \"add_charge_occur3\": null, \"pickup_eta_date\": null, \"deliver_special_instructions4\": null, \"custom_special_instr_long\": null, \"deliver_special_instructions2\": null, \"pickup_signature\": \"SOF\", \"az_equip1\": null, \"add_charge_amt12\": null, \"settlements\": [{\"vendor_invoice_number\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"voucher_date\": null, \"voucher_amount\": null, \"fuel_price_source\": null, \"settlement_bucket6_pct\": null, \"pre_book_percentage\": true, \"settlement_bucket4_pct\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"settlement_bucket5_pct\": null, \"voucher_number\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"vendor_employee_numer\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"driver_number_text\": \"LAVERT KENDALL MORRIS\", \"driver_number\": 3001, \"fuel_plan\": null, \"agents_etrac_partner_id\": null, \"charge2\": null, \"charge3\": null, \"settlement_bucket1_pct\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"id\": \"002018724440D1\", \"record_type\": 0, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"pay_chart_used\": null, \"fuel_price_zone\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"charge1\": null, \"control_number\": 1872444, \"adjustment_type\": null, \"order_date\": \"2021-06-28\", \"time_last_updated\": \"05:02\", \"agent_etrac_transaction_number\": null, \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket3_pct\": null}], \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"blocks\": null, \"del_actual_location_accuracy\": null, \"zone_set_used\": 1, \"pickup_country\": null, \"pickup_state\": \"VA\", \"add_charge_amt7\": null, \"email_addresses\": null, \"add_charge_occur1\": null, \"pickup_wait_time\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"distribution_branch_id\": null, \"rate_buck_amt9\": null, \"add_charge_amt1\": null, \"pickup_requested_dep_time\": \"09:00\", \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"deliver_state\": \"VA\", \"deliver_dispatch_zone\": null, \"image_sign_req\": false, \"add_charge_code6\": null, \"deliver_requested_date\": \"2021-06-28\", \"add_charge_amt5\": null, \"time_order_entered\": \"06:02\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_attention\": null, \"rate_buck_amt7\": null, \"add_charge_occur6\": null, \"fuel_price_source\": null, \"pickup_airport_code\": null, \"rate_buck_amt2\": null, \"rate_buck_amt3\": null, \"deliver_omw_timestamp\": null, \"exception_code\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"weight\": null, \"signature_required\": true, \"rate_buck_amt10\": 2.34, \"hist_inv_number\": 0, \"deliver_pricing_zone\": 1, \"pickup_actual_longitude\": null, \"push_services\": null, \"add_charge_amt11\": null, \"rt_actual_location_accuracy\": null, \"roundtrip_actual_date\": null, \"pickup_requested_arr_time\": \"07:00\", \"deliver_attention\": null, \"deliver_special_instructions3\": null, \"pickup_actual_pieces\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"roundtrip_signature\": null, \"po_number\": null, \"signature\": \"SOF\", \"pickup_special_instructions2\": null, \"original_ctrl_number\": null, \"previous_ctrl_number\": null}}";
                                                         //  objresponse.Reason = "{\"002018724450\": {\"roundtrip_actual_date\": null, \"notes\": [], \"pickup_phone_ext\": null, \"holiday_groups\": null, \"deliver_eta_time\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"add_charge_occur4\": null, \"deliver_state\": \"VA\", \"quote_amount\": null, \"cod_text\": \"No\", \"cod\": \"N\", \"additional_drivers\": false, \"rescheduled_ctrl_number\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_actual_pieces\": null, \"record_type\": 0, \"pickup_special_instr_long\": null, \"pickup_special_instructions3\": null, \"exception_timestamp\": null, \"deliver_actual_arr_time\": \"08:00\", \"house_airway_bill_number\": null, \"deliver_pricing_zone\": 1, \"total_pages\": 1, \"add_charge_occur11\": null, \"deliver_omw_latitude\": null, \"callback_userid\": null, \"rate_buck_amt1\": 57.00, \"pickup_point_customer\": 31025, \"pickup_eta_time\": null, \"add_charge_occur8\": null, \"invoice_period_end_date\": null, \"pickup_special_instructions1\": null, \"rate_buck_amt2\": null, \"pickup_special_instructions4\": null, \"manual_notepad\": false, \"edi_acknowledgement_required\": false, \"pickup_name\": \"BIG LOTS\", \"ordered_by_phone_number\": null, \"add_charge_amt12\": null, \"delivery_point_customer\": 31025, \"deliver_actual_dep_time\": \"08:15\", \"email_addresses\": null, \"pickup_address\": \"540 EASTPARK CT\", \"driver2\": null, \"signature_images\": [], \"rate_buck_amt11\": null, \"delivery_latitude\": 37.48366600, \"pickup_attention\": null, \"date_order_entered\": \"2021-07-08\", \"vehicle_type\": null, \"add_charge_amt9\": null, \"pickup_phone\": null, \"rate_miles\": null, \"customers_etrac_partner_id\": \"96609250\", \"order_type_text\": \"One way\", \"order_type\": \"O\", \"dl_arrive_notification_sent\": false, \"add_charge_code3\": null, \"etrac_number\": null, \"pickup_requested_arr_time\": \"07:00\", \"rate_buck_amt3\": null, \"pickup_actual_dep_time\": \"08:30\", \"line_items\": [], \"pickup_sign_req\": true, \"add_charge_code10\": null, \"deliver_city\": \"LANEXA\", \"fuel_plan\": null, \"add_charge_amt10\": null, \"roundtrip_actual_depart_time\": null, \"control_number\": 1872445, \"pickup_dispatch_zone\": null, \"send_new_order_alert\": false, \"settlements\": [{\"settlement_bucket4_pct\": null, \"charge1\": null, \"date_last_updated\": \"2021-07-08\", \"fuel_price_zone\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge4\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"time_last_updated\": \"05:06\", \"charge6\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"control_number\": 1872445, \"settlement_bucket2_pct\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"voucher_date\": null, \"agent_etrac_transaction_number\": null, \"settlement_bucket5_pct\": null, \"record_type\": 0, \"voucher_number\": null, \"voucher_amount\": null, \"pay_chart_used\": null, \"settlement_pct\": 100.00, \"vendor_invoice_number\": null, \"settlement_bucket3_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"pre_book_percentage\": true, \"charge3\": null, \"settlement_bucket6_pct\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"adjustment_type\": null, \"id\": \"002018724450D1\", \"agents_etrac_partner_id\": null, \"fuel_plan\": null, \"fuel_price_source\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"vendor_employee_numer\": null, \"settlement_bucket1_pct\": null, \"order_date\": \"2021-06-28\", \"charge2\": null}], \"deliver_actual_latitude\": null, \"fuel_price_zone\": null, \"verified_weight\": null, \"deliver_requested_dep_time\": \"17:00\", \"pickup_airport_code\": null, \"dispatch_time\": null, \"deliver_attention\": null, \"time_order_entered\": \"06:06\", \"rate_buck_amt4\": null, \"roundtrip_wait_time\": null, \"add_charge_amt2\": null, \"az_equip3\": null, \"progress\": [{\"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\", \"status_time\": \"06:06:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\", \"status_time\": \"08:30:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\", \"status_time\": \"08:15:00\"}], \"page_number\": 1, \"roundtrip_sign_req\": false, \"add_charge_amt1\": null, \"add_charge_code8\": null, \"weight\": null, \"rate_buck_amt6\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"bringg_send_sms\": false, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"custom_special_instr_long\": null, \"deliver_requested_arr_time\": \"08:00\", \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"az_equip1\": null, \"add_charge_code4\": null, \"bringg_order_id\": null, \"delivery_address_point_number_text\": \"JOSEPH FESSMAN\", \"delivery_address_point_number\": 26313, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"deliver_special_instructions1\": null, \"pickup_wait_time\": null, \"add_charge_occur5\": null, \"push_partner_order_id\": null, \"deliver_route_sequence\": null, \"pickup_country\": null, \"pickup_state\": \"VA\", \"original_schedule_number\": null, \"frequent_caller_id\": null, \"distribution_unique_id\": 0, \"fuel_miles\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"rate_buck_amt5\": null, \"exception_sign_required\": false, \"pickup_route_code\": null, \"deliver_dispatch_zone\": null, \"delivery_longitude\": -76.90426400, \"pickup_pricing_zone\": 1, \"zone_set_used\": 1, \"deliver_special_instructions2\": null, \"add_charge_amt3\": null, \"deliver_phone\": null, \"pickup_email_notification_sent\": false, \"add_charge_occur12\": null, \"reference_text\": \"2125617401\", \"reference\": \"2125617401\", \"deliver_requested_date\": \"2021-06-28\", \"deliver_actual_longitude\": null, \"image_sign_req\": false, \"pickup_eta_date\": null, \"deliver_phone_ext\": null, \"pickup_omw_longitude\": null, \"original_ctrl_number\": null, \"pickup_special_instructions2\": null, \"order_automatically_quoted\": false, \"bol_number\": null, \"rate_buck_amt10\": 2.34, \"callback_time\": null, \"hazmat\": false, \"distribution_shift_id\": null, \"pickup_latitude\": 37.53250820, \"ordered_by\": \"RYDER\", \"insurance_amount\": null, \"cod_accept_cashiers_check\": false, \"add_charge_amt4\": null, \"add_charge_code7\": null, \"deliver_actual_pieces\": null, \"deliver_address\": \"15400 STAGE RD\", \"cod_accept_company_check\": false, \"signature\": \"SOF\", \"previous_ctrl_number\": null, \"deliver_zip\": \"23089\", \"deliver_special_instructions3\": null, \"rate_buck_amt7\": null, \"hist_inv_number\": 0, \"callback_date\": null, \"deliver_special_instr_long\": null, \"po_number\": null, \"pickup_actual_arr_time\": \"08:00\", \"pickup_requested_date\": \"2021-06-28\", \"number_of_pieces\": 2, \"dispatch_id\": null, \"photos_exist\": false, \"pickup_actual_latitude\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"id\": \"002018724450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"del_actual_location_accuracy\": null, \"add_charge_occur7\": null, \"add_charge_occur9\": null, \"roundtrip_actual_latitude\": null, \"add_charge_occur6\": null, \"pickup_actual_longitude\": null, \"pickup_omw_timestamp\": null, \"bringg_last_loc_sent\": null, \"add_charge_code5\": null, \"deliver_country\": null, \"master_airway_bill_number\": null, \"pickup_route_seq\": null, \"roundtrip_signature\": null, \"calc_add_on_chgs\": false, \"deliver_actual_date\": \"2021-06-28\", \"cod_amount\": null, \"add_charge_code12\": null, \"rt_actual_location_accuracy\": null, \"rate_chart_used\": 0, \"pickup_longitude\": -77.33035820, \"pickup_signature\": \"SOF\", \"add_charge_amt5\": null, \"pu_arrive_notification_sent\": false, \"pickup_actual_date\": \"2021-06-28\", \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"push_services\": null, \"deliver_eta_date\": null, \"driver1_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver1\": 3208, \"deliver_omw_longitude\": null, \"deliver_wait_time\": null, \"pickup_room\": null, \"deliver_special_instructions4\": null, \"add_charge_amt7\": null, \"az_equip2\": null, \"hours\": \"15\", \"add_charge_code2\": null, \"exception_code\": null, \"roundtrip_actual_pieces\": null, \"rate_special_instructions\": null, \"roundtrip_actual_arrival_time\": null, \"add_charge_occur1\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"delivery_airport_code\": null, \"distribution_branch_id\": null, \"hist_inv_date\": null, \"add_charge_code1\": null, \"pickup_requested_dep_time\": \"09:00\", \"deliver_route_code\": null, \"roundtrip_actual_longitude\": null, \"pickup_city\": \"SANDSTON\", \"rate_buck_amt8\": null, \"pickup_omw_latitude\": null, \"deliver_omw_timestamp\": null, \"rate_buck_amt9\": null, \"deliver_room\": null, \"add_charge_code6\": null, \"add_charge_occur3\": null, \"blocks\": null, \"add_charge_code9\": null, \"actual_miles\": null, \"add_charge_occur10\": null, \"add_charge_code11\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"customer_name\": \"MXD/RYDER\", \"pu_actual_location_accuracy\": null, \"deliver_name\": \"JOSEPH FESSMAN\", \"add_charge_amt6\": null, \"signature_required\": true, \"csr\": \"DX*\", \"add_charge_amt8\": null, \"callback_to\": null, \"fuel_price_source\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"pickup_zip\": \"23150\", \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"return_svc_level\": null, \"add_charge_amt11\": null, \"add_charge_occur2\": null}}";
-                                                        //objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
+                                                        // objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                                         // objresponse.Reason = "{\"999000115280\": {\"deliver_eta_time\": null, \"deliver_special_instructions4\": null, \"del_actual_location_accuracy\": null, \"add_charge_amt8\": null, \"callback_to\": null, \"rate_chart_used\": 1, \"pickup_actual_latitude\": null, \"signature_images\": [], \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"add_charge_occur8\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"hours\": null, \"distribution_shift_id\": null, \"pickup_longitude\": null, \"hist_inv_number\": 0, \"add_charge_amt7\": null, \"dispatch_id\": null, \"dl_arrive_notification_sent\": false, \"add_charge_code8\": null, \"roundtrip_sign_req\": false, \"exception_timestamp\": null, \"pickup_city\": null, \"delivery_airport_code\": null, \"progress\": [{\"status_time\": \"08:34:00\", \"status_date\": \"2022-03-10\", \"status_text\": \"Entered in carrier's system\"}], \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"add_charge_amt2\": null, \"pickup_special_instructions1\": null, \"time_order_entered\": \"08:34\", \"distribution_unique_id\": 0, \"pickup_eta_date\": null, \"rate_buck_amt2\": null, \"rate_buck_amt9\": null, \"deliver_zip\": \"48150\", \"rate_buck_amt7\": null, \"customer_name\": \"TEST\", \"deliver_phone_ext\": null, \"roundtrip_actual_depart_time\": null, \"add_charge_code10\": null, \"add_charge_occur2\": null, \"deliver_state\": \"MI\", \"pickup_wait_time\": null, \"pickup_requested_arr_time\": null, \"csr\": \"RG\", \"add_charge_amt4\": null, \"holiday_groups\": null, \"total_pages\": 1, \"delivery_longitude\": -83.35663860, \"bringg_last_loc_sent\": null, \"deliver_name\": \"TANTARA\", \"deliver_actual_longitude\": null, \"distribution_branch_id\": null, \"deliver_wait_time\": null, \"add_charge_occur11\": null, \"deliver_omw_timestamp\": null, \"add_charge_amt3\": null, \"add_charge_amt10\": null, \"rate_buck_amt3\": null, \"rescheduled_ctrl_number\": null, \"add_charge_occur10\": null, \"deliver_address\": \"31782 ENTERPRISE DR\", \"pickup_latitude\": null, \"rate_buck_amt1\": null, \"pickup_phone\": null, \"pickup_actual_date\": \"2022-01-03\", \"previous_ctrl_number\": null, \"control_number\": 11528, \"rate_buck_amt11\": null, \"fuel_price_source\": null, \"add_charge_code9\": null, \"add_charge_occur3\": null, \"fuel_price_zone\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"rate_buck_amt10\": null, \"add_charge_code12\": null, \"quote_amount\": null, \"deliver_phone\": null, \"ordered_by_phone_number\": null, \"cod_accept_company_check\": false, \"callback_time\": null, \"deliver_dispatch_zone\": null, \"hazmat\": false, \"az_equip2\": null, \"add_charge_occur1\": null, \"pickup_email_notification_sent\": false, \"deliver_requested_dep_time\": null, \"deliver_special_instructions1\": null, \"deliver_actual_date\": null, \"rt_actual_location_accuracy\": null, \"signature_required\": false, \"pickup_attention\": null, \"pu_actual_location_accuracy\": null, \"rate_special_instructions\": null, \"pickup_special_instructions2\": null, \"driver2\": null, \"deliver_route_sequence\": null, \"add_charge_code2\": null, \"pickup_state\": null, \"add_charge_code1\": null, \"deliver_actual_pieces\": null, \"pickup_country\": null, \"signature\": null, \"add_charge_occur12\": null, \"reference_text\": \"FEDX01032022\", \"reference\": \"FEDX01032022\", \"pickup_pricing_zone\": null, \"pickup_route_seq\": null, \"pickup_actual_arr_time\": null, \"date_order_entered\": \"2022-03-10\", \"rate_buck_amt5\": null, \"number_of_pieces\": null, \"add_charge_code11\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_omw_timestamp\": null, \"delivery_point_customer\": 1, \"roundtrip_actual_latitude\": null, \"rate_buck_amt4\": null, \"pickup_requested_date\": \"2022-01-03\", \"po_number\": null, \"origin_code_text\": \"Web-Carrier UI\", \"origin_code\": \"X\", \"add_charge_occur7\": null, \"exception_sign_required\": false, \"id\": \"999000115280\", \"pickup_route_code\": null, \"pickup_airport_code\": null, \"roundtrip_actual_date\": null, \"roundtrip_signature\": null, \"roundtrip_actual_pieces\": null, \"pickup_phone_ext\": null, \"deliver_city\": \"LIVONIA\", \"deliver_omw_latitude\": null, \"service_level_text\": \"REGULAR\", \"service_level\": 1, \"order_timeliness_text\": \"Open\", \"order_timeliness\": \"5\", \"roundtrip_actual_arrival_time\": null, \"deliver_actual_arr_time\": null, \"etrac_number\": null, \"add_charge_occur9\": null, \"az_equip1\": null, \"rate_miles\": null, \"frequent_caller_id\": null, \"pickup_sign_req\": false, \"customer_type\": null, \"pickup_omw_latitude\": null, \"actual_miles\": null, \"add_charge_code3\": null, \"deliver_eta_date\": null, \"fuel_miles\": null, \"pickup_special_instructions4\": null, \"house_airway_bill_number\": null, \"vehicle_type\": null, \"cod_accept_cashiers_check\": false, \"settlements\": [], \"pickup_address\": null, \"pickup_room\": null, \"weight\": null, \"pickup_actual_longitude\": null, \"rate_buck_amt8\": null, \"delivery_address_point_number_text\": \"TANTARA\", \"delivery_address_point_number\": 10, \"status_code_text\": \"Entered\", \"status_code\": \"E\", \"master_airway_bill_number\": null, \"delivery_latitude\": 42.36977420, \"bringg_order_id\": null, \"add_charge_code7\": null, \"roundtrip_wait_time\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"cod_text\": \"No\", \"cod\": \"N\", \"deliver_room\": null, \"rate_buck_amt6\": null, \"pu_arrive_notification_sent\": false, \"deliver_actual_latitude\": null, \"blocks\": null, \"callback_userid\": null, \"edi_acknowledgement_required\": false, \"add_charge_code4\": null, \"driver1\": null, \"calc_add_on_chgs\": false, \"fuel_plan\": null, \"add_charge_amt9\": null, \"pickup_point_customer\": 0, \"zone_set_used\": 1, \"exception_code\": null, \"invoice_period_end_date\": null, \"push_partner_order_id\": null, \"verified_weight\": null, \"pickup_actual_pieces\": null, \"notes\": [], \"add_charge_amt12\": null, \"deliver_special_instructions3\": null, \"deliver_special_instructions2\": null, \"customer_number_text\": \"test\", \"customer_number\": 1, \"return_svc_level\": null, \"add_charge_amt1\": null, \"az_equip3\": null, \"image_sign_req\": false, \"pickup_omw_longitude\": null, \"deliver_requested_arr_time\": null, \"pickup_name\": null, \"pickup_address_point_number\": null, \"pickup_signature\": null, \"pickup_special_instructions3\": null, \"original_ctrl_number\": null, \"add_charge_code6\": null, \"deliver_omw_longitude\": null, \"additional_drivers\": false, \"deliver_country\": null, \"add_charge_amt5\": null, \"insurance_amount\": null, \"cod_amount\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": null, \"page_number\": 1, \"dispatch_time\": null, \"callback_date\": null, \"add_charge_occur5\": null, \"add_charge_occur6\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"pickup_dispatch_zone\": null, \"deliver_attention\": null, \"record_type\": 0, \"deliver_pricing_zone\": 1, \"deliver_requested_date\": \"2022-01-03\", \"push_services\": null, \"add_charge_amt6\": null, \"order_automatically_quoted\": false, \"custom_special_instr_long\": null, \"bol_number\": \"FEDX01032022\", \"hist_inv_date\": null, \"roundtrip_actual_longitude\": null, \"add_charge_amt11\": null, \"bringg_send_sms\": false, \"pickup_special_instr_long\": null, \"ordered_by\": \"DET\", \"deliver_special_instr_long\": null, \"pickup_zip\": null, \"pickup_requested_dep_time\": null, \"deliver_route_code\": null, \"deliver_actual_dep_time\": null, \"customers_etrac_partner_id\": null, \"add_charge_code5\": null, \"photos_exist\": false, \"original_schedule_number\": null, \"add_charge_occur4\": null, \"send_new_order_alert\": false, \"manual_notepad\": false, \"line_items\": [], \"pickup_eta_time\": null, \"_utc_offset\": \"-06:00\"}}";
                                                         // objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
 
@@ -2332,389 +2371,429 @@ namespace DatatracAPIOrder_OrderSettlement
                                         {
 
                                             // To Order Post and Put for other clients apart from BBB
-                                            objOrder.line_items = objorder_line_itemList;
-                                            objOrder.company_number = Convert.ToInt32(dr["Company"]);
-                                            objOrder.service_level = Convert.ToInt32(dr["Service Type"]);
-                                            objOrder.customer_number = Convert.ToInt32(dr["Billing Customer Number"]);
-                                            objOrder.reference = Convert.ToString(dr["Customer Reference"]);
-                                            //  DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
+                                            try
+                                            {
+                                                ReferenceId = Convert.ToString(dr["Customer Reference"]);
 
-                                            if (dr.Table.Columns.Contains("BOL Number"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["BOL Number"])))
-                                                {
-                                                    objOrder.bol_number = Convert.ToString(dr["BOL Number"]);
-                                                }
-                                            }
+                                                objOrder.reference = Convert.ToString(dr["Customer Reference"]);
+                                                objOrder.line_items = objorder_line_itemList;
+                                                objOrder.company_number = Convert.ToInt32(dr["Company"]);
+                                                objOrder.service_level = Convert.ToInt32(dr["Service Type"]);
+                                                objOrder.customer_number = Convert.ToInt32(dr["Billing Customer Number"]);
 
-                                            if (dr.Table.Columns.Contains("Delivery Date"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Date"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
-                                                    objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
-                                                    objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
-                                                    objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
-                                                    objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup actual arrival time"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual arrival time"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Pickup actual arrival time"]);
-                                                    objOrder.pickup_actual_arr_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup actual depart time"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual depart time"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
-                                                    objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            //    dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
-                                            //  objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
-                                            if (dr.Table.Columns.Contains("Pickup no later than"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup no later than"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Pickup no later than"]);
-                                                    objOrder.pickup_requested_dep_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup name"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup name"])))
-                                                {
-                                                    objOrder.pickup_name = Convert.ToString(dr["Pickup name"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup address"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup address"])))
-                                                {
-                                                    objOrder.pickup_address = Convert.ToString(dr["Pickup address"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup city"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup city"])))
-                                                {
-                                                    objOrder.pickup_city = Convert.ToString(dr["Pickup city"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup state/province"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup state/province"])))
-                                                {
-                                                    objOrder.pickup_state = Convert.ToString(dr["Pickup state/province"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup zip/postal code"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup zip/postal code"])))
-                                                {
-                                                    // objOrder.pickup_zip = Convert.ToString(dr["Pickup zip/postal code"]);
+                                                //  DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
 
-                                                    string strZip = Convert.ToString(dr["Pickup zip/postal code"]);
-                                                    strZip = Regex.Replace(strZip, @"\t", "");
-                                                    if (strZip.Length > 5)
+                                                if (dr.Table.Columns.Contains("BOL Number"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["BOL Number"])))
                                                     {
-                                                        objOrder.pickup_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
-                                                    }
-                                                    else
-                                                    {
-                                                        objOrder.pickup_zip = Convert.ToString(dr["Pickup zip/postal code"]);
+                                                        objOrder.bol_number = Convert.ToString(dr["BOL Number"]);
                                                     }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Deliver no earlier than"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no earlier than"])))
+
+                                                if (dr.Table.Columns.Contains("Delivery Date"))
                                                 {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Deliver no earlier than"]);
-                                                    objOrder.deliver_requested_arr_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Deliver no later than"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no later than"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Deliver no later than"]);
-                                                    objOrder.deliver_requested_dep_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Delivery actual arrive time"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual arrive time"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Delivery actual arrive time"]);
-                                                    objOrder.deliver_actual_arr_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Delivery actual depart time"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual depart time"])))
-                                                {
-                                                    DateTime dtValue = Convert.ToDateTime(dr["Delivery actual depart time"]);
-                                                    objOrder.deliver_actual_dep_time = dtValue.ToString("HH:mm");
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Customer Name"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Customer Name"])))
-                                                {
-                                                    objOrder.deliver_name = Convert.ToString(dr["Customer Name"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Address"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Address"])))
-                                                {
-                                                    objOrder.deliver_address = Convert.ToString(dr["Address"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("City"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["City"])))
-                                                {
-                                                    objOrder.deliver_city = Convert.ToString(dr["City"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("State"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["State"])))
-                                                {
-                                                    objOrder.deliver_state = Convert.ToString(dr["State"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Zip"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Zip"])))
-                                                {
-                                                    string strZip = Convert.ToString(dr["Zip"]);
-                                                    strZip = Regex.Replace(strZip, @"\t", "");
-                                                    if (strZip.Length > 5)
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Date"])))
                                                     {
-                                                        objOrder.deliver_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5); ;
-                                                    }
-                                                    else
-                                                    {
-                                                        objOrder.deliver_zip = Convert.ToString(dr["Zip"]);
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Delivery Date"]);
+                                                        objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                        objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                        objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                        objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
                                                     }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Delivery text signature"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery text signature"])))
+                                                if (dr.Table.Columns.Contains("Pickup actual arrival time"))
                                                 {
-                                                    objOrder.signature = Convert.ToString(dr["Delivery text signature"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual arrival time"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Pickup actual arrival time"]);
+                                                        objOrder.pickup_actual_arr_time = dtValue.ToString("HH:mm");
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Bill Rate"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Bill Rate"])))
+                                                if (dr.Table.Columns.Contains("Pickup actual depart time"))
                                                 {
-                                                    objOrder.rate_buck_amt1 = Convert.ToDouble(dr["Bill Rate"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual depart time"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
+                                                        objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pieces ACC"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces ACC"])))
+                                                //    dtValue = Convert.ToDateTime(dr["Pickup actual depart time"]);
+                                                //  objOrder.pickup_actual_dep_time = dtValue.ToString("HH:mm");
+                                                if (dr.Table.Columns.Contains("Pickup no later than"))
                                                 {
-                                                    objOrder.rate_buck_amt3 = Convert.ToDouble(dr["Pieces ACC"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup no later than"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Pickup no later than"]);
+                                                        objOrder.pickup_requested_dep_time = dtValue.ToString("HH:mm");
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("FSC"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["FSC"])))
+                                                if (dr.Table.Columns.Contains("Pickup name"))
                                                 {
-                                                    objOrder.rate_buck_amt10 = Convert.ToDouble(dr["FSC"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup name"])))
+                                                    {
+                                                        objOrder.pickup_name = Convert.ToString(dr["Pickup name"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt2"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt2"])))
+                                                if (dr.Table.Columns.Contains("Pickup address"))
                                                 {
-                                                    objOrder.rate_buck_amt2 = Convert.ToDouble(dr["rate_buck_amt2"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup address"])))
+                                                    {
+                                                        objOrder.pickup_address = Convert.ToString(dr["Pickup address"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt4"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt4"])))
+                                                if (dr.Table.Columns.Contains("Pickup city"))
                                                 {
-                                                    objOrder.rate_buck_amt4 = Convert.ToDouble(dr["rate_buck_amt4"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup city"])))
+                                                    {
+                                                        objOrder.pickup_city = Convert.ToString(dr["Pickup city"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt5"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt5"])))
+                                                if (dr.Table.Columns.Contains("Pickup state/province"))
                                                 {
-                                                    objOrder.rate_buck_amt5 = Convert.ToDouble(dr["rate_buck_amt5"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup state/province"])))
+                                                    {
+                                                        objOrder.pickup_state = Convert.ToString(dr["Pickup state/province"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt6"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt6"])))
+                                                if (dr.Table.Columns.Contains("Pickup zip/postal code"))
                                                 {
-                                                    objOrder.rate_buck_amt6 = Convert.ToDouble(dr["rate_buck_amt6"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt7"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt7"])))
-                                                {
-                                                    objOrder.rate_buck_amt7 = Convert.ToDouble(dr["rate_buck_amt7"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt8"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt8"])))
-                                                {
-                                                    objOrder.rate_buck_amt8 = Convert.ToDouble(dr["rate_buck_amt8"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt9"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt9"])))
-                                                {
-                                                    objOrder.rate_buck_amt9 = Convert.ToDouble(dr["rate_buck_amt9"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("rate_buck_amt11"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt11"])))
-                                                {
-                                                    objOrder.rate_buck_amt11 = Convert.ToDouble(dr["rate_buck_amt11"]);
-                                                }
-                                            }
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup zip/postal code"])))
+                                                    {
+                                                        // objOrder.pickup_zip = Convert.ToString(dr["Pickup zip/postal code"]);
 
-                                            if (dr.Table.Columns.Contains("Pieces"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
-                                                {
-                                                    objOrder.number_of_pieces = Convert.ToInt32(dr["Pieces"]);
+                                                        string strZip = Convert.ToString(dr["Pickup zip/postal code"]);
+                                                        strZip = Regex.Replace(strZip, @"\t", "");
+                                                        if (strZip.Length > 5)
+                                                        {
+                                                            if (strZip.Contains("-"))
+                                                            {
+                                                                objOrder.pickup_zip = strZip;
+                                                            }
+                                                            else
+                                                            {
+                                                                objOrder.pickup_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5);
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            objOrder.pickup_zip = strZip;
+                                                        }
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Miles"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                                                if (dr.Table.Columns.Contains("Deliver no earlier than"))
                                                 {
-                                                    objOrder.rate_miles = Convert.ToInt32(Convert.ToDouble(dr["Miles"]));
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no earlier than"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Deliver no earlier than"]);
+                                                        objOrder.deliver_requested_arr_time = dtValue.ToString("HH:mm");
+                                                    }
                                                 }
-                                            }
-                                            //    string driver1 = null;
-                                            if (dr.Table.Columns.Contains("Correct Driver Number"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Correct Driver Number"])))
+                                                if (dr.Table.Columns.Contains("Deliver no later than"))
                                                 {
-                                                    objOrder.driver1 = Convert.ToInt32(dr["Correct Driver Number"]);
-                                                    //driver1 = Convert.ToString(dr["Correct Driver Number"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver no later than"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Deliver no later than"]);
+                                                        objOrder.deliver_requested_dep_time = dtValue.ToString("HH:mm");
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Delivery actual arrive time"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual arrive time"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Delivery actual arrive time"]);
+                                                        objOrder.deliver_actual_arr_time = dtValue.ToString("HH:mm");
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Delivery actual depart time"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual depart time"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Delivery actual depart time"]);
+                                                        objOrder.deliver_actual_dep_time = dtValue.ToString("HH:mm");
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Customer Name"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Customer Name"])))
+                                                    {
+                                                        objOrder.deliver_name = Convert.ToString(dr["Customer Name"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Address"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Address"])))
+                                                    {
+                                                        objOrder.deliver_address = Convert.ToString(dr["Address"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("City"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["City"])))
+                                                    {
+                                                        objOrder.deliver_city = Convert.ToString(dr["City"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("State"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["State"])))
+                                                    {
+                                                        objOrder.deliver_state = Convert.ToString(dr["State"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Zip"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Zip"])))
+                                                    {
+                                                        string strZip = Convert.ToString(dr["Zip"]);
+                                                        strZip = Regex.Replace(strZip, @"\t", "");
+                                                        if (strZip.Length > 5)
+                                                        {
+                                                            if (strZip.Contains("-"))
+                                                            {
+                                                                objOrder.deliver_zip = strZip;
+                                                            }
+                                                            else
+                                                            {
+                                                                objOrder.deliver_zip = strZip.Substring(0, 5) + "-" + strZip.Substring(5, strZip.Length - 5);
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            objOrder.deliver_zip = strZip;
+                                                        }
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Delivery text signature"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery text signature"])))
+                                                    {
+                                                        objOrder.signature = Convert.ToString(dr["Delivery text signature"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Bill Rate"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Bill Rate"])))
+                                                    {
+                                                        objOrder.rate_buck_amt1 = Convert.ToDouble(dr["Bill Rate"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Pieces ACC"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces ACC"])))
+                                                    {
+                                                        objOrder.rate_buck_amt3 = Convert.ToDouble(dr["Pieces ACC"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("FSC"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["FSC"])))
+                                                    {
+                                                        objOrder.rate_buck_amt10 = Convert.ToDouble(dr["FSC"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt2"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt2"])))
+                                                    {
+                                                        objOrder.rate_buck_amt2 = Convert.ToDouble(dr["rate_buck_amt2"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt4"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt4"])))
+                                                    {
+                                                        objOrder.rate_buck_amt4 = Convert.ToDouble(dr["rate_buck_amt4"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt5"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt5"])))
+                                                    {
+                                                        objOrder.rate_buck_amt5 = Convert.ToDouble(dr["rate_buck_amt5"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt6"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt6"])))
+                                                    {
+                                                        objOrder.rate_buck_amt6 = Convert.ToDouble(dr["rate_buck_amt6"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt7"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt7"])))
+                                                    {
+                                                        objOrder.rate_buck_amt7 = Convert.ToDouble(dr["rate_buck_amt7"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt8"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt8"])))
+                                                    {
+                                                        objOrder.rate_buck_amt8 = Convert.ToDouble(dr["rate_buck_amt8"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt9"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt9"])))
+                                                    {
+                                                        objOrder.rate_buck_amt9 = Convert.ToDouble(dr["rate_buck_amt9"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("rate_buck_amt11"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["rate_buck_amt11"])))
+                                                    {
+                                                        objOrder.rate_buck_amt11 = Convert.ToDouble(dr["rate_buck_amt11"]);
+                                                    }
                                                 }
 
-                                            }
-                                            //if (dr.Table.Columns.Contains("Requested by"))
-                                            //{
-                                            //    if (!string.IsNullOrEmpty(Convert.ToString(dr["Requested by"])))
-                                            //    {
-                                            //        objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
-                                            //    }
-                                            //}
+                                                if (dr.Table.Columns.Contains("Pieces"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pieces"])))
+                                                    {
+                                                        objOrder.number_of_pieces = Convert.ToInt32(dr["Pieces"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Miles"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Miles"])))
+                                                    {
+                                                        objOrder.rate_miles = Convert.ToInt32(Convert.ToDouble(dr["Miles"]));
+                                                    }
+                                                }
+                                                //    string driver1 = null;
+                                                if (dr.Table.Columns.Contains("Correct Driver Number"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Correct Driver Number"])))
+                                                    {
+                                                        objOrder.driver1 = Convert.ToInt32(dr["Correct Driver Number"]);
+                                                        //driver1 = Convert.ToString(dr["Correct Driver Number"]);
+                                                    }
 
-                                            objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
-                                            objOrder.csr = Convert.ToString(dr["Entered by"]);
-                                            if (dr.Table.Columns.Contains("Pickup Delivery Transfer Flag"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Delivery Transfer Flag"])))
-                                                {
-                                                    objOrder.pick_del_trans_flag = Convert.ToString(dr["Pickup Delivery Transfer Flag"]);
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup text signature"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup text signature"])))
-                                                {
-                                                    objOrder.pickup_signature = Convert.ToString(dr["Pickup text signature"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Weight"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Weight"])))
-                                                {
-                                                    objOrder.weight = Convert.ToInt32(Convert.ToDouble(dr["Weight"]));
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Insurance Amount"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Insurance Amount"])))
-                                                {
-                                                    objOrder.insurance_amount = Convert.ToInt32(Convert.ToDouble(dr["Insurance Amount"]));
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("Master airway bill number"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Master airway bill number"])))
-                                                {
-                                                    objOrder.master_airway_bill_number = Convert.ToString(dr["Master airway bill number"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("PO Number"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["PO Number"])))
-                                                {
-                                                    objOrder.po_number = Convert.ToString(dr["PO Number"]);
-                                                }
-                                            }
-                                            if (dr.Table.Columns.Contains("House airway bill number"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["House airway bill number"])))
-                                                {
-                                                    objOrder.house_airway_bill_number = Convert.ToString(dr["House airway bill number"]);
-                                                }
-                                            }
+                                                //if (dr.Table.Columns.Contains("Requested by"))
+                                                //{
+                                                //    if (!string.IsNullOrEmpty(Convert.ToString(dr["Requested by"])))
+                                                //    {
+                                                //        objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
+                                                //    }
+                                                //}
 
-                                            if (dr.Table.Columns.Contains("Delivery Phone"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Phone"])))
+                                                objOrder.ordered_by = Convert.ToString(dr["Requested by"]);
+                                                objOrder.csr = Convert.ToString(dr["Entered by"]);
+                                                if (dr.Table.Columns.Contains("Pickup Delivery Transfer Flag"))
                                                 {
-                                                    objOrder.deliver_phone = Convert.ToString(dr["Delivery Phone"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Delivery Transfer Flag"])))
+                                                    {
+                                                        objOrder.pick_del_trans_flag = Convert.ToString(dr["Pickup Delivery Transfer Flag"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup Room"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Room"])))
+                                                if (dr.Table.Columns.Contains("Pickup text signature"))
                                                 {
-                                                    objOrder.pickup_room = Convert.ToString(dr["Pickup Room"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup text signature"])))
+                                                    {
+                                                        objOrder.pickup_signature = Convert.ToString(dr["Pickup text signature"]);
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Pickup Attention"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Attention"])))
+                                                if (dr.Table.Columns.Contains("Weight"))
                                                 {
-                                                    objOrder.pickup_attention = Convert.ToString(dr["Pickup Attention"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Weight"])))
+                                                    {
+                                                        objOrder.weight = Convert.ToInt32(Convert.ToDouble(dr["Weight"]));
+                                                    }
                                                 }
-                                            }
-                                            if (dr.Table.Columns.Contains("Deliver Attention"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver Attention"])))
+                                                if (dr.Table.Columns.Contains("Insurance Amount"))
                                                 {
-                                                    objOrder.deliver_attention = Convert.ToString(dr["Deliver Attention"]);
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Insurance Amount"])))
+                                                    {
+                                                        objOrder.insurance_amount = Convert.ToInt32(Convert.ToDouble(dr["Insurance Amount"]));
+                                                    }
                                                 }
-                                            }
+                                                if (dr.Table.Columns.Contains("Master airway bill number"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Master airway bill number"])))
+                                                    {
+                                                        objOrder.master_airway_bill_number = Convert.ToString(dr["Master airway bill number"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("PO Number"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["PO Number"])))
+                                                    {
+                                                        objOrder.po_number = Convert.ToString(dr["PO Number"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("House airway bill number"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["House airway bill number"])))
+                                                    {
+                                                        objOrder.house_airway_bill_number = Convert.ToString(dr["House airway bill number"]);
+                                                    }
+                                                }
 
-                                            if (dr.Table.Columns.Contains("Pickup special instr long"))
-                                            {
-                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup special instr long"])))
+                                                if (dr.Table.Columns.Contains("Delivery Phone"))
                                                 {
-                                                    string strpickup_special_instr_long = Convert.ToString(dr["Pickup actual depart time"]);
-                                                    objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery Phone"])))
+                                                    {
+                                                        objOrder.deliver_phone = Convert.ToString(dr["Delivery Phone"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Pickup Room"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Room"])))
+                                                    {
+                                                        objOrder.pickup_room = Convert.ToString(dr["Pickup Room"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Pickup Attention"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup Attention"])))
+                                                    {
+                                                        objOrder.pickup_attention = Convert.ToString(dr["Pickup Attention"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("Deliver Attention"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Deliver Attention"])))
+                                                    {
+                                                        objOrder.deliver_attention = Convert.ToString(dr["Deliver Attention"]);
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("Pickup special instr long"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup special instr long"])))
+                                                    {
+                                                        string strpickup_special_instr_long = Convert.ToString(dr["Pickup actual depart time"]);
+                                                        objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
                                                 }
                                             }
-                                            else
+                                            catch (Exception ex)
                                             {
-                                                objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
+                                                strExecutionLogMessage = "ProcessAddOrderFiles Exception -" + ex.Message + System.Environment.NewLine;
+                                                strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
+                                                strExecutionLogMessage += "Found exception while generating the file, filename  -" + strFileName + System.Environment.NewLine;
+                                                strExecutionLogMessage += "For Customer Reference -" + objOrder.reference + System.Environment.NewLine;
+                                                objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
+
+                                                ErrorResponse objErrorResponse = new ErrorResponse();
+                                                objErrorResponse.error = ex.Message;
+                                                objErrorResponse.status = "Error";
+                                                objErrorResponse.code = "Exception while generating the Order Post Request";
+                                                objErrorResponse.reference = objOrder.reference;
+                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                dsFailureResponse.Tables[0].TableName = "OrderFailure";
+                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            strInputFilePath, processingFileName, strDatetime);
+                                                continue;
                                             }
 
                                             objorderdetails.order = objOrder;
@@ -2724,11 +2803,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                             string data = Regex.Replace(request, @"\\t", "");
                                             request = Regex.Replace(data, @"\\""", "");
                                             objresponse = objclsDatatrac.CallDataTracOrderPostAPI(objorderdetails);
-                                            //objresponse.ResponseVal = true;
-                                            //objresponse.Reason = "{\"002018775030\": {\"verified_weight\": null, \"roundtrip_actual_latitude\": null, \"pickup_special_instructions4\": null, \"fuel_miles\": null, \"pickup_dispatch_zone\": null, \"pickup_zip\": \"23150\", \"pickup_actual_arr_time\": \"08:00\", \"cod_accept_company_check\": false, \"add_charge_occur9\": null, \"pickup_omw_latitude\": null, \"service_level_text\": \"Threshold Delivery\", \"service_level\": 57, \"exception_sign_required\": false, \"pickup_phone_ext\": null, \"roundtrip_actual_pieces\": null, \"bringg_send_sms\": false, \"az_equip2\": null, \"hist_inv_date\": null, \"date_order_entered\": \"2021-07-21\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_city\": \"SANDSTON\", \"pickup_phone\": null, \"pickup_sign_req\": true, \"deliver_route_sequence\": null, \"deliver_phone\": null, \"deliver_omw_longitude\": null, \"roundtrip_actual_longitude\": null, \"page_number\": 1, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code9\": null, \"pickup_eta_time\": null, \"record_type\": 0, \"add_charge_occur11\": null, \"push_partner_order_id\": null, \"deliver_country\": null, \"customer_name\": \"MXD/RYDER\", \"bol_number\": null, \"pickup_latitude\": 37.53250820, \"add_charge_code4\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pu_arrive_notification_sent\": false, \"distribution_shift_id\": null, \"pickup_special_instr_long\": null, \"id\": \"002018775030\", \"callback_to\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"ordered_by\": \"RYDER\", \"add_charge_code12\": null, \"pickup_route_seq\": null, \"deliver_city\": \"HANOVER\", \"add_charge_occur5\": null, \"edi_acknowledgement_required\": false, \"rescheduled_ctrl_number\": null, \"driver2\": null, \"deliver_room\": null, \"deliver_actual_arr_time\": \"08:00\", \"fuel_price_zone\": null, \"add_charge_amt9\": null, \"add_charge_amt4\": null, \"delivery_address_point_number_text\": \"PAMELA YORK\", \"delivery_address_point_number\": 24254, \"deliver_actual_longitude\": null, \"add_charge_amt2\": null, \"additional_drivers\": false, \"pickup_pricing_zone\": 1, \"hazmat\": false, \"pickup_address\": \"540 EASTPARK CT\", \"pickup_route_code\": null, \"callback_userid\": null, \"pickup_point_customer\": 31025, \"rate_buck_amt1\": 52.00, \"add_charge_amt8\": null, \"callback_time\": null, \"csr\": \"DX*\", \"roundtrip_actual_depart_time\": null, \"customers_etrac_partner_id\": \"96609250\", \"manual_notepad\": false, \"add_charge_code8\": null, \"bringg_order_id\": null, \"deliver_omw_latitude\": null, \"pickup_longitude\": -77.33035820, \"etrac_number\": null, \"distribution_unique_id\": 0, \"vehicle_type\": null, \"roundtrip_actual_arrival_time\": null, \"delivery_longitude\": -77.28769600, \"pu_actual_location_accuracy\": null, \"deliver_actual_date\": \"2021-07-14\", \"exception_timestamp\": null, \"deliver_zip\": \"23069\", \"roundtrip_wait_time\": null, \"add_charge_occur8\": null, \"dl_arrive_notification_sent\": false, \"pickup_special_instructions1\": null, \"ordered_by_phone_number\": null, \"deliver_requested_arr_time\": \"08:00\", \"rate_miles\": null, \"holiday_groups\": null, \"pickup_email_notification_sent\": false, \"add_charge_code3\": null, \"dispatch_id\": null, \"add_charge_occur10\": null, \"dispatch_time\": null, \"deliver_wait_time\": null, \"invoice_period_end_date\": null, \"add_charge_occur12\": null, \"fuel_plan\": null, \"return_svc_level\": null, \"pickup_actual_date\": \"2021-07-14\", \"send_new_order_alert\": false, \"pickup_room\": null, \"rate_buck_amt8\": null, \"add_charge_amt10\": null, \"insurance_amount\": null, \"add_charge_amt3\": null, \"add_charge_amt6\": null, \"pickup_special_instructions3\": null, \"pickup_requested_date\": \"2021-07-14\", \"roundtrip_sign_req\": false, \"actual_miles\": null, \"pickup_address_point_number_text\": \"1STOPBEDROOMS\", \"pickup_address_point_number\": 19845, \"deliver_actual_latitude\": null, \"deliver_phone_ext\": null, \"deliver_route_code\": null, \"add_charge_code10\": null, \"delivery_airport_code\": null, \"reference\": null, \"photos_exist\": false, \"master_airway_bill_number\": null, \"control_number\": 1877503, \"cod_text\": \"No\", \"cod\": \"N\", \"rate_buck_amt11\": null, \"cod_amount\": null, \"pickup_omw_timestamp\": null, \"signature_images\": [], \"deliver_special_instructions1\": null, \"quote_amount\": null, \"total_pages\": 1, \"rate_buck_amt4\": null, \"line_items\": [], \"delivery_latitude\": 37.80844290, \"progress\": [{\"status_time\": \"15:57:00\", \"status_date\": \"2021-07-21\", \"status_text\": \"Entered in carrier's system\"}, {\"status_time\": \"08:30:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Picked up\"}, {\"status_time\": \"08:15:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Delivered\"}], \"add_charge_code1\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_special_instr_long\": null, \"deliver_address\": \"205 HARDWOOD LN\", \"add_charge_occur4\": null, \"deliver_eta_date\": null, \"pickup_actual_dep_time\": \"08:30\", \"deliver_requested_dep_time\": \"17:00\", \"add_charge_code7\": null, \"deliver_actual_dep_time\": \"08:15\", \"cod_accept_cashiers_check\": false, \"bringg_last_loc_sent\": null, \"az_equip3\": null, \"driver1_text\": \"WALT DARBY\", \"driver1\": 3215, \"pickup_actual_latitude\": null, \"add_charge_occur2\": null, \"order_automatically_quoted\": false, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"hours\": \"15\", \"frequent_caller_id\": null, \"rate_buck_amt6\": null, \"rate_chart_used\": 0, \"deliver_actual_pieces\": null, \"add_charge_code5\": null, \"pickup_omw_longitude\": null, \"notes\": [], \"delivery_point_customer\": 31025, \"add_charge_occur7\": null, \"rate_buck_amt5\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"add_charge_code11\": null, \"pickup_name\": \"1STOPBEDROOMS\", \"callback_date\": null, \"add_charge_code2\": null, \"house_airway_bill_number\": null, \"deliver_name\": \"PAMELA YORK\", \"number_of_pieces\": 1, \"deliver_eta_time\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"rate_special_instructions\": null, \"add_charge_occur3\": null, \"pickup_eta_date\": null, \"deliver_special_instructions4\": null, \"custom_special_instr_long\": null, \"deliver_special_instructions2\": null, \"pickup_signature\": \"SOF\", \"az_equip1\": null, \"add_charge_amt12\": null, \"settlements\": [{\"vendor_invoice_number\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"voucher_date\": null, \"voucher_amount\": null, \"fuel_price_source\": null, \"settlement_bucket6_pct\": null, \"pre_book_percentage\": true, \"settlement_bucket4_pct\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"settlement_bucket5_pct\": null, \"voucher_number\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"vendor_employee_numer\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"driver_number_text\": \"WALT DARBY\", \"driver_number\": 3215, \"fuel_plan\": null, \"agents_etrac_partner_id\": null, \"charge2\": null, \"charge3\": null, \"settlement_bucket1_pct\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"id\": \"002018775030D1\", \"record_type\": 0, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"pay_chart_used\": null, \"fuel_price_zone\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"charge1\": null, \"control_number\": 1877503, \"adjustment_type\": null, \"order_date\": \"2021-07-14\", \"time_last_updated\": \"14:57\", \"agent_etrac_transaction_number\": null, \"date_last_updated\": \"2021-07-21\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket3_pct\": null}], \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"blocks\": null, \"del_actual_location_accuracy\": null, \"zone_set_used\": 1, \"pickup_country\": null, \"pickup_state\": \"VA\", \"add_charge_amt7\": null, \"email_addresses\": null, \"add_charge_occur1\": null, \"pickup_wait_time\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"distribution_branch_id\": null, \"rate_buck_amt9\": null, \"add_charge_amt1\": null, \"pickup_requested_dep_time\": \"09:00\", \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"deliver_state\": \"VA\", \"deliver_dispatch_zone\": null, \"image_sign_req\": false, \"add_charge_code6\": null, \"deliver_requested_date\": \"2021-07-14\", \"add_charge_amt5\": null, \"time_order_entered\": \"15:57\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_attention\": null, \"rate_buck_amt7\": null, \"add_charge_occur6\": null, \"fuel_price_source\": null, \"pickup_airport_code\": null, \"rate_buck_amt2\": null, \"rate_buck_amt3\": null, \"deliver_omw_timestamp\": null, \"exception_code\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"weight\": null, \"signature_required\": true, \"rate_buck_amt10\": null, \"hist_inv_number\": 0, \"deliver_pricing_zone\": 1, \"pickup_actual_longitude\": null, \"push_services\": null, \"add_charge_amt11\": null, \"rt_actual_location_accuracy\": null, \"roundtrip_actual_date\": null, \"pickup_requested_arr_time\": null, \"deliver_attention\": null, \"deliver_special_instructions3\": null, \"pickup_actual_pieces\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"roundtrip_signature\": null, \"po_number\": null, \"signature\": \"SOF\", \"pickup_special_instructions2\": null, \"original_ctrl_number\": null, \"previous_ctrl_number\": null}}";
+                                            // objresponse.ResponseVal = true;
+                                            // objresponse.Reason = "{\"002018775030\": {\"verified_weight\": null, \"roundtrip_actual_latitude\": null, \"pickup_special_instructions4\": null, \"fuel_miles\": null, \"pickup_dispatch_zone\": null, \"pickup_zip\": \"23150\", \"pickup_actual_arr_time\": \"08:00\", \"cod_accept_company_check\": false, \"add_charge_occur9\": null, \"pickup_omw_latitude\": null, \"service_level_text\": \"Threshold Delivery\", \"service_level\": 57, \"exception_sign_required\": false, \"pickup_phone_ext\": null, \"roundtrip_actual_pieces\": null, \"bringg_send_sms\": false, \"az_equip2\": null, \"hist_inv_date\": null, \"date_order_entered\": \"2021-07-21\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_city\": \"SANDSTON\", \"pickup_phone\": null, \"pickup_sign_req\": true, \"deliver_route_sequence\": null, \"deliver_phone\": null, \"deliver_omw_longitude\": null, \"roundtrip_actual_longitude\": null, \"page_number\": 1, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code9\": null, \"pickup_eta_time\": null, \"record_type\": 0, \"add_charge_occur11\": null, \"push_partner_order_id\": null, \"deliver_country\": null, \"customer_name\": \"MXD/RYDER\", \"bol_number\": null, \"pickup_latitude\": 37.53250820, \"add_charge_code4\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pu_arrive_notification_sent\": false, \"distribution_shift_id\": null, \"pickup_special_instr_long\": null, \"id\": \"002018775030\", \"callback_to\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"ordered_by\": \"RYDER\", \"add_charge_code12\": null, \"pickup_route_seq\": null, \"deliver_city\": \"HANOVER\", \"add_charge_occur5\": null, \"edi_acknowledgement_required\": false, \"rescheduled_ctrl_number\": null, \"driver2\": null, \"deliver_room\": null, \"deliver_actual_arr_time\": \"08:00\", \"fuel_price_zone\": null, \"add_charge_amt9\": null, \"add_charge_amt4\": null, \"delivery_address_point_number_text\": \"PAMELA YORK\", \"delivery_address_point_number\": 24254, \"deliver_actual_longitude\": null, \"add_charge_amt2\": null, \"additional_drivers\": false, \"pickup_pricing_zone\": 1, \"hazmat\": false, \"pickup_address\": \"540 EASTPARK CT\", \"pickup_route_code\": null, \"callback_userid\": null, \"pickup_point_customer\": 31025, \"rate_buck_amt1\": 52.00, \"add_charge_amt8\": null, \"callback_time\": null, \"csr\": \"DX*\", \"roundtrip_actual_depart_time\": null, \"customers_etrac_partner_id\": \"96609250\", \"manual_notepad\": false, \"add_charge_code8\": null, \"bringg_order_id\": null, \"deliver_omw_latitude\": null, \"pickup_longitude\": -77.33035820, \"etrac_number\": null, \"distribution_unique_id\": 0, \"vehicle_type\": null, \"roundtrip_actual_arrival_time\": null, \"delivery_longitude\": -77.28769600, \"pu_actual_location_accuracy\": null, \"deliver_actual_date\": \"2021-07-14\", \"exception_timestamp\": null, \"deliver_zip\": \"23069\", \"roundtrip_wait_time\": null, \"add_charge_occur8\": null, \"dl_arrive_notification_sent\": false, \"pickup_special_instructions1\": null, \"ordered_by_phone_number\": null, \"deliver_requested_arr_time\": \"08:00\", \"rate_miles\": null, \"holiday_groups\": null, \"pickup_email_notification_sent\": false, \"add_charge_code3\": null, \"dispatch_id\": null, \"add_charge_occur10\": null, \"dispatch_time\": null, \"deliver_wait_time\": null, \"invoice_period_end_date\": null, \"add_charge_occur12\": null, \"fuel_plan\": null, \"return_svc_level\": null, \"pickup_actual_date\": \"2021-07-14\", \"send_new_order_alert\": false, \"pickup_room\": null, \"rate_buck_amt8\": null, \"add_charge_amt10\": null, \"insurance_amount\": null, \"add_charge_amt3\": null, \"add_charge_amt6\": null, \"pickup_special_instructions3\": null, \"pickup_requested_date\": \"2021-07-14\", \"roundtrip_sign_req\": false, \"actual_miles\": null, \"pickup_address_point_number_text\": \"1STOPBEDROOMS\", \"pickup_address_point_number\": 19845, \"deliver_actual_latitude\": null, \"deliver_phone_ext\": null, \"deliver_route_code\": null, \"add_charge_code10\": null, \"delivery_airport_code\": null, \"reference\": null, \"photos_exist\": false, \"master_airway_bill_number\": null, \"control_number\": 1877503, \"cod_text\": \"No\", \"cod\": \"N\", \"rate_buck_amt11\": null, \"cod_amount\": null, \"pickup_omw_timestamp\": null, \"signature_images\": [], \"deliver_special_instructions1\": null, \"quote_amount\": null, \"total_pages\": 1, \"rate_buck_amt4\": null, \"line_items\": [], \"delivery_latitude\": 37.80844290, \"progress\": [{\"status_time\": \"15:57:00\", \"status_date\": \"2021-07-21\", \"status_text\": \"Entered in carrier's system\"}, {\"status_time\": \"08:30:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Picked up\"}, {\"status_time\": \"08:15:00\", \"status_date\": \"2021-07-14\", \"status_text\": \"Delivered\"}], \"add_charge_code1\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_special_instr_long\": null, \"deliver_address\": \"205 HARDWOOD LN\", \"add_charge_occur4\": null, \"deliver_eta_date\": null, \"pickup_actual_dep_time\": \"08:30\", \"deliver_requested_dep_time\": \"17:00\", \"add_charge_code7\": null, \"deliver_actual_dep_time\": \"08:15\", \"cod_accept_cashiers_check\": false, \"bringg_last_loc_sent\": null, \"az_equip3\": null, \"driver1_text\": \"WALT DARBY\", \"driver1\": 3215, \"pickup_actual_latitude\": null, \"add_charge_occur2\": null, \"order_automatically_quoted\": false, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"hours\": \"15\", \"frequent_caller_id\": null, \"rate_buck_amt6\": null, \"rate_chart_used\": 0, \"deliver_actual_pieces\": null, \"add_charge_code5\": null, \"pickup_omw_longitude\": null, \"notes\": [], \"delivery_point_customer\": 31025, \"add_charge_occur7\": null, \"rate_buck_amt5\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"add_charge_code11\": null, \"pickup_name\": \"1STOPBEDROOMS\", \"callback_date\": null, \"add_charge_code2\": null, \"house_airway_bill_number\": null, \"deliver_name\": \"PAMELA YORK\", \"number_of_pieces\": 1, \"deliver_eta_time\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"rate_special_instructions\": null, \"add_charge_occur3\": null, \"pickup_eta_date\": null, \"deliver_special_instructions4\": null, \"custom_special_instr_long\": null, \"deliver_special_instructions2\": null, \"pickup_signature\": \"SOF\", \"az_equip1\": null, \"add_charge_amt12\": null, \"settlements\": [{\"vendor_invoice_number\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"voucher_date\": null, \"voucher_amount\": null, \"fuel_price_source\": null, \"settlement_bucket6_pct\": null, \"pre_book_percentage\": true, \"settlement_bucket4_pct\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"settlement_bucket5_pct\": null, \"voucher_number\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"vendor_employee_numer\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"driver_number_text\": \"WALT DARBY\", \"driver_number\": 3215, \"fuel_plan\": null, \"agents_etrac_partner_id\": null, \"charge2\": null, \"charge3\": null, \"settlement_bucket1_pct\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"id\": \"002018775030D1\", \"record_type\": 0, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"pay_chart_used\": null, \"fuel_price_zone\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"charge1\": null, \"control_number\": 1877503, \"adjustment_type\": null, \"order_date\": \"2021-07-14\", \"time_last_updated\": \"14:57\", \"agent_etrac_transaction_number\": null, \"date_last_updated\": \"2021-07-21\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket3_pct\": null}], \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"blocks\": null, \"del_actual_location_accuracy\": null, \"zone_set_used\": 1, \"pickup_country\": null, \"pickup_state\": \"VA\", \"add_charge_amt7\": null, \"email_addresses\": null, \"add_charge_occur1\": null, \"pickup_wait_time\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"distribution_branch_id\": null, \"rate_buck_amt9\": null, \"add_charge_amt1\": null, \"pickup_requested_dep_time\": \"09:00\", \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"deliver_state\": \"VA\", \"deliver_dispatch_zone\": null, \"image_sign_req\": false, \"add_charge_code6\": null, \"deliver_requested_date\": \"2021-07-14\", \"add_charge_amt5\": null, \"time_order_entered\": \"15:57\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_attention\": null, \"rate_buck_amt7\": null, \"add_charge_occur6\": null, \"fuel_price_source\": null, \"pickup_airport_code\": null, \"rate_buck_amt2\": null, \"rate_buck_amt3\": null, \"deliver_omw_timestamp\": null, \"exception_code\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"weight\": null, \"signature_required\": true, \"rate_buck_amt10\": null, \"hist_inv_number\": 0, \"deliver_pricing_zone\": 1, \"pickup_actual_longitude\": null, \"push_services\": null, \"add_charge_amt11\": null, \"rt_actual_location_accuracy\": null, \"roundtrip_actual_date\": null, \"pickup_requested_arr_time\": null, \"deliver_attention\": null, \"deliver_special_instructions3\": null, \"pickup_actual_pieces\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"roundtrip_signature\": null, \"po_number\": null, \"signature\": \"SOF\", \"pickup_special_instructions2\": null, \"original_ctrl_number\": null, \"previous_ctrl_number\": null}}";
                                             // objresponse.Reason = "{\"002018724440\": {\"verified_weight\": null, \"roundtrip_actual_latitude\": null, \"pickup_special_instructions4\": null, \"fuel_miles\": null, \"pickup_dispatch_zone\": null, \"pickup_zip\": \"23150\", \"pickup_actual_arr_time\": \"08:00\", \"cod_accept_company_check\": false, \"add_charge_occur9\": null, \"pickup_omw_latitude\": null, \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"exception_sign_required\": false, \"pickup_phone_ext\": null, \"roundtrip_actual_pieces\": null, \"bringg_send_sms\": false, \"az_equip2\": null, \"hist_inv_date\": null, \"date_order_entered\": \"2021-07-08\", \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_city\": \"SANDSTON\", \"pickup_phone\": null, \"pickup_sign_req\": true, \"deliver_route_sequence\": null, \"deliver_phone\": null, \"deliver_omw_longitude\": null, \"roundtrip_actual_longitude\": null, \"page_number\": 1, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"add_charge_code9\": null, \"pickup_eta_time\": null, \"record_type\": 0, \"add_charge_occur11\": null, \"push_partner_order_id\": null, \"deliver_country\": null, \"customer_name\": \"MXD/RYDER\", \"bol_number\": null, \"pickup_latitude\": 37.53250820, \"add_charge_code4\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pu_arrive_notification_sent\": false, \"distribution_shift_id\": null, \"pickup_special_instr_long\": null, \"id\": \"002018724440\", \"callback_to\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"ordered_by\": \"RYDER\", \"add_charge_code12\": null, \"pickup_route_seq\": null, \"deliver_city\": \"CHESAPEAKE\", \"add_charge_occur5\": null, \"edi_acknowledgement_required\": false, \"rescheduled_ctrl_number\": null, \"driver2\": null, \"deliver_room\": null, \"deliver_actual_arr_time\": \"08:00\", \"fuel_price_zone\": null, \"add_charge_amt9\": null, \"add_charge_amt4\": null, \"delivery_address_point_number_text\": \"ANNE BAILEY\", \"delivery_address_point_number\": 26312, \"deliver_actual_longitude\": null, \"add_charge_amt2\": null, \"additional_drivers\": false, \"pickup_pricing_zone\": 1, \"hazmat\": false, \"pickup_address\": \"540 EASTPARK CT\", \"pickup_route_code\": null, \"callback_userid\": null, \"pickup_point_customer\": 31025, \"rate_buck_amt1\": 57.00, \"add_charge_amt8\": null, \"callback_time\": null, \"csr\": \"DX*\", \"roundtrip_actual_depart_time\": null, \"customers_etrac_partner_id\": \"96609250\", \"manual_notepad\": false, \"add_charge_code8\": null, \"bringg_order_id\": null, \"deliver_omw_latitude\": null, \"pickup_longitude\": -77.33035820, \"etrac_number\": null, \"distribution_unique_id\": 0, \"vehicle_type\": null, \"roundtrip_actual_arrival_time\": null, \"delivery_longitude\": -76.34760620, \"pu_actual_location_accuracy\": null, \"deliver_actual_date\": \"2021-06-28\", \"exception_timestamp\": null, \"deliver_zip\": \"23323\", \"roundtrip_wait_time\": null, \"add_charge_occur8\": null, \"dl_arrive_notification_sent\": false, \"pickup_special_instructions1\": null, \"ordered_by_phone_number\": null, \"deliver_requested_arr_time\": \"08:00\", \"rate_miles\": null, \"holiday_groups\": null, \"pickup_email_notification_sent\": false, \"add_charge_code3\": null, \"dispatch_id\": null, \"add_charge_occur10\": null, \"dispatch_time\": null, \"deliver_wait_time\": null, \"invoice_period_end_date\": null, \"add_charge_occur12\": null, \"fuel_plan\": null, \"return_svc_level\": null, \"pickup_actual_date\": \"2021-06-28\", \"send_new_order_alert\": false, \"pickup_room\": null, \"rate_buck_amt8\": null, \"add_charge_amt10\": null, \"insurance_amount\": null, \"add_charge_amt3\": null, \"add_charge_amt6\": null, \"pickup_special_instructions3\": null, \"pickup_requested_date\": \"2021-06-28\", \"roundtrip_sign_req\": false, \"actual_miles\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"deliver_actual_latitude\": null, \"deliver_phone_ext\": null, \"deliver_route_code\": null, \"add_charge_code10\": null, \"delivery_airport_code\": null, \"reference_text\": \"2125095801\", \"reference\": \"2125095801\", \"photos_exist\": false, \"master_airway_bill_number\": null, \"control_number\": 1872444, \"cod_text\": \"No\", \"cod\": \"N\", \"rate_buck_amt11\": null, \"cod_amount\": null, \"pickup_omw_timestamp\": null, \"signature_images\": [], \"deliver_special_instructions1\": null, \"quote_amount\": null, \"total_pages\": 1, \"rate_buck_amt4\": null, \"line_items\": [], \"delivery_latitude\": 36.78396970, \"progress\": [{\"status_time\": \"06:02:00\", \"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\"}, {\"status_time\": \"08:30:00\", \"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\"}, {\"status_time\": \"08:15:00\", \"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\"}], \"add_charge_code1\": null, \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"deliver_special_instr_long\": null, \"deliver_address\": \"2920 AARON DR\", \"add_charge_occur4\": null, \"deliver_eta_date\": null, \"pickup_actual_dep_time\": \"08:30\", \"deliver_requested_dep_time\": \"17:00\", \"add_charge_code7\": null, \"deliver_actual_dep_time\": \"08:15\", \"cod_accept_cashiers_check\": false, \"bringg_last_loc_sent\": null, \"az_equip3\": null, \"driver1_text\": \"LAVERT KENDALL MORRIS\", \"driver1\": 3001, \"pickup_actual_latitude\": null, \"add_charge_occur2\": null, \"order_automatically_quoted\": false, \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"hours\": \"15\", \"frequent_caller_id\": null, \"rate_buck_amt6\": null, \"rate_chart_used\": 0, \"deliver_actual_pieces\": null, \"add_charge_code5\": null, \"pickup_omw_longitude\": null, \"notes\": [], \"delivery_point_customer\": 31025, \"add_charge_occur7\": null, \"rate_buck_amt5\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"add_charge_code11\": null, \"pickup_name\": \"BIG LOTS\", \"callback_date\": null, \"add_charge_code2\": null, \"house_airway_bill_number\": null, \"deliver_name\": \"ANNE BAILEY\", \"number_of_pieces\": 3, \"deliver_eta_time\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"rate_special_instructions\": null, \"add_charge_occur3\": null, \"pickup_eta_date\": null, \"deliver_special_instructions4\": null, \"custom_special_instr_long\": null, \"deliver_special_instructions2\": null, \"pickup_signature\": \"SOF\", \"az_equip1\": null, \"add_charge_amt12\": null, \"settlements\": [{\"vendor_invoice_number\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"voucher_date\": null, \"voucher_amount\": null, \"fuel_price_source\": null, \"settlement_bucket6_pct\": null, \"pre_book_percentage\": true, \"settlement_bucket4_pct\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"settlement_bucket5_pct\": null, \"voucher_number\": null, \"charge6\": null, \"settlement_bucket2_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"settlement_pct\": 100.00, \"vendor_employee_numer\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"charge4\": null, \"driver_number_text\": \"LAVERT KENDALL MORRIS\", \"driver_number\": 3001, \"fuel_plan\": null, \"agents_etrac_partner_id\": null, \"charge2\": null, \"charge3\": null, \"settlement_bucket1_pct\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"id\": \"002018724440D1\", \"record_type\": 0, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"pay_chart_used\": null, \"fuel_price_zone\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"charge1\": null, \"control_number\": 1872444, \"adjustment_type\": null, \"order_date\": \"2021-06-28\", \"time_last_updated\": \"05:02\", \"agent_etrac_transaction_number\": null, \"date_last_updated\": \"2021-07-08\", \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"settlement_bucket3_pct\": null}], \"calc_add_on_chgs\": false, \"original_schedule_number\": null, \"blocks\": null, \"del_actual_location_accuracy\": null, \"zone_set_used\": 1, \"pickup_country\": null, \"pickup_state\": \"VA\", \"add_charge_amt7\": null, \"email_addresses\": null, \"add_charge_occur1\": null, \"pickup_wait_time\": null, \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"distribution_branch_id\": null, \"rate_buck_amt9\": null, \"add_charge_amt1\": null, \"pickup_requested_dep_time\": \"09:00\", \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"deliver_state\": \"VA\", \"deliver_dispatch_zone\": null, \"image_sign_req\": false, \"add_charge_code6\": null, \"deliver_requested_date\": \"2021-06-28\", \"add_charge_amt5\": null, \"time_order_entered\": \"06:02\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"pickup_attention\": null, \"rate_buck_amt7\": null, \"add_charge_occur6\": null, \"fuel_price_source\": null, \"pickup_airport_code\": null, \"rate_buck_amt2\": null, \"rate_buck_amt3\": null, \"deliver_omw_timestamp\": null, \"exception_code\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"weight\": null, \"signature_required\": true, \"rate_buck_amt10\": 2.34, \"hist_inv_number\": 0, \"deliver_pricing_zone\": 1, \"pickup_actual_longitude\": null, \"push_services\": null, \"add_charge_amt11\": null, \"rt_actual_location_accuracy\": null, \"roundtrip_actual_date\": null, \"pickup_requested_arr_time\": \"07:00\", \"deliver_attention\": null, \"deliver_special_instructions3\": null, \"pickup_actual_pieces\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"roundtrip_signature\": null, \"po_number\": null, \"signature\": \"SOF\", \"pickup_special_instructions2\": null, \"original_ctrl_number\": null, \"previous_ctrl_number\": null}}";
                                             //  objresponse.Reason = "{\"002018724450\": {\"roundtrip_actual_date\": null, \"notes\": [], \"pickup_phone_ext\": null, \"holiday_groups\": null, \"deliver_eta_time\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"add_charge_occur4\": null, \"deliver_state\": \"VA\", \"quote_amount\": null, \"cod_text\": \"No\", \"cod\": \"N\", \"additional_drivers\": false, \"rescheduled_ctrl_number\": null, \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"pickup_actual_pieces\": null, \"record_type\": 0, \"pickup_special_instr_long\": null, \"pickup_special_instructions3\": null, \"exception_timestamp\": null, \"deliver_actual_arr_time\": \"08:00\", \"house_airway_bill_number\": null, \"deliver_pricing_zone\": 1, \"total_pages\": 1, \"add_charge_occur11\": null, \"deliver_omw_latitude\": null, \"callback_userid\": null, \"rate_buck_amt1\": 57.00, \"pickup_point_customer\": 31025, \"pickup_eta_time\": null, \"add_charge_occur8\": null, \"invoice_period_end_date\": null, \"pickup_special_instructions1\": null, \"rate_buck_amt2\": null, \"pickup_special_instructions4\": null, \"manual_notepad\": false, \"edi_acknowledgement_required\": false, \"pickup_name\": \"BIG LOTS\", \"ordered_by_phone_number\": null, \"add_charge_amt12\": null, \"delivery_point_customer\": 31025, \"deliver_actual_dep_time\": \"08:15\", \"email_addresses\": null, \"pickup_address\": \"540 EASTPARK CT\", \"driver2\": null, \"signature_images\": [], \"rate_buck_amt11\": null, \"delivery_latitude\": 37.48366600, \"pickup_attention\": null, \"date_order_entered\": \"2021-07-08\", \"vehicle_type\": null, \"add_charge_amt9\": null, \"pickup_phone\": null, \"rate_miles\": null, \"customers_etrac_partner_id\": \"96609250\", \"order_type_text\": \"One way\", \"order_type\": \"O\", \"dl_arrive_notification_sent\": false, \"add_charge_code3\": null, \"etrac_number\": null, \"pickup_requested_arr_time\": \"07:00\", \"rate_buck_amt3\": null, \"pickup_actual_dep_time\": \"08:30\", \"line_items\": [], \"pickup_sign_req\": true, \"add_charge_code10\": null, \"deliver_city\": \"LANEXA\", \"fuel_plan\": null, \"add_charge_amt10\": null, \"roundtrip_actual_depart_time\": null, \"control_number\": 1872445, \"pickup_dispatch_zone\": null, \"send_new_order_alert\": false, \"settlements\": [{\"settlement_bucket4_pct\": null, \"charge1\": null, \"date_last_updated\": \"2021-07-08\", \"fuel_price_zone\": null, \"driver_sequence_text\": \"1\", \"driver_sequence\": \"1\", \"posting_status_text\": \"Not processed\", \"posting_status\": \"0\", \"charge4\": null, \"settlement_period_end_date\": null, \"charge5\": null, \"time_last_updated\": \"05:06\", \"charge6\": null, \"driver_number_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver_number\": 3208, \"control_number\": 1872445, \"settlement_bucket2_pct\": null, \"driver_company_number_text\": \"JW LOGISTICS EAST REGION\", \"driver_company_number\": 2, \"voucher_date\": null, \"agent_etrac_transaction_number\": null, \"settlement_bucket5_pct\": null, \"record_type\": 0, \"voucher_number\": null, \"voucher_amount\": null, \"pay_chart_used\": null, \"settlement_pct\": 100.00, \"vendor_invoice_number\": null, \"settlement_bucket3_pct\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"pre_book_percentage\": true, \"charge3\": null, \"settlement_bucket6_pct\": null, \"transaction_type_text\": \"Driver\", \"transaction_type\": \"D\", \"adjustment_type\": null, \"id\": \"002018724450D1\", \"agents_etrac_partner_id\": null, \"fuel_plan\": null, \"fuel_price_source\": null, \"agent_accepted_or_rejected_text\": \"\", \"agent_accepted_or_rejected\": null, \"file_status_text\": \"Order\", \"file_status\": \"O\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"vendor_employee_numer\": null, \"settlement_bucket1_pct\": null, \"order_date\": \"2021-06-28\", \"charge2\": null}], \"deliver_actual_latitude\": null, \"fuel_price_zone\": null, \"verified_weight\": null, \"deliver_requested_dep_time\": \"17:00\", \"pickup_airport_code\": null, \"dispatch_time\": null, \"deliver_attention\": null, \"time_order_entered\": \"06:06\", \"rate_buck_amt4\": null, \"roundtrip_wait_time\": null, \"add_charge_amt2\": null, \"az_equip3\": null, \"progress\": [{\"status_date\": \"2021-07-08\", \"status_text\": \"Entered in carrier's system\", \"status_time\": \"06:06:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Picked up\", \"status_time\": \"08:30:00\"}, {\"status_date\": \"2021-06-28\", \"status_text\": \"Delivered\", \"status_time\": \"08:15:00\"}], \"page_number\": 1, \"roundtrip_sign_req\": false, \"add_charge_amt1\": null, \"add_charge_code8\": null, \"weight\": null, \"rate_buck_amt6\": null, \"customer_type_text\": \"Philadelphia\", \"customer_type\": \"P\", \"bringg_send_sms\": false, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"custom_special_instr_long\": null, \"deliver_requested_arr_time\": \"08:00\", \"service_level_text\": \"Room of Choice\", \"service_level\": 55, \"az_equip1\": null, \"add_charge_code4\": null, \"bringg_order_id\": null, \"delivery_address_point_number_text\": \"JOSEPH FESSMAN\", \"delivery_address_point_number\": 26313, \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"deliver_special_instructions1\": null, \"pickup_wait_time\": null, \"add_charge_occur5\": null, \"push_partner_order_id\": null, \"deliver_route_sequence\": null, \"pickup_country\": null, \"pickup_state\": \"VA\", \"original_schedule_number\": null, \"frequent_caller_id\": null, \"distribution_unique_id\": 0, \"fuel_miles\": null, \"status_code_text\": \"Rated\", \"status_code\": \"R\", \"rate_buck_amt5\": null, \"exception_sign_required\": false, \"pickup_route_code\": null, \"deliver_dispatch_zone\": null, \"delivery_longitude\": -76.90426400, \"pickup_pricing_zone\": 1, \"zone_set_used\": 1, \"deliver_special_instructions2\": null, \"add_charge_amt3\": null, \"deliver_phone\": null, \"pickup_email_notification_sent\": false, \"add_charge_occur12\": null, \"reference_text\": \"2125617401\", \"reference\": \"2125617401\", \"deliver_requested_date\": \"2021-06-28\", \"deliver_actual_longitude\": null, \"image_sign_req\": false, \"pickup_eta_date\": null, \"deliver_phone_ext\": null, \"pickup_omw_longitude\": null, \"original_ctrl_number\": null, \"pickup_special_instructions2\": null, \"order_automatically_quoted\": false, \"bol_number\": null, \"rate_buck_amt10\": 2.34, \"callback_time\": null, \"hazmat\": false, \"distribution_shift_id\": null, \"pickup_latitude\": 37.53250820, \"ordered_by\": \"RYDER\", \"insurance_amount\": null, \"cod_accept_cashiers_check\": false, \"add_charge_amt4\": null, \"add_charge_code7\": null, \"deliver_actual_pieces\": null, \"deliver_address\": \"15400 STAGE RD\", \"cod_accept_company_check\": false, \"signature\": \"SOF\", \"previous_ctrl_number\": null, \"deliver_zip\": \"23089\", \"deliver_special_instructions3\": null, \"rate_buck_amt7\": null, \"hist_inv_number\": 0, \"callback_date\": null, \"deliver_special_instr_long\": null, \"po_number\": null, \"pickup_actual_arr_time\": \"08:00\", \"pickup_requested_date\": \"2021-06-28\", \"number_of_pieces\": 2, \"dispatch_id\": null, \"photos_exist\": false, \"pickup_actual_latitude\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"id\": \"002018724450\", \"company_number_text\": \"JW LOGISTICS EAST REGION\", \"company_number\": 2, \"del_actual_location_accuracy\": null, \"add_charge_occur7\": null, \"add_charge_occur9\": null, \"roundtrip_actual_latitude\": null, \"add_charge_occur6\": null, \"pickup_actual_longitude\": null, \"pickup_omw_timestamp\": null, \"bringg_last_loc_sent\": null, \"add_charge_code5\": null, \"deliver_country\": null, \"master_airway_bill_number\": null, \"pickup_route_seq\": null, \"roundtrip_signature\": null, \"calc_add_on_chgs\": false, \"deliver_actual_date\": \"2021-06-28\", \"cod_amount\": null, \"add_charge_code12\": null, \"rt_actual_location_accuracy\": null, \"rate_chart_used\": 0, \"pickup_longitude\": -77.33035820, \"pickup_signature\": \"SOF\", \"add_charge_amt5\": null, \"pu_arrive_notification_sent\": false, \"pickup_actual_date\": \"2021-06-28\", \"order_timeliness_text\": \"On time\", \"order_timeliness\": \"2\", \"push_services\": null, \"deliver_eta_date\": null, \"driver1_text\": \"RIC GUY WITH A TRUCK 3208\", \"driver1\": 3208, \"deliver_omw_longitude\": null, \"deliver_wait_time\": null, \"pickup_room\": null, \"deliver_special_instructions4\": null, \"add_charge_amt7\": null, \"az_equip2\": null, \"hours\": \"15\", \"add_charge_code2\": null, \"exception_code\": null, \"roundtrip_actual_pieces\": null, \"rate_special_instructions\": null, \"roundtrip_actual_arrival_time\": null, \"add_charge_occur1\": null, \"origin_code_text\": \"Web-Carrier API\", \"origin_code\": \"W\", \"delivery_airport_code\": null, \"distribution_branch_id\": null, \"hist_inv_date\": null, \"add_charge_code1\": null, \"pickup_requested_dep_time\": \"09:00\", \"deliver_route_code\": null, \"roundtrip_actual_longitude\": null, \"pickup_city\": \"SANDSTON\", \"rate_buck_amt8\": null, \"pickup_omw_latitude\": null, \"deliver_omw_timestamp\": null, \"rate_buck_amt9\": null, \"deliver_room\": null, \"add_charge_code6\": null, \"add_charge_occur3\": null, \"blocks\": null, \"add_charge_code9\": null, \"actual_miles\": null, \"add_charge_occur10\": null, \"add_charge_code11\": null, \"pickup_address_point_number_text\": \"BIG LOTS\", \"pickup_address_point_number\": 19864, \"customer_name\": \"MXD/RYDER\", \"pu_actual_location_accuracy\": null, \"deliver_name\": \"JOSEPH FESSMAN\", \"add_charge_amt6\": null, \"signature_required\": true, \"csr\": \"DX*\", \"add_charge_amt8\": null, \"callback_to\": null, \"fuel_price_source\": null, \"customer_number_text\": \"MXD/Ryder\", \"customer_number\": 31025, \"pickup_zip\": \"23150\", \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"return_svc_level\": null, \"add_charge_amt11\": null, \"add_charge_occur2\": null}}";
-                                            //  objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
+                                            // objresponse.Reason = "{\"error\": \"Unable to perform API call object with RecordID:WS_OPORDR-9990111870 - The record may have been deleted.\", \"status\": \"error\", \"code\": \"U.RecordNotFound\"}";
                                             // objresponse.Reason = "{\"999000115280\": {\"deliver_eta_time\": null, \"deliver_special_instructions4\": null, \"del_actual_location_accuracy\": null, \"add_charge_amt8\": null, \"callback_to\": null, \"rate_chart_used\": 1, \"pickup_actual_latitude\": null, \"signature_images\": [], \"edi_order_accepted_or_rejected_text\": \"\", \"edi_order_accepted_or_rejected\": null, \"add_charge_occur8\": null, \"fuel_update_freq_text\": \"Weekly\", \"fuel_update_freq\": \"0\", \"hours\": null, \"distribution_shift_id\": null, \"pickup_longitude\": null, \"hist_inv_number\": 0, \"add_charge_amt7\": null, \"dispatch_id\": null, \"dl_arrive_notification_sent\": false, \"add_charge_code8\": null, \"roundtrip_sign_req\": false, \"exception_timestamp\": null, \"pickup_city\": null, \"delivery_airport_code\": null, \"progress\": [{\"status_time\": \"08:34:00\", \"status_date\": \"2022-03-10\", \"status_text\": \"Entered in carrier's system\"}], \"callback_required_text\": \"No\", \"callback_required\": \"N\", \"add_charge_amt2\": null, \"pickup_special_instructions1\": null, \"time_order_entered\": \"08:34\", \"distribution_unique_id\": 0, \"pickup_eta_date\": null, \"rate_buck_amt2\": null, \"rate_buck_amt9\": null, \"deliver_zip\": \"48150\", \"rate_buck_amt7\": null, \"customer_name\": \"TEST\", \"deliver_phone_ext\": null, \"roundtrip_actual_depart_time\": null, \"add_charge_code10\": null, \"add_charge_occur2\": null, \"deliver_state\": \"MI\", \"pickup_wait_time\": null, \"pickup_requested_arr_time\": null, \"csr\": \"RG\", \"add_charge_amt4\": null, \"holiday_groups\": null, \"total_pages\": 1, \"delivery_longitude\": -83.35663860, \"bringg_last_loc_sent\": null, \"deliver_name\": \"TANTARA\", \"deliver_actual_longitude\": null, \"distribution_branch_id\": null, \"deliver_wait_time\": null, \"add_charge_occur11\": null, \"deliver_omw_timestamp\": null, \"add_charge_amt3\": null, \"add_charge_amt10\": null, \"rate_buck_amt3\": null, \"rescheduled_ctrl_number\": null, \"add_charge_occur10\": null, \"deliver_address\": \"31782 ENTERPRISE DR\", \"pickup_latitude\": null, \"rate_buck_amt1\": null, \"pickup_phone\": null, \"pickup_actual_date\": \"2022-01-03\", \"previous_ctrl_number\": null, \"control_number\": 11528, \"rate_buck_amt11\": null, \"fuel_price_source\": null, \"add_charge_code9\": null, \"add_charge_occur3\": null, \"fuel_price_zone\": null, \"order_type_text\": \"One way\", \"order_type\": \"O\", \"rate_buck_amt10\": null, \"add_charge_code12\": null, \"quote_amount\": null, \"deliver_phone\": null, \"ordered_by_phone_number\": null, \"cod_accept_company_check\": false, \"callback_time\": null, \"deliver_dispatch_zone\": null, \"hazmat\": false, \"az_equip2\": null, \"add_charge_occur1\": null, \"pickup_email_notification_sent\": false, \"deliver_requested_dep_time\": null, \"deliver_special_instructions1\": null, \"deliver_actual_date\": null, \"rt_actual_location_accuracy\": null, \"signature_required\": false, \"pickup_attention\": null, \"pu_actual_location_accuracy\": null, \"rate_special_instructions\": null, \"pickup_special_instructions2\": null, \"driver2\": null, \"deliver_route_sequence\": null, \"add_charge_code2\": null, \"pickup_state\": null, \"add_charge_code1\": null, \"deliver_actual_pieces\": null, \"pickup_country\": null, \"signature\": null, \"add_charge_occur12\": null, \"reference_text\": \"FEDX01032022\", \"reference\": \"FEDX01032022\", \"pickup_pricing_zone\": null, \"pickup_route_seq\": null, \"pickup_actual_arr_time\": null, \"date_order_entered\": \"2022-03-10\", \"rate_buck_amt5\": null, \"number_of_pieces\": null, \"add_charge_code11\": null, \"powerpage_status_text\": \"\", \"powerpage_status\": \"0\", \"pickup_omw_timestamp\": null, \"delivery_point_customer\": 1, \"roundtrip_actual_latitude\": null, \"rate_buck_amt4\": null, \"pickup_requested_date\": \"2022-01-03\", \"po_number\": null, \"origin_code_text\": \"Web-Carrier UI\", \"origin_code\": \"X\", \"add_charge_occur7\": null, \"exception_sign_required\": false, \"id\": \"999000115280\", \"pickup_route_code\": null, \"pickup_airport_code\": null, \"roundtrip_actual_date\": null, \"roundtrip_signature\": null, \"roundtrip_actual_pieces\": null, \"pickup_phone_ext\": null, \"deliver_city\": \"LIVONIA\", \"deliver_omw_latitude\": null, \"service_level_text\": \"REGULAR\", \"service_level\": 1, \"order_timeliness_text\": \"Open\", \"order_timeliness\": \"5\", \"roundtrip_actual_arrival_time\": null, \"deliver_actual_arr_time\": null, \"etrac_number\": null, \"add_charge_occur9\": null, \"az_equip1\": null, \"rate_miles\": null, \"frequent_caller_id\": null, \"pickup_sign_req\": false, \"customer_type\": null, \"pickup_omw_latitude\": null, \"actual_miles\": null, \"add_charge_code3\": null, \"deliver_eta_date\": null, \"fuel_miles\": null, \"pickup_special_instructions4\": null, \"house_airway_bill_number\": null, \"vehicle_type\": null, \"cod_accept_cashiers_check\": false, \"settlements\": [], \"pickup_address\": null, \"pickup_room\": null, \"weight\": null, \"pickup_actual_longitude\": null, \"rate_buck_amt8\": null, \"delivery_address_point_number_text\": \"TANTARA\", \"delivery_address_point_number\": 10, \"status_code_text\": \"Entered\", \"status_code\": \"E\", \"master_airway_bill_number\": null, \"delivery_latitude\": 42.36977420, \"bringg_order_id\": null, \"add_charge_code7\": null, \"roundtrip_wait_time\": null, \"exception_order_action_text\": \"Close order\", \"exception_order_action\": \"0\", \"pick_del_trans_flag_text\": \"Transfer\", \"pick_del_trans_flag\": \"T\", \"cod_text\": \"No\", \"cod\": \"N\", \"deliver_room\": null, \"rate_buck_amt6\": null, \"pu_arrive_notification_sent\": false, \"deliver_actual_latitude\": null, \"blocks\": null, \"callback_userid\": null, \"edi_acknowledgement_required\": false, \"add_charge_code4\": null, \"driver1\": null, \"calc_add_on_chgs\": false, \"fuel_plan\": null, \"add_charge_amt9\": null, \"pickup_point_customer\": 0, \"zone_set_used\": 1, \"exception_code\": null, \"invoice_period_end_date\": null, \"push_partner_order_id\": null, \"verified_weight\": null, \"pickup_actual_pieces\": null, \"notes\": [], \"add_charge_amt12\": null, \"deliver_special_instructions3\": null, \"deliver_special_instructions2\": null, \"customer_number_text\": \"test\", \"customer_number\": 1, \"return_svc_level\": null, \"add_charge_amt1\": null, \"az_equip3\": null, \"image_sign_req\": false, \"pickup_omw_longitude\": null, \"deliver_requested_arr_time\": null, \"pickup_name\": null, \"pickup_address_point_number\": null, \"pickup_signature\": null, \"pickup_special_instructions3\": null, \"original_ctrl_number\": null, \"add_charge_code6\": null, \"deliver_omw_longitude\": null, \"additional_drivers\": false, \"deliver_country\": null, \"add_charge_amt5\": null, \"insurance_amount\": null, \"cod_amount\": null, \"email_addresses\": null, \"pickup_actual_dep_time\": null, \"page_number\": 1, \"dispatch_time\": null, \"callback_date\": null, \"add_charge_occur5\": null, \"add_charge_occur6\": null, \"company_number_text\": \"TEST COMPANY\", \"company_number\": 999, \"pickup_dispatch_zone\": null, \"deliver_attention\": null, \"record_type\": 0, \"deliver_pricing_zone\": 1, \"deliver_requested_date\": \"2022-01-03\", \"push_services\": null, \"add_charge_amt6\": null, \"order_automatically_quoted\": false, \"custom_special_instr_long\": null, \"bol_number\": \"FEDX01032022\", \"hist_inv_date\": null, \"roundtrip_actual_longitude\": null, \"add_charge_amt11\": null, \"bringg_send_sms\": false, \"pickup_special_instr_long\": null, \"ordered_by\": \"DET\", \"deliver_special_instr_long\": null, \"pickup_zip\": null, \"pickup_requested_dep_time\": null, \"deliver_route_code\": null, \"deliver_actual_dep_time\": null, \"customers_etrac_partner_id\": null, \"add_charge_code5\": null, \"photos_exist\": false, \"original_schedule_number\": null, \"add_charge_occur4\": null, \"send_new_order_alert\": false, \"manual_notepad\": false, \"line_items\": [], \"pickup_eta_time\": null, \"_utc_offset\": \"-06:00\"}}";
                                             // objresponse.Reason = "{\"error\": \"Backoffice is currently too busy, please try again later.\", \"status\": \"error\", \"code\": \"E.Busy\"}";
                                             if (objresponse.ResponseVal)
@@ -4179,7 +4258,10 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 string strPickupzip = Convert.ToString(dr["Pickup zip/postal code"]);
                                                 if (strPickupzip.Length > 5)
                                                 {
-                                                    strPickupzip = strPickupzip.Substring(0, 5) + "-" + strPickupzip.Substring(5, strPickupzip.Length - 5); ;
+                                                    if (!strPickupzip.Contains("-"))
+                                                    {
+                                                        strPickupzip = strPickupzip.Substring(0, 5) + "-" + strPickupzip.Substring(5, strPickupzip.Length - 5);
+                                                    }
                                                 }
                                                 orderputrequest = orderputrequest + @"'pickup_zip': '" + strPickupzip + "',";
                                             }
@@ -4288,7 +4370,10 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 string strzip = Convert.ToString(dr["Zip"]);
                                                 if (strzip.Length > 5)
                                                 {
-                                                    strzip = strzip.Substring(0, 5) + "-" + strzip.Substring(5, strzip.Length - 5); ;
+                                                    if (!strzip.Contains("-"))
+                                                    {
+                                                        strzip = strzip.Substring(0, 5) + "-" + strzip.Substring(5, strzip.Length - 5);
+                                                    }
                                                 }
                                                 orderputrequest = orderputrequest + @"'deliver_zip': '" + strzip + "',";
                                             }
