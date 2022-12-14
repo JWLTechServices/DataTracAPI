@@ -1633,45 +1633,45 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             ordersettlementputrequest = ordersettlementputrequest + @"'charge5': " + charge5 + ",";
 
                                                                         }
-                                                                        else
-                                                                        {
-                                                                            strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                            strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                            strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                            // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                            ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                            objErrorResponse.error = "Carrier ACC value not found for this record";
-                                                                            objErrorResponse.status = "Error";
-                                                                            objErrorResponse.code = "Carrier ACC value Missing";
-                                                                            objErrorResponse.reference = ReferenceId;
-                                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                                        strInputFilePath, processingFileName, strDatetime);
-                                                                            continue;
-                                                                        }
+                                                                        //else
+                                                                        //{
+                                                                        //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                                        //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                                        //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                                        //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                                        //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                                        //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                                        //    objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                                        //    objErrorResponse.status = "Error";
+                                                                        //    objErrorResponse.code = "Carrier ACC value Missing";
+                                                                        //    objErrorResponse.reference = ReferenceId;
+                                                                        //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                                        //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                                        //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                                        //strInputFilePath, processingFileName, strDatetime);
+                                                                        //    continue;
+                                                                        //}
                                                                     }
-                                                                    else
-                                                                    {
-                                                                        strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                        strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                        strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                                        objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                        // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                        ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                        objErrorResponse.error = "Carrier ACC column not found for this record";
-                                                                        objErrorResponse.status = "Error";
-                                                                        objErrorResponse.code = "Carrier ACC column Missing";
-                                                                        objErrorResponse.reference = ReferenceId;
-                                                                        string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                        DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                        dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                        objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                                    strInputFilePath, processingFileName, strDatetime);
-                                                                        continue;
-                                                                    }
+                                                                    //else
+                                                                    //{
+                                                                    //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                                    //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                                    //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                                    //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                                    //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                                    //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                                    //    objErrorResponse.error = "Carrier ACC column not found for this record";
+                                                                    //    objErrorResponse.status = "Error";
+                                                                    //    objErrorResponse.code = "Carrier ACC column Missing";
+                                                                    //    objErrorResponse.reference = ReferenceId;
+                                                                    //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                                    //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                                    //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                                    //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                                    //strInputFilePath, processingFileName, strDatetime);
+                                                                    //    continue;
+                                                                    //}
 
                                                                     if (drow.Table.Columns.Contains("Carrier FSC"))
                                                                     {
@@ -2162,45 +2162,45 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge5': " + charge5 + ",";
 
                                                                                             }
-                                                                                            else
-                                                                                            {
-                                                                                                strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                                                strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                                                strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                                                // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                                                ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                                                objErrorResponse.error = "Carrier ACC value not found for this record";
-                                                                                                objErrorResponse.status = "Error";
-                                                                                                objErrorResponse.code = "Carrier ACC value Missing";
-                                                                                                objErrorResponse.reference = ReferenceId;
-                                                                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                                                dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                                                            strInputFilePath, processingFileName, strDatetime);
-                                                                                                continue;
-                                                                                            }
+                                                                                            //else
+                                                                                            //{
+                                                                                            //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                                                            //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                                                            //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                                                            //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                                                            //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                                                            //    objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                                                            //    objErrorResponse.status = "Error";
+                                                                                            //    objErrorResponse.code = "Carrier ACC value Missing";
+                                                                                            //    objErrorResponse.reference = ReferenceId;
+                                                                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                                                            //    dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                                                            //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                                                            //strInputFilePath, processingFileName, strDatetime);
+                                                                                            //    continue;
+                                                                                            //}
                                                                                         }
-                                                                                        else
-                                                                                        {
-                                                                                            strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                                            strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                                            strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                                            // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                                            ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                                            objErrorResponse.error = "Carrier ACC column not found for this record";
-                                                                                            objErrorResponse.status = "Error";
-                                                                                            objErrorResponse.code = "Carrier ACC column Missing";
-                                                                                            objErrorResponse.reference = ReferenceId;
-                                                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                                            dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                                                        strInputFilePath, processingFileName, strDatetime);
-                                                                                            continue;
-                                                                                        }
+                                                                                        //else
+                                                                                        //{
+                                                                                        //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                                                        //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                                                        //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                                                        //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                                                        //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                                                        //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                                                        //    objErrorResponse.error = "Carrier ACC column not found for this record";
+                                                                                        //    objErrorResponse.status = "Error";
+                                                                                        //    objErrorResponse.code = "Carrier ACC column Missing";
+                                                                                        //    objErrorResponse.reference = ReferenceId;
+                                                                                        //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                                                        //    dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                                                        //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                                                        //strInputFilePath, processingFileName, strDatetime);
+                                                                                        //    continue;
+                                                                                        //}
 
                                                                                         if (drow.Table.Columns.Contains("Carrier FSC"))
                                                                                         {
@@ -3463,45 +3463,45 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             {
                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge5': " + dr["Carrier ACC"] + ",";
                                                             }
-                                                            else
-                                                            {
-                                                                strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                objErrorResponse.error = "Carrier ACC value not found for this record";
-                                                                objErrorResponse.status = "Error";
-                                                                objErrorResponse.code = "Carrier ACC value Missing";
-                                                                objErrorResponse.reference = ReferenceId;
-                                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                            strInputFilePath, processingFileName, strDatetime);
-                                                                continue;
-                                                            }
+                                                            //else
+                                                            //{
+                                                            //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                            //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                            //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                            //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                            //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            //    objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                            //    objErrorResponse.status = "Error";
+                                                            //    objErrorResponse.code = "Carrier ACC value Missing";
+                                                            //    objErrorResponse.reference = ReferenceId;
+                                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                            //strInputFilePath, processingFileName, strDatetime);
+                                                            //    continue;
+                                                            //}
                                                         }
-                                                        else
-                                                        {
-                                                            strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                            ErrorResponse objErrorResponse = new ErrorResponse();
-                                                            objErrorResponse.error = "Carrier ACC column not found for this record";
-                                                            objErrorResponse.status = "Error";
-                                                            objErrorResponse.code = "Carrier ACC column Missing";
-                                                            objErrorResponse.reference = ReferenceId;
-                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                        strInputFilePath, processingFileName, strDatetime);
-                                                            continue;
-                                                        }
+                                                        //else
+                                                        //{
+                                                        //    strExecutionLogMessage = "OrderPost-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                        //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                        //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
+                                                        //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                        //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                        //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        //    objErrorResponse.error = "Carrier ACC column not found for this record";
+                                                        //    objErrorResponse.status = "Error";
+                                                        //    objErrorResponse.code = "Carrier ACC column Missing";
+                                                        //    objErrorResponse.reference = ReferenceId;
+                                                        //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        //strInputFilePath, processingFileName, strDatetime);
+                                                        //    continue;
+                                                        //}
 
                                                         if (dr.Table.Columns.Contains("Carrier FSC"))
                                                         {
@@ -5414,50 +5414,50 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             {
                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge5': " + dr["Carrier ACC"] + ",";
                                                             }
-                                                            else
-                                                            {
-                                                                strExecutionLogMessage = "OrderPut-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
-                                                                // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                                ErrorResponse objErrorResponse = new ErrorResponse();
-                                                                objErrorResponse.error = "Carrier ACC value not found for this record";
-                                                                objErrorResponse.status = "Error";
-                                                                objErrorResponse.code = "Carrier ACC column Missing";
-                                                                objErrorResponse.reference = UniqueId;
-                                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                            strInputFilePath, processingFileName, strDatetime);
-                                                                rowindex++;
-                                                                continue;
+                                                            //else
+                                                            //{
+                                                            //    strExecutionLogMessage = "OrderPut-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                            //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                            //    strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                                            //    strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
+                                                            //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                            //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                            //    objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                            //    objErrorResponse.status = "Error";
+                                                            //    objErrorResponse.code = "Carrier ACC column Missing";
+                                                            //    objErrorResponse.reference = UniqueId;
+                                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                            //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                            //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                            //strInputFilePath, processingFileName, strDatetime);
+                                                            //    rowindex++;
+                                                            //    continue;
 
-                                                            }
+                                                            //}
                                                         }
-                                                        else
-                                                        {
-                                                            strExecutionLogMessage = "OrderPut-OrderSettlementPut Error " + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
-                                                            // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            ErrorResponse objErrorResponse = new ErrorResponse();
-                                                            objErrorResponse.error = "Carrier ACC value not found for this record";
-                                                            objErrorResponse.status = "Error";
-                                                            objErrorResponse.code = "Carrier ACC Value  Missing";
-                                                            objErrorResponse.reference = UniqueId;
-                                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                        strInputFilePath, processingFileName, strDatetime);
-                                                            rowindex++;
-                                                            continue;
-                                                        }
+                                                        //else
+                                                        //{
+                                                        //    strExecutionLogMessage = "OrderPut-OrderSettlementPut Error " + System.Environment.NewLine;
+                                                        //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                                        //    strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                                        //    strExecutionLogMessage += "And For Unique Id -" + UniqueId + System.Environment.NewLine;
+                                                        //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                                        //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                                        //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                                        //    objErrorResponse.error = "Carrier ACC value not found for this record";
+                                                        //    objErrorResponse.status = "Error";
+                                                        //    objErrorResponse.code = "Carrier ACC Value  Missing";
+                                                        //    objErrorResponse.reference = UniqueId;
+                                                        //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                                        //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                                        //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                                        //strInputFilePath, processingFileName, strDatetime);
+                                                        //    rowindex++;
+                                                        //    continue;
+                                                        //}
 
                                                         if (dr.Table.Columns.Contains("Carrier FSC"))
                                                         {
@@ -6086,51 +6086,51 @@ namespace DatatracAPIOrder_OrderSettlement
                                             {
                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge5': " + dr["Carrier ACC"] + ",";
                                             }
-                                            else
-                                            {
-                                                strExecutionLogMessage = "OrderSettlementPut Error " + System.Environment.NewLine;
-                                                strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                                strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
-                                                strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
-                                                //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                            //else
+                                            //{
+                                            //    strExecutionLogMessage = "OrderSettlementPut Error " + System.Environment.NewLine;
+                                            //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                            //    strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                            //    strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
+                                            //    //  objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                            //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
-                                                ErrorResponse objErrorResponse = new ErrorResponse();
-                                                objErrorResponse.error = "Carrier ACC value not found for this  record";
-                                                objErrorResponse.status = "Error";
-                                                objErrorResponse.code = "Carrier ACC Value Missing";
-                                                objErrorResponse.reference = UniqueId;
-                                                string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                                objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                            strInputFilePath, processingFileName, strDatetime);
-                                                rowindex++;
-                                                continue;
-                                            }
+                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                            //    objErrorResponse.error = "Carrier ACC value not found for this  record";
+                                            //    objErrorResponse.status = "Error";
+                                            //    objErrorResponse.code = "Carrier ACC Value Missing";
+                                            //    objErrorResponse.reference = UniqueId;
+                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                            //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                            //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                            //strInputFilePath, processingFileName, strDatetime);
+                                            //    rowindex++;
+                                            //    continue;
+                                            //}
                                         }
-                                        else
-                                        {
-                                            strExecutionLogMessage = "OrderSettlementPut Error " + System.Environment.NewLine;
-                                            strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
-                                            strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
-                                            strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
-                                            // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
-                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+                                        //else
+                                        //{
+                                        //    strExecutionLogMessage = "OrderSettlementPut Error " + System.Environment.NewLine;
+                                        //    strExecutionLogMessage += "Carrier ACC Not found in the sheet -" + strFileName + System.Environment.NewLine;
+                                        //    strExecutionLogMessage += "For row number -" + rowindex + System.Environment.NewLine;
+                                        //    strExecutionLogMessage += "For Unique Reference -" + UniqueId + System.Environment.NewLine;
+                                        //    // objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
+                                        //    objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
-                                            ErrorResponse objErrorResponse = new ErrorResponse();
-                                            objErrorResponse.error = "Carrier ACC column not found for this file record";
-                                            objErrorResponse.status = "Error";
-                                            objErrorResponse.code = "Carrier ACC column Missing";
-                                            objErrorResponse.reference = UniqueId;
-                                            string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                            DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                            dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
-                                            objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                        strInputFilePath, processingFileName, strDatetime);
-                                            rowindex++;
-                                            continue;
-                                        }
+                                        //    ErrorResponse objErrorResponse = new ErrorResponse();
+                                        //    objErrorResponse.error = "Carrier ACC column not found for this file record";
+                                        //    objErrorResponse.status = "Error";
+                                        //    objErrorResponse.code = "Carrier ACC column Missing";
+                                        //    objErrorResponse.reference = UniqueId;
+                                        //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
+                                        //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
+                                        //    dsFailureResponse.Tables[0].TableName = "OrderSettlementFailure";
+                                        //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
+                                        //strInputFilePath, processingFileName, strDatetime);
+                                        //    rowindex++;
+                                        //    continue;
+                                        //}
 
                                         if (dr.Table.Columns.Contains("Carrier FSC"))
                                         {
@@ -7574,7 +7574,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                             //  objitems.container_id = Convert.ToString(drItems["Container Id"]);
                                             // objitems.reference = Convert.ToString(drItems["Customer_Reference"]);
-                                            objitems.item_number = Regex.Replace(Convert.ToString(drItems["Customer_Reference"]), @"\\t", "");
+                                            objitems.reference = Regex.Replace(Convert.ToString(drItems["Customer_Reference"]), @"\\t", "");
 
                                             if (drItems.Table.Columns.Contains("Return"))
                                             {
@@ -7622,7 +7622,13 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     dtValue = Convert.ToDateTime(drresult[0]["RequestedDeliveryDate"]);
                                                 }
                                             }
-
+                                            else if (drItems.Table.Columns.Contains("DeliveryDate"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["DeliveryDate"])))
+                                                {
+                                                    dtValue = Convert.ToDateTime(drresult[0]["DeliveryDate"]);
+                                                }
+                                            }
                                             objitemsList.Add(objitems);
                                         }
 
