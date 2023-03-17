@@ -557,6 +557,19 @@ namespace DatatracAPIOrder_OrderSettlement
         public string deliver_attention { get; set; }
         public string pickup_special_instr_long { get; set; }
 
+        public double add_charge_amt1 { get; set; }
+        public double add_charge_amt2 { get; set; }
+        public double add_charge_amt3 { get; set; }
+        public double add_charge_amt4 { get; set; }
+        public double add_charge_amt5 { get; set; }
+        public double add_charge_amt6 { get; set; }
+        public string add_charge_code1 { get; set; }
+        public string add_charge_code2 { get; set; }
+        public string add_charge_code3 { get; set; }
+        public string add_charge_code4 { get; set; }
+        public string add_charge_code5 { get; set; }
+        public string add_charge_code6 { get; set; }
+        public string status_code { get; set; }
 
     }
     public class notes

@@ -912,13 +912,110 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup special instr long"])))
                                                                 {
-                                                                    string strpickup_special_instr_long = Convert.ToString(drow["Pickup actual depart time"]);
-                                                                    objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                                    string strpickup_special_instr_long = Convert.ToString(drow["Pickup special instr long"]);
+                                                                    objOrder.pickup_special_instr_long =  "#INPUTAPIFILE:" + strFileName + " " + strpickup_special_instr_long.Trim();
+                                                                }
+                                                                else
+                                                                {
+                                                                    objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
                                                                 }
                                                             }
                                                             else
                                                             {
                                                                 objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
+                                                            }
+
+                                                            if (dr.Table.Columns.Contains("add_charge_amt1"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt1"])))
+                                                                {
+                                                                    objOrder.add_charge_amt1 = Convert.ToDouble(dr["add_charge_amt1"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_amt2"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt2"])))
+                                                                {
+                                                                    objOrder.add_charge_amt2 = Convert.ToDouble(dr["add_charge_amt2"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_amt3"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt3"])))
+                                                                {
+                                                                    objOrder.add_charge_amt3 = Convert.ToDouble(dr["add_charge_amt3"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_amt4"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt4"])))
+                                                                {
+                                                                    objOrder.add_charge_amt4 = Convert.ToDouble(dr["add_charge_amt4"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_amt5"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt5"])))
+                                                                {
+                                                                    objOrder.add_charge_amt5 = Convert.ToDouble(dr["add_charge_amt5"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_amt6"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt6"])))
+                                                                {
+                                                                    objOrder.add_charge_amt6 = Convert.ToDouble(dr["add_charge_amt6"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code1"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code1"])))
+                                                                {
+                                                                    objOrder.add_charge_code1 = Convert.ToString(dr["add_charge_code1"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code2"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code2"])))
+                                                                {
+                                                                    objOrder.add_charge_code2 = Convert.ToString(dr["add_charge_code2"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code3"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code3"])))
+                                                                {
+                                                                    objOrder.add_charge_code3 = Convert.ToString(dr["add_charge_code3"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code4"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code4"])))
+                                                                {
+                                                                    objOrder.add_charge_code4 = Convert.ToString(dr["add_charge_code4"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code5"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code5"])))
+                                                                {
+                                                                    objOrder.add_charge_code5 = Convert.ToString(dr["add_charge_code5"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("add_charge_code6"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code6"])))
+                                                                {
+                                                                    objOrder.add_charge_code6 = Convert.ToString(dr["add_charge_code6"]);
+                                                                }
+                                                            }
+
+                                                            if (dr.Table.Columns.Contains("status_code"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["status_code"])))
+                                                                {
+                                                                    objOrder.status_code = Convert.ToString(dr["status_code"]);
+                                                                }
                                                             }
 
                                                         }
@@ -2766,13 +2863,112 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 {
                                                     if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup special instr long"])))
                                                     {
-                                                        string strpickup_special_instr_long = Convert.ToString(dr["Pickup actual depart time"]);
-                                                        objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                        string strpickup_special_instr_long = Convert.ToString(dr["Pickup special instr long"]);
+                                                        //objOrder.pickup_special_instr_long = strpickup_special_instr_long.Trim() + " " + "#INPUTAPIFILE:" + strFileName;
+                                                        objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName + " " + strpickup_special_instr_long.Trim();
+                                                    }
+                                                    else
+                                                    {
+                                                        objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
                                                     }
                                                 }
                                                 else
                                                 {
                                                     objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName;
+                                                }
+
+                                                if (dr.Table.Columns.Contains("add_charge_amt1"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt1"])))
+                                                    {
+                                                        objOrder.add_charge_amt1 = Convert.ToDouble(dr["add_charge_amt1"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_amt2"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt2"])))
+                                                    {
+                                                        objOrder.add_charge_amt2 = Convert.ToDouble(dr["add_charge_amt2"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_amt3"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt3"])))
+                                                    {
+                                                        objOrder.add_charge_amt3 = Convert.ToDouble(dr["add_charge_amt3"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_amt4"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt4"])))
+                                                    {
+                                                        objOrder.add_charge_amt4 = Convert.ToDouble(dr["add_charge_amt4"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_amt5"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt5"])))
+                                                    {
+                                                        objOrder.add_charge_amt5 = Convert.ToDouble(dr["add_charge_amt5"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_amt6"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_amt6"])))
+                                                    {
+                                                        objOrder.add_charge_amt6 = Convert.ToDouble(dr["add_charge_amt6"]);
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("add_charge_code1"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code1"])))
+                                                    {
+                                                        objOrder.add_charge_code1 = Convert.ToString(dr["add_charge_code1"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_code2"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code2"])))
+                                                    {
+                                                        objOrder.add_charge_code2 = Convert.ToString(dr["add_charge_code2"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_code3"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code3"])))
+                                                    {
+                                                        objOrder.add_charge_code3 = Convert.ToString(dr["add_charge_code3"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_code4"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code4"])))
+                                                    {
+                                                        objOrder.add_charge_code4 = Convert.ToString(dr["add_charge_code4"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_code5"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code5"])))
+                                                    {
+                                                        objOrder.add_charge_code5 = Convert.ToString(dr["add_charge_code5"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("add_charge_code6"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["add_charge_code6"])))
+                                                    {
+                                                        objOrder.add_charge_code6 = Convert.ToString(dr["add_charge_code6"]);
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("status_code"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["status_code"])))
+                                                    {
+                                                        objOrder.status_code = Convert.ToString(dr["status_code"]);
+                                                    }
                                                 }
                                             }
                                             catch (Exception ex)
