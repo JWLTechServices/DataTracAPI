@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="clsCommon.cs" />
     <Compile Include="clsDatatrac.cs" />
+    <Compile Include="clsDBContext.cs" />
     <Compile Include="clsExcelHelper.cs" />
     <Compile Include="clsRoute.cs" />
     <Compile Include="Program.cs" />

@@ -238,6 +238,16 @@ namespace DatatracAPIOrder_OrderSettlement
 
             }
         }
+        public static bool IsDigitsOnly(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
         public static string Right(this string str, int length)
         {
             return str.Substring(str.Length - length, length);
@@ -323,7 +333,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                             int noofrowspertable = Convert.ToInt16(objCommon.GetConfigValue("DivideToProcessParallelly"));
 
-                            if (CustomerName == "BBB")
+                            if (CustomerName == "BBB" || CustomerName == "BURL")
                             {
                                 noofrowspertable = 0;
                             }
@@ -355,7 +365,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                 DataTable datatable; //  = currentDatatable;
-                                if (CustomerName == "BBB")
+                                if (CustomerName == "BBB" || CustomerName == "BURL")
                                 {
                                     datatable = RemoveDuplicateRows(dsExcel.Tables[0], "Customer Reference");
                                 }
@@ -375,7 +385,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                         orderdetails objorderdetails = new orderdetails();
                                         order objOrder = new order();
                                         List<order_line_item> objorder_line_itemList = new List<order_line_item>();
-                                        if (CustomerName == "BBB")
+                                        if (CustomerName == "BBB" || CustomerName == "BURL")
                                         {
                                             // Order post and put only for BBB client
                                             DataTable dtBBB = currentDatatable.Select("[Customer Reference]= '" + dr["Customer Reference"] + "'").CopyToDataTable();
@@ -410,6 +420,9 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                     foreach (DataRow drow in datatable1.Rows)
                                                     {
+                                                        double carrierBasepay = 0;
+                                                        double billrate = 0;
+
                                                         try
                                                         {
                                                             ReferenceId = Convert.ToString(drow["Customer Reference"]);
@@ -438,6 +451,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 {
                                                                     objitems.dim_width = Convert.ToInt32(Convert.ToDouble(drItems["Dim Width"]));
                                                                 }
+
+                                                                if (drItems.Table.Columns.Contains("item_name"))
+                                                                {
+                                                                    objitems.item_name = Convert.ToString(drItems["item_name"]);
+                                                                }
+
+                                                                if (drItems.Table.Columns.Contains("item_price"))
+                                                                {
+                                                                    objitems.item_price = Convert.ToDouble(drItems["item_price"]);
+                                                                }
+
                                                                 objorder_line_itemList.Add(objitems);
                                                             }
                                                             objOrder.number_of_pieces = Convert.ToInt32(drItemresult.Length);
@@ -715,6 +739,16 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                     objOrder.rate_buck_amt11 = Convert.ToDouble(drow["rate_buck_amt11"]);
                                                                 }
                                                             }
+
+                                                            if (drow.Table.Columns.Contains("Weight"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Weight"])))
+                                                                {
+                                                                    objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
+                                                                }
+                                                            }
+
+                                                          
                                                             if (drow.Table.Columns.Contains("Pieces"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
@@ -724,13 +758,118 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 else
                                                                 {
                                                                     // to set billing rates in case of detailed data
-                                                                    if (drow.Table.Columns.Contains("Bill Rate"))
+                                                                 
+                                                                    if (CustomerName == "BURL")
                                                                     {
-                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
+                                                                        var totalWeight = drItemresult.Sum(r => Convert.ToDouble(r.Field<string>("Weight")));
+                                                                        objOrder.weight = Convert.ToInt32( Math.Round(Convert.ToDouble(totalWeight)));
+
+                                                                        string storenumber = objOrder.deliver_name;
+                                                                        int band = 0;
+                                                                        string storenumberfordbverifaction = objOrder.deliver_name;
+                                                                        if (IsDigitsOnly(storenumber))
                                                                         {
-                                                                            objOrder.rate_buck_amt1 = objOrder.number_of_pieces * Convert.ToDouble(drow["Bill Rate"]);
+                                                                            storenumberfordbverifaction = Convert.ToString(Convert.ToInt32(storenumber));
+                                                                        }
+
+                                                                        clsDBContext objclsDBContext = new clsDBContext();
+                                                                        DataTable dtBBBDificitWeightRating = new DataTable();
+                                                                        DataTable dtBBBDificitWeightRatingPayable = new DataTable();
+                                                                        DataTable dtBBBStoreBands = new DataTable();
+                                                                      
+                                                                        clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
+                                                                        objDificitRatesResponse = objclsDBContext.GetDeficitWeightRatingDetails(objOrder.company_number, objOrder.customer_number);
+                                                                        if (objDificitRatesResponse.dsResp.ResponseVal)
+                                                                        {
+                                                                            if (objDificitRatesResponse.DS.Tables.Count > 0)
+                                                                            {
+                                                                                dtBBBStoreBands = objDificitRatesResponse.DS.Tables[0];
+                                                                            }
+                                                                            if (objDificitRatesResponse.DS.Tables.Count > 1)
+                                                                            {
+                                                                                dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
+                                                                            }
+                                                                            if (objDificitRatesResponse.DS.Tables.Count > 2)
+                                                                            {
+                                                                                dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
+                                                                            }
+                                                                        }
+
+                                                                        int weight = objOrder.weight;
+
+                                                                        DataTable dtstorebandsfiltered = new DataTable();
+
+                                                                        IEnumerable<DataRow> storebandsfilteredRows = dtBBBStoreBands.AsEnumerable()
+                                                                                                              .Where(row => row.Field<string>("Store") == storenumberfordbverifaction && row.Field<string>("IsActive") == "Y");
+                                                                        if (storebandsfilteredRows.Any())
+                                                                        {
+                                                                            dtstorebandsfiltered = storebandsfilteredRows.CopyToDataTable();
+                                                                        }
+
+                                                                        if (dtstorebandsfiltered.Rows.Count > 0)
+                                                                        {
+                                                                            band = Convert.ToInt16(dtstorebandsfiltered.Rows[0]["Band"]);
+                                                                        }
+
+
+                                                                        DataTable dtDeficitWeightRatingfiltered = new DataTable();
+                                                                        IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtBBBDificitWeightRating.AsEnumerable()
+                                                                                                                                  .Where(row => (row.Field<int>("Band") == band)
+                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight)
+                                                                                                                                  && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+
+
+                                                                        if (deficitWeightRatingfilteredRows.Any())
+                                                                        {
+                                                                            dtDeficitWeightRatingfiltered = deficitWeightRatingfilteredRows.CopyToDataTable();
+                                                                        }
+
+                                                                        if (dtDeficitWeightRatingfiltered.Rows.Count > 0)
+                                                                        {
+
+                                                                           // billrate = Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                            billrate = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                        }
+
+                                                                       
+                                                                        DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
+                                                                        IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                                                                                  .Where(row => (row.Field<int>("Band") == band)
+                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight)
+                                                                                                                                  && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+
+                                                                        if (deficitWeightRatingPayablefilteredRows.Any())
+                                                                        {
+                                                                            dtDeficitWeightRatingPayablefiltered = deficitWeightRatingPayablefilteredRows.CopyToDataTable();
+                                                                        }
+
+                                                                        if (dtDeficitWeightRatingPayablefiltered.Rows.Count > 0)
+                                                                        {
+                                                                            //carrierBasepay = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                                                            carrierBasepay = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
                                                                         }
                                                                     }
+                                                                   else if (CustomerName == "BBB")
+                                                                    {
+                                                                        if (drow.Table.Columns.Contains("Bill Rate"))
+                                                                        {
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
+                                                                            {
+                                                                                billrate = objOrder.number_of_pieces * Convert.ToDouble(drow["Bill Rate"]);
+                                                                            }
+                                                                        }
+                                                                        if (drow.Table.Columns.Contains("Carrier Base Pay"))
+                                                                        {
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Carrier Base Pay"])))
+                                                                            {
+                                                                                double charge1 = Convert.ToDouble(drow["Carrier Base Pay"]);
+                                                                                carrierBasepay = Convert.ToDouble(objOrder.number_of_pieces * charge1);
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    objOrder.rate_buck_amt1 = billrate;
+
                                                                     if (drow.Table.Columns.Contains("Pieces ACC"))
                                                                     {
                                                                         if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces ACC"])))
@@ -843,13 +982,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                     objOrder.pickup_signature = Convert.ToString(drow["Pickup text signature"]);
                                                                 }
                                                             }
-                                                            if (drow.Table.Columns.Contains("Weight"))
-                                                            {
-                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Weight"])))
-                                                                {
-                                                                    objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
-                                                                }
-                                                            }
+                                                          
                                                             if (drow.Table.Columns.Contains("Insurance Amount"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Insurance Amount"])))
@@ -913,7 +1046,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup special instr long"])))
                                                                 {
                                                                     string strpickup_special_instr_long = Convert.ToString(drow["Pickup special instr long"]);
-                                                                    objOrder.pickup_special_instr_long =  "#INPUTAPIFILE:" + strFileName + " " + strpickup_special_instr_long.Trim();
+                                                                    objOrder.pickup_special_instr_long = "#INPUTAPIFILE:" + strFileName + " " + strpickup_special_instr_long.Trim();
                                                                 }
                                                                 else
                                                                 {
@@ -1018,6 +1151,28 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 }
                                                             }
 
+                                                            if (dr.Table.Columns.Contains("pickup_route_code"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["pickup_route_code"])))
+                                                                {
+                                                                    objOrder.pickup_route_code = Convert.ToString(dr["pickup_route_code"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("pickup_route_seq"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["pickup_route_seq"])))
+                                                                {
+                                                                    objOrder.pickup_route_seq = Convert.ToString(dr["pickup_route_seq"]);
+                                                                }
+                                                            }
+                                                            if (dr.Table.Columns.Contains("pu_arrive_notification_sent"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(dr["pu_arrive_notification_sent"])))
+                                                                {
+                                                                    objOrder.pu_arrive_notification_sent = Convert.ToString(dr["pu_arrive_notification_sent"]);
+                                                                }
+                                                            }
+
                                                         }
                                                         catch (Exception ex)
                                                         {
@@ -1067,553 +1222,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                             WriteOrderPostOutput(dsOrderResponse, processingFileName, strDatetime, ReferenceId, strInputFilePath, strFileName, fileName);
 
-                                                            //try
-                                                            //{
-                                                            //    if (dsOrderResponse.Tables.Contains("id"))
-                                                            //    {
-                                                            //        List<Id> idList = new List<Id>();
-                                                            //        for (int i = 0; i < dsOrderResponse.Tables["id"].Rows.Count; i++)
-                                                            //        {
-                                                            //            DataTable dt = dsOrderResponse.Tables["id"];
-                                                            //            Id objIds = new Id();
-                                                            //            // objIds.verified_weight = dt.Rows[i]["verified_weight"];
-                                                            //            // objIds.roundtrip_actual_latitude = dt.Rows[i]["roundtrip_actual_latitude"];
-                                                            //            // objIds.pickup_special_instructions4 = dt.Rows[i]["pickup_special_instructions4"];
-                                                            //            // objIds.fuel_miles = dt.Rows[i]["fuel_miles"];
-                                                            //            // objIds.pickup_dispatch_zone = dt.Rows[i]["pickup_dispatch_zone"];
-                                                            //            if (dt.Columns.Contains("pickup_zip"))
-                                                            //            {
-                                                            //                objIds.pickup_zip = dt.Rows[i]["pickup_zip"];
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("pickup_actual_arr_time"))
-                                                            //            {
-                                                            //                objIds.pickup_actual_arr_time = dt.Rows[i]["pickup_actual_arr_time"];
-                                                            //            }
-                                                            //            //objIds.cod_accept_company_check = dt.Rows[i]["cod_accept_company_check"];
-                                                            //            // objIds.add_charge_occur9 = dt.Rows[i]["add_charge_occur9"];
-                                                            //            //objIds.pickup_omw_latitude = dt.Rows[i]["pickup_omw_latitude"];
-                                                            //            // objIds.service_level_text = dt.Rows[i]["service_level_text"];
-                                                            //            if (dt.Columns.Contains("service_level"))
-                                                            //            {
-                                                            //                objIds.service_level = dt.Rows[i]["service_level"];
-                                                            //            }
-                                                            //            //objIds.exception_sign_required = dt.Rows[i]["exception_sign_required"];
-                                                            //            //objIds.pickup_phone_ext = dt.Rows[i]["pickup_phone_ext"];
-                                                            //            //objIds.roundtrip_actual_pieces = dt.Rows[i]["roundtrip_actual_pieces"];
-                                                            //            //objIds.bringg_send_sms = dt.Rows[i]["bringg_send_sms"];
-                                                            //            //objIds.az_equip2 = dt.Rows[i]["az_equip2"];
-
-                                                            //            //objIds.hist_inv_date = dt.Rows[i]["hist_inv_date"];
-                                                            //            //objIds.date_order_entered = dt.Rows[i]["date_order_entered"];
-                                                            //            //objIds.powerpage_status_text = dt.Rows[i]["powerpage_status_text"];
-                                                            //            //objIds.powerpage_status = dt.Rows[i]["powerpage_status"];
-                                                            //            if (dt.Columns.Contains("pickup_city"))
-                                                            //            {
-                                                            //                objIds.pickup_city = dt.Rows[i]["pickup_city"];
-                                                            //            }
-                                                            //            //objIds.pickup_phone = dt.Rows[i]["pickup_phone"];
-                                                            //            //objIds.pickup_sign_req = dt.Rows[i]["pickup_sign_req"];
-
-                                                            //            //objIds.deliver_phone = dt.Rows[i]["deliver_phone"];
-                                                            //            //objIds.deliver_omw_longitude = dt.Rows[i]["deliver_omw_longitude"];
-                                                            //            //objIds.roundtrip_actual_longitude = dt.Rows[i]["roundtrip_actual_longitude"];
-                                                            //            //objIds.page_number = dt.Rows[i]["page_number"];
-                                                            //            //objIds.order_type_text = dt.Rows[i]["order_type_text"];
-                                                            //            //objIds.order_type = dt.Rows[i]["order_type"];
-                                                            //            //objIds.add_charge_code9 = dt.Rows[i]["add_charge_code9"];
-                                                            //            //objIds.pickup_eta_time = dt.Rows[i]["pickup_eta_time"];
-
-                                                            //            //objIds.record_type = dt.Rows[i]["record_type"];
-                                                            //            //objIds.add_charge_occur11 = dt.Rows[i]["add_charge_occur11"];
-                                                            //            //objIds.push_partner_order_id = dt.Rows[i]["push_partner_order_id"];
-                                                            //            //objIds.deliver_country = dt.Rows[i]["deliver_country"];
-                                                            //            //objIds.customer_name = dt.Rows[i]["customer_name"];
-                                                            //            if (dt.Columns.Contains("bol_number"))
-                                                            //            {
-                                                            //                objIds.bol_number = dt.Rows[i]["bol_number"];
-                                                            //            }
-                                                            //            //objIds.pickup_latitude = dt.Rows[i]["pickup_latitude"];
-                                                            //            //objIds.add_charge_code4 = dt.Rows[i]["add_charge_code4"];
-
-                                                            //            //objIds.exception_order_action_text = dt.Rows[i]["exception_order_action_text"];
-                                                            //            //objIds.exception_order_action = dt.Rows[i]["exception_order_action"];
-                                                            //            //objIds.pu_arrive_notification_sent = dt.Rows[i]["pu_arrive_notification_sent"];
-                                                            //            //objIds.distribution_shift_id = dt.Rows[i]["distribution_shift_id"];
-                                                            //            //objIds.pickup_special_instr_long = dt.Rows[i]["pickup_special_instr_long"];
-                                                            //            if (dt.Columns.Contains("id"))
-                                                            //            {
-                                                            //                objIds.id = dt.Rows[i]["id"];
-                                                            //            }
-                                                            //            //objIds.callback_to = dt.Rows[i]["callback_to"];
-                                                            //            //objIds.customer_number_text = dt.Rows[i]["customer_number_text"];
-                                                            //            if (dt.Columns.Contains("customer_number"))
-                                                            //            {
-                                                            //                objIds.customer_number = dt.Rows[i]["customer_number"];
-                                                            //            }
-                                                            //            //objIds.ordered_by = dt.Rows[i]["ordered_by"];
-                                                            //            //objIds.add_charge_code12 = dt.Rows[i]["add_charge_code12"];
-                                                            //            //objIds.pickup_route_seq = dt.Rows[i]["pickup_route_seq"];
-                                                            //            if (dt.Columns.Contains("deliver_city"))
-                                                            //            {
-                                                            //                objIds.deliver_city = dt.Rows[i]["deliver_city"];
-                                                            //            }
-
-                                                            //            //objIds.add_charge_occur5 = dt.Rows[i]["add_charge_occur5"];
-                                                            //            //objIds.edi_acknowledgement_required = dt.Rows[i]["edi_acknowledgement_required"];
-                                                            //            //objIds.rescheduled_ctrl_number = dt.Rows[i]["rescheduled_ctrl_number"];
-                                                            //            //objIds.driver2 = dt.Rows[i]["driver2"];
-                                                            //            //objIds.deliver_room = dt.Rows[i]["deliver_room"];
-                                                            //            if (dt.Columns.Contains("deliver_actual_arr_time"))
-                                                            //            {
-                                                            //                objIds.deliver_actual_arr_time = dt.Rows[i]["deliver_actual_arr_time"];
-                                                            //            }
-                                                            //            //objIds.fuel_price_zone = dt.Rows[i]["fuel_price_zone"];
-                                                            //            //objIds.add_charge_amt9 = dt.Rows[i]["add_charge_amt9"];
-                                                            //            //objIds.add_charge_amt4 = dt.Rows[i]["add_charge_amt4"];
-                                                            //            //objIds.delivery_address_point_number_text = dt.Rows[i]["delivery_address_point_number_text"];
-                                                            //            //objIds.delivery_address_point_number = dt.Rows[i]["delivery_address_point_number"];
-
-                                                            //            //objIds.deliver_actual_longitude = dt.Rows[i]["deliver_actual_longitude"];
-                                                            //            //objIds.add_charge_amt2 = dt.Rows[i]["add_charge_amt2"];
-                                                            //            //objIds.additional_drivers = dt.Rows[i]["additional_drivers"];
-                                                            //            //objIds.pickup_pricing_zone = dt.Rows[i]["pickup_pricing_zone"];
-                                                            //            //objIds.hazmat = dt.Rows[i]["hazmat"];
-                                                            //            if (dt.Columns.Contains("pickup_address"))
-                                                            //            {
-                                                            //                objIds.pickup_address = dt.Rows[i]["pickup_address"];
-                                                            //            }
-                                                            //            //objIds.pickup_route_code = dt.Rows[i]["pickup_route_code"];
-                                                            //            //objIds.callback_userid = dt.Rows[i]["callback_userid"];
-                                                            //            //objIds.pickup_point_customer = dt.Rows[i]["pickup_point_customer"];
-
-                                                            //            //objIds.rate_buck_amt1 = dt.Rows[i]["rate_buck_amt1"];
-                                                            //            //objIds.add_charge_amt8 = dt.Rows[i]["add_charge_amt8"];
-                                                            //            //objIds.callback_time = dt.Rows[i]["callback_time"];
-                                                            //            //objIds.csr = dt.Rows[i]["csr"];
-                                                            //            //objIds.roundtrip_actual_depart_time = dt.Rows[i]["roundtrip_actual_depart_time"];
-                                                            //            //objIds.customers_etrac_partner_id = dt.Rows[i]["customers_etrac_partner_id"];
-                                                            //            //objIds.manual_notepad = dt.Rows[i]["manual_notepad"];
-                                                            //            //objIds.add_charge_code8 = dt.Rows[i]["add_charge_code8"];
-                                                            //            //objIds.bringg_order_id = dt.Rows[i]["bringg_order_id"];
-                                                            //            //objIds.deliver_omw_latitude = dt.Rows[i]["deliver_omw_latitude"];
-                                                            //            //objIds.pickup_longitude = dt.Rows[i]["pickup_longitude"];
-                                                            //            //objIds.etrac_number = dt.Rows[i]["etrac_number"];
-
-                                                            //            //objIds.distribution_unique_id = dt.Rows[i]["distribution_unique_id"];
-                                                            //            //objIds.vehicle_type = dt.Rows[i]["vehicle_type"];
-                                                            //            //objIds.roundtrip_actual_arrival_time = dt.Rows[i]["roundtrip_actual_arrival_time"];
-                                                            //            //objIds.delivery_longitude = dt.Rows[i]["delivery_longitude"];
-                                                            //            //objIds.pu_actual_location_accuracy = dt.Rows[i]["pu_actual_location_accuracy"];
-                                                            //            if (dt.Columns.Contains("deliver_actual_date"))
-                                                            //            {
-                                                            //                objIds.deliver_actual_date = dt.Rows[i]["deliver_actual_date"];
-                                                            //            }
-                                                            //            //objIds.exception_timestamp = dt.Rows[i]["exception_timestamp"];
-                                                            //            if (dt.Columns.Contains("deliver_zip"))
-                                                            //            {
-                                                            //                objIds.deliver_zip = dt.Rows[i]["deliver_zip"];
-                                                            //            }
-                                                            //            //objIds.roundtrip_wait_time = dt.Rows[i]["roundtrip_wait_time"];
-                                                            //            //objIds.add_charge_occur8 = dt.Rows[i]["add_charge_occur8"];
-                                                            //            //objIds.dl_arrive_notification_sent = dt.Rows[i]["dl_arrive_notification_sent"];
-                                                            //            //objIds.pickup_special_instructions1 = dt.Rows[i]["pickup_special_instructions1"];
-                                                            //            //objIds.ordered_by_phone_number = dt.Rows[i]["ordered_by_phone_number"];
-                                                            //            if (dt.Columns.Contains("deliver_requested_arr_time"))
-                                                            //            {
-                                                            //                objIds.deliver_requested_arr_time = dt.Rows[i]["deliver_requested_arr_time"];
-                                                            //            }
-
-                                                            //            //objIds.rate_miles = dt.Rows[i]["rate_miles"];
-                                                            //            //objIds.holiday_groups = dt.Rows[i]["holiday_groups"];
-                                                            //            //objIds.pickup_email_notification_sent = dt.Rows[i]["pickup_email_notification_sent"];
-                                                            //            //objIds.add_charge_code3 = dt.Rows[i]["add_charge_code3"];
-                                                            //            //objIds.dispatch_id = dt.Rows[i]["dispatch_id"];
-                                                            //            //objIds.add_charge_occur10 = dt.Rows[i]["add_charge_occur10"];
-                                                            //            //objIds.dispatch_time = dt.Rows[i]["dispatch_time"];
-                                                            //            //objIds.deliver_wait_time = dt.Rows[i]["deliver_wait_time"];
-                                                            //            //objIds.invoice_period_end_date = dt.Rows[i]["invoice_period_end_date"];
-                                                            //            //objIds.add_charge_occur12 = dt.Rows[i]["add_charge_occur12"];
-
-                                                            //            //objIds.fuel_plan = dt.Rows[i]["fuel_plan"];
-                                                            //            //objIds.return_svc_level = dt.Rows[i]["return_svc_level"];
-                                                            //            if (dt.Columns.Contains("pickup_actual_date"))
-                                                            //            {
-                                                            //                objIds.pickup_actual_date = dt.Rows[i]["pickup_actual_date"];
-                                                            //            }
-                                                            //            //objIds.send_new_order_alert = dt.Rows[i]["send_new_order_alert"];
-                                                            //            //objIds.pickup_room = dt.Rows[i]["pickup_room"];
-                                                            //            //objIds.rate_buck_amt8 = dt.Rows[i]["rate_buck_amt8"];
-                                                            //            //objIds.add_charge_amt10 = dt.Rows[i]["add_charge_amt10"];
-                                                            //            //objIds.insurance_amount = dt.Rows[i]["insurance_amount"];
-                                                            //            //objIds.add_charge_amt3 = dt.Rows[i]["add_charge_amt3"];
-                                                            //            //objIds.add_charge_amt6 = dt.Rows[i]["add_charge_amt6"];
-                                                            //            //objIds.pickup_special_instructions3 = dt.Rows[i]["pickup_special_instructions3"];
-                                                            //            if (dt.Columns.Contains("pickup_requested_date"))
-                                                            //            {
-                                                            //                objIds.pickup_requested_date = dt.Rows[i]["pickup_requested_date"];
-                                                            //            }
-                                                            //            //objIds.roundtrip_sign_req = dt.Rows[i]["roundtrip_sign_req"];
-                                                            //            //objIds.actual_miles = dt.Rows[i]["actual_miles"];
-                                                            //            //objIds.pickup_address_point_number_text = dt.Rows[i]["pickup_address_point_number_text"];
-                                                            //            //if (dt.Columns.Contains("pickup_address_point_number_text"))
-                                                            //            //{
-                                                            //            //    objIds.pickup_address_point_number_text = dt.Rows[i]["pickup_address_point_number_text"];
-                                                            //            //}
-                                                            //            //objIds.pickup_address_point_number = dt.Rows[i]["pickup_address_point_number"];
-                                                            //            //objIds.deliver_actual_latitude = dt.Rows[i]["deliver_actual_latitude"];
-                                                            //            //objIds.deliver_phone_ext = dt.Rows[i]["deliver_phone_ext"];
-                                                            //            //objIds.deliver_route_code = dt.Rows[i]["deliver_route_code"];
-                                                            //            //objIds.add_charge_code10 = dt.Rows[i]["add_charge_code10"];
-                                                            //            //objIds.delivery_airport_code = dt.Rows[i]["delivery_airport_code"];
-                                                            //            if (dt.Columns.Contains("reference_text"))
-                                                            //            {
-                                                            //                objIds.reference_text = dt.Rows[i]["reference_text"];
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("reference"))
-                                                            //            {
-                                                            //                objIds.reference = dt.Rows[i]["reference"];
-                                                            //            }
-                                                            //            //objIds.photos_exist = dt.Rows[i]["photos_exist"];
-                                                            //            //objIds.master_airway_bill_number = dt.Rows[i]["master_airway_bill_number"];
-                                                            //            if (dt.Columns.Contains("control_number"))
-                                                            //            {
-                                                            //                objIds.control_number = dt.Rows[i]["control_number"];
-                                                            //            }
-                                                            //            //objIds.cod_text = dt.Rows[i]["cod_text"];
-                                                            //            //objIds.cod = dt.Rows[i]["cod"];
-                                                            //            //objIds.rate_buck_amt11 = dt.Rows[i]["rate_buck_amt11"];
-                                                            //            //objIds.pickup_omw_timestamp = dt.Rows[i]["pickup_omw_timestamp"];
-                                                            //            //objIds.deliver_special_instructions1 = dt.Rows[i]["deliver_special_instructions1"];
-                                                            //            //objIds.quote_amount = dt.Rows[i]["quote_amount"];
-                                                            //            //objIds.total_pages = dt.Rows[i]["total_pages"];
-                                                            //            //objIds.rate_buck_amt4 = dt.Rows[i]["rate_buck_amt4"];
-                                                            //            //objIds.delivery_latitude = dt.Rows[i]["delivery_latitude"];
-                                                            //            //objIds.add_charge_code1 = dt.Rows[i]["add_charge_code1"];
-
-
-                                                            //            //objIds.order_timeliness_text = dt.Rows[i]["order_timeliness_text"];
-                                                            //            //objIds.order_timeliness = dt.Rows[i]["order_timeliness"];
-                                                            //            //objIds.deliver_special_instr_long = dt.Rows[i]["deliver_special_instr_long"];
-                                                            //            if (dt.Columns.Contains("deliver_address"))
-                                                            //            {
-                                                            //                objIds.deliver_address = dt.Rows[i]["deliver_address"];
-                                                            //            }
-                                                            //            //objIds.add_charge_occur4 = dt.Rows[i]["add_charge_occur4"];
-                                                            //            //objIds.deliver_eta_date = dt.Rows[i]["deliver_eta_date"];
-                                                            //            if (dt.Columns.Contains("pickup_actual_dep_time"))
-                                                            //            {
-                                                            //                objIds.pickup_actual_dep_time = dt.Rows[i]["pickup_actual_dep_time"];
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("deliver_requested_dep_time"))
-                                                            //            {
-                                                            //                objIds.deliver_requested_dep_time = dt.Rows[i]["deliver_requested_dep_time"];
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("deliver_actual_dep_time"))
-                                                            //            {
-                                                            //                objIds.deliver_actual_dep_time = dt.Rows[i]["deliver_actual_dep_time"];
-                                                            //            }
-
-                                                            //            //objIds.bringg_last_loc_sent = dt.Rows[i]["bringg_last_loc_sent"];
-                                                            //            //objIds.az_equip3 = dt.Rows[i]["az_equip3"];
-                                                            //            //objIds.driver1_text = dt.Rows[i]["driver1_text"];
-                                                            //            //if (dt.Columns.Contains("driver1_text"))
-                                                            //            //{
-                                                            //            //    objIds.driver1_text = dt.Rows[i]["driver1_text"];
-                                                            //            //}
-                                                            //            if (dt.Columns.Contains("driver1"))
-                                                            //            {
-                                                            //                objIds.driver1 = dt.Rows[i]["driver1"];
-                                                            //            }
-                                                            //            //objIds.pickup_actual_latitude = dt.Rows[i]["pickup_actual_latitude"];
-                                                            //            //objIds.add_charge_occur2 = dt.Rows[i]["add_charge_occur2"];
-                                                            //            //objIds.order_automatically_quoted = dt.Rows[i]["order_automatically_quoted"];
-                                                            //            //objIds.callback_required = dt.Rows[i]["callback_required_text"];
-                                                            //            //objIds.frequent_caller_id = dt.Rows[i]["frequent_caller_id"];
-                                                            //            //objIds.rate_buck_amt6 = dt.Rows[i]["rate_buck_amt6"];
-                                                            //            //objIds.rate_chart_used = dt.Rows[i]["rate_chart_used"];
-                                                            //            if (dt.Columns.Contains("deliver_actual_pieces"))
-                                                            //            {
-                                                            //                objIds.deliver_actual_pieces = dt.Rows[i]["deliver_actual_pieces"];
-                                                            //            }
-
-                                                            //            //objIds.add_charge_code5 = dt.Rows[i]["add_charge_code5"];
-                                                            //            //objIds.pickup_omw_longitude = dt.Rows[i]["pickup_omw_longitude"];
-                                                            //            //objIds.delivery_point_customer = dt.Rows[i]["delivery_point_customer"];
-                                                            //            //objIds.add_charge_occur7 = dt.Rows[i]["add_charge_occur7"];
-                                                            //            //objIds.rate_buck_amt5 = dt.Rows[i]["rate_buck_amt5"];
-                                                            //            //objIds.fuel_update_freq_text = dt.Rows[i]["fuel_update_freq_text"];
-                                                            //            //objIds.fuel_update_freq = dt.Rows[i]["fuel_update_freq"];
-                                                            //            //objIds.add_charge_code11 = dt.Rows[i]["add_charge_code11"];
-                                                            //            if (dt.Columns.Contains("pickup_name"))
-                                                            //            {
-                                                            //                objIds.pickup_name = dt.Rows[i]["pickup_name"];
-                                                            //            }
-                                                            //            //objIds.callback_date = dt.Rows[i]["callback_date"];
-                                                            //            //objIds.add_charge_code2 = dt.Rows[i]["add_charge_code2"];
-                                                            //            //objIds.house_airway_bill_number = dt.Rows[i]["house_airway_bill_number"];
-                                                            //            if (dt.Columns.Contains("deliver_name"))
-                                                            //            {
-                                                            //                objIds.deliver_name = dt.Rows[i]["deliver_name"];
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("number_of_pieces"))
-                                                            //            {
-                                                            //                objIds.number_of_pieces = dt.Rows[i]["number_of_pieces"];
-                                                            //            }
-                                                            //            //objIds.deliver_eta_time = dt.Rows[i]["deliver_eta_time"];
-                                                            //            //objIds.origin_code_text = dt.Rows[i]["origin_code_text"];
-                                                            //            //objIds.origin_code = dt.Rows[i]["origin_code"];
-                                                            //            //objIds.rate_special_instructions = dt.Rows[i]["rate_special_instructions"];
-                                                            //            //objIds.add_charge_occur3 = dt.Rows[i]["add_charge_occur3"];
-                                                            //            //objIds.pickup_eta_date = dt.Rows[i]["pickup_eta_date"];
-                                                            //            //objIds.deliver_special_instructions4 = dt.Rows[i]["deliver_special_instructions4"];
-                                                            //            //objIds.custom_special_instr_long = dt.Rows[i]["custom_special_instr_long"];
-                                                            //            //objIds.deliver_special_instructions2 = dt.Rows[i]["deliver_special_instructions2"];
-                                                            //            if (dt.Columns.Contains("pickup_signature"))
-                                                            //            {
-                                                            //                objIds.pickup_signature = dt.Rows[i]["pickup_signature"];
-                                                            //            }
-                                                            //            //objIds.az_equip1 = dt.Rows[i]["az_equip1"];
-                                                            //            //objIds.add_charge_amt12 = dt.Rows[i]["add_charge_amt12"];
-                                                            //            //objIds.calc_add_on_chgs = dt.Rows[i]["calc_add_on_chgs"];
-                                                            //            //objIds.original_schedule_number = dt.Rows[i]["original_schedule_number"];
-                                                            //            //objIds.blocks = dt.Rows[i]["blocks"];
-                                                            //            //objIds.del_actual_location_accuracy = dt.Rows[i]["del_actual_location_accuracy"];
-                                                            //            //objIds.zone_set_used = dt.Rows[i]["zone_set_used"];
-
-                                                            //            // objIds.pickup_country = dt.Rows[i]["pickup_country"];
-                                                            //            if (dt.Columns.Contains("pickup_state"))
-                                                            //            {
-                                                            //                objIds.pickup_state = dt.Rows[i]["pickup_state"];
-                                                            //            }
-
-                                                            //            //objIds.add_charge_amt7 = dt.Rows[i]["add_charge_amt7"];
-                                                            //            //objIds.email_addresses = dt.Rows[i]["email_addresses"];
-                                                            //            //objIds.add_charge_occur1 = dt.Rows[i]["add_charge_occur1"];
-                                                            //            //objIds.pickup_wait_time = dt.Rows[i]["pickup_wait_time"];
-                                                            //            //objIds.company_number_text = dt.Rows[i]["company_number_text"];
-                                                            //            if (dt.Columns.Contains("company_number"))
-                                                            //            {
-                                                            //                objIds.company_number = dt.Rows[i]["company_number"];
-                                                            //            }
-                                                            //            //objIds.distribution_branch_id = dt.Rows[i]["distribution_branch_id"];
-                                                            //            //objIds.rate_buck_amt9 = dt.Rows[i]["rate_buck_amt9"];
-                                                            //            //objIds.add_charge_amt1 = dt.Rows[i]["add_charge_amt1"];
-                                                            //            if (dt.Columns.Contains("pickup_requested_dep_time"))
-                                                            //            {
-                                                            //                objIds.pickup_requested_dep_time = dt.Rows[i]["pickup_requested_dep_time"];
-                                                            //            }
-                                                            //            //objIds.customer_type_text = dt.Rows[i]["customer_type_text"];
-                                                            //            //if (dt.Columns.Contains("customer_type_text"))
-                                                            //            //{
-                                                            //            //    objIds.customer_type_text = dt.Rows[i]["customer_type_text"];
-                                                            //            //}
-                                                            //            //objIds.customer_type = dt.Rows[i]["customer_type"];
-                                                            //            if (dt.Columns.Contains("deliver_state"))
-                                                            //            {
-                                                            //                objIds.deliver_state = dt.Rows[i]["deliver_state"];
-                                                            //            }
-                                                            //            //objIds.deliver_dispatch_zone = dt.Rows[i]["deliver_dispatch_zone"];
-                                                            //            //objIds.image_sign_req = dt.Rows[i]["image_sign_req"];
-                                                            //            //objIds.add_charge_code6 = dt.Rows[i]["add_charge_code6"];
-                                                            //            if (dt.Columns.Contains("deliver_requested_date"))
-                                                            //            {
-                                                            //                objIds.deliver_requested_date = dt.Rows[i]["deliver_requested_date"];
-                                                            //            }
-                                                            //            // objIds.add_charge_amt5 = dt.Rows[i]["add_charge_amt5"];
-                                                            //            if (dt.Columns.Contains("time_order_entered"))
-                                                            //            {
-                                                            //                objIds.time_order_entered = dt.Rows[i]["time_order_entered"];
-                                                            //            }
-                                                            //            //objIds.pick_del_trans_flag_text = dt.Rows[i]["pick_del_trans_flag_text"];
-                                                            //            //objIds.pick_del_trans_flag = dt.Rows[i]["pick_del_trans_flag"];
-                                                            //            //objIds.pickup_attention = dt.Rows[i]["pickup_attention"];
-                                                            //            //objIds.rate_buck_amt7 = dt.Rows[i]["rate_buck_amt7"];
-                                                            //            //objIds.add_charge_occur6 = dt.Rows[i]["add_charge_occur6"];
-                                                            //            //objIds.fuel_price_source = dt.Rows[i]["fuel_price_source"];
-                                                            //            //objIds.pickup_airport_code = dt.Rows[i]["pickup_airport_code"];
-                                                            //            //objIds.rate_buck_amt2 = dt.Rows[i]["rate_buck_amt2"];
-                                                            //            //objIds.rate_buck_amt3 = dt.Rows[i]["rate_buck_amt3"];
-                                                            //            //objIds.deliver_omw_timestamp = dt.Rows[i]["deliver_omw_timestamp"];
-                                                            //            //objIds.exception_code = dt.Rows[i]["exception_code"];
-                                                            //            //objIds.status_code_text = dt.Rows[i]["status_code_text"];
-                                                            //            //objIds.status_code = dt.Rows[i]["status_code"];
-                                                            //            //objIds.weight = dt.Rows[i]["weight"];
-                                                            //            //objIds.signature_required = dt.Rows[i]["signature_required"];
-                                                            //            //objIds.rate_buck_amt10 = dt.Rows[i]["rate_buck_amt10"];
-                                                            //            //objIds.hist_inv_number = dt.Rows[i]["hist_inv_number"];
-                                                            //            //objIds.deliver_pricing_zone = dt.Rows[i]["deliver_pricing_zone"];
-                                                            //            //objIds.pickup_actual_longitude = dt.Rows[i]["pickup_actual_longitude"];
-                                                            //            //objIds.push_services = dt.Rows[i]["push_services"];
-                                                            //            //objIds.add_charge_amt11 = dt.Rows[i]["add_charge_amt11"];
-                                                            //            //objIds.rt_actual_location_accuracy = dt.Rows[i]["rt_actual_location_accuracy"];
-                                                            //            //objIds.roundtrip_actual_date = dt.Rows[i]["roundtrip_actual_date"];
-                                                            //            if (dt.Columns.Contains("pickup_requested_arr_time"))
-                                                            //            {
-                                                            //                objIds.pickup_requested_arr_time = dt.Rows[i]["pickup_requested_arr_time"];
-                                                            //            }
-                                                            //            //objIds.deliver_attention = dt.Rows[i]["deliver_attention"];
-                                                            //            //objIds.deliver_special_instructions3 = dt.Rows[i]["deliver_special_instructions3"];
-                                                            //            //objIds.pickup_actual_pieces = dt.Rows[i]["pickup_actual_pieces"];
-                                                            //            //objIds.edi_order_accepted_or_rejected_text = dt.Rows[i]["edi_order_accepted_or_rejected_text"];
-                                                            //            //objIds.edi_order_accepted_or_rejected = dt.Rows[i]["edi_order_accepted_or_rejected"];
-                                                            //            //objIds.roundtrip_signature = dt.Rows[i]["roundtrip_signature"];
-                                                            //            //objIds.po_number = dt.Rows[i]["po_number"];
-                                                            //            if (dt.Columns.Contains("signature"))
-                                                            //            {
-                                                            //                objIds.signature = dt.Rows[i]["signature"];
-                                                            //            }
-                                                            //            //objIds.pickup_special_instructions2 = dt.Rows[i]["pickup_special_instructions2"];
-                                                            //            //objIds.original_ctrl_number = dt.Rows[i]["original_ctrl_number"];
-                                                            //            //objIds.previous_ctrl_number = dt.Rows[i]["previous_ctrl_number"];
-                                                            //            //if (dt.Columns.Contains("Id"))
-                                                            //            //{
-                                                            //            //    objIds.id = dt.Rows[i]["Id"];
-                                                            //            //}
-                                                            //            idList.Add(objIds);
-
-                                                            //        }
-                                                            //        objCommon.SaveOutputDataToCsvFileParallely(idList, "Order-Create",
-                                                            //           processingFileName, strDatetime);
-                                                            //    }
-                                                            //    if (dsOrderResponse.Tables.Contains("settlements"))
-                                                            //    {
-                                                            //        List<Settlement> settelmentList = new List<Settlement>();
-                                                            //        for (int i = 0; i < dsOrderResponse.Tables["settlements"].Rows.Count; i++)
-                                                            //        {
-                                                            //            DataTable dt = dsOrderResponse.Tables["settlements"];
-                                                            //            Settlement objsettlements = new Settlement();
-                                                            //            //objsettlements.company_number_text = (dt.Rows[i]["company_number_text"]);
-                                                            //            if (dt.Columns.Contains("company_number"))
-                                                            //            {
-                                                            //                objsettlements.company_number = (dt.Rows[i]["company_number"]);
-                                                            //            }
-                                                            //            //objsettlements.charge4 = dt.Rows[i]["charge4"];
-                                                            //            //objsettlements.posting_status_text = (dt.Rows[i]["posting_status_text"]);
-                                                            //            //objsettlements.posting_status = (dt.Rows[i]["posting_status"]);
-                                                            //            //objsettlements.time_last_updated = (dt.Rows[i]["time_last_updated"]);
-                                                            //            //objsettlements.fuel_update_freq_text = (dt.Rows[i]["fuel_update_freq_text"]);
-                                                            //            //objsettlements.fuel_update_freq = (dt.Rows[i]["fuel_update_freq"]);
-                                                            //            if (dt.Columns.Contains("order_date"))
-                                                            //            {
-                                                            //                objsettlements.order_date = (dt.Rows[i]["order_date"]);
-                                                            //            }
-                                                            //            //objsettlements.agent_etrac_transaction_number = (dt.Rows[i]["agent_etrac_transaction_number"]);
-                                                            //            //objsettlements.settlement_bucket1_pct = (dt.Rows[i]["settlement_bucket1_pct"]);
-                                                            //            //objsettlements.settlement_bucket2_pct = (dt.Rows[i]["settlement_bucket2_pct"]);
-                                                            //            //objsettlements.vendor_employee_numer = (dt.Rows[i]["vendor_employee_numer"]);
-                                                            //            //objsettlements.fuel_price_zone = (dt.Rows[i]["fuel_price_zone"]);
-                                                            //            //objsettlements.agent_accepted_or_rejected_text = (dt.Rows[i]["agent_accepted_or_rejected_text"]);
-                                                            //            //objsettlements.agent_accepted_or_rejected = (dt.Rows[i]["agent_accepted_or_rejected"]);
-                                                            //            //objsettlements.charge1 = (dt.Rows[i]["charge1"]);
-                                                            //            //objsettlements.file_status_text = (dt.Rows[i]["file_status_text"]);
-                                                            //            //objsettlements.file_status = (dt.Rows[i]["file_status"]);
-                                                            //            //objsettlements.adjustment_type = (dt.Rows[i]["adjustment_type"]);
-                                                            //            //objsettlements.agents_etrac_partner_id = (dt.Rows[i]["agents_etrac_partner_id"]);
-                                                            //            //objsettlements.driver_company_number_text = (dt.Rows[i]["driver_company_number_text"]);
-                                                            //            if (dt.Columns.Contains("driver_company_number"))
-                                                            //            {
-                                                            //                objsettlements.driver_company_number = (dt.Rows[i]["driver_company_number"]);
-                                                            //            }
-                                                            //            //objsettlements.vendor_invoice_number = (dt.Rows[i]["vendor_invoice_number"]);
-                                                            //            //objsettlements.charge6 = (dt.Rows[i]["charge6"]);
-                                                            //            //objsettlements.settlement_bucket4_pct = (dt.Rows[i]["settlement_bucket4_pct"]);
-                                                            //            //objsettlements.fuel_plan = (dt.Rows[i]["fuel_plan"]);
-                                                            //            //objsettlements.record_type = (dt.Rows[i]["record_type"]);
-                                                            //            //objsettlements.voucher_amount = (dt.Rows[i]["voucher_amount"]);
-                                                            //            if (dt.Columns.Contains("id"))
-                                                            //            {
-                                                            //                objsettlements.id = (dt.Rows[i]["id"]);
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("date_last_updated"))
-                                                            //            {
-                                                            //                objsettlements.date_last_updated = (dt.Rows[i]["date_last_updated"]);
-                                                            //            }
-                                                            //            //objsettlements.driver_sequence_text = (dt.Rows[i]["driver_sequence_text"]);
-                                                            //            //objsettlements.driver_sequence = (dt.Rows[i]["driver_sequence"]);
-                                                            //            //objsettlements.voucher_number = (dt.Rows[i]["voucher_number"]);
-                                                            //            //objsettlements.driver_number_text = (dt.Rows[i]["driver_number_text"]);
-                                                            //            if (dt.Columns.Contains("driver_number"))
-                                                            //            {
-                                                            //                objsettlements.driver_number = (dt.Rows[i]["driver_number"]);
-                                                            //            }
-                                                            //            //objsettlements.settlement_bucket6_pct = (dt.Rows[i]["settlement_bucket6_pct"]);
-                                                            //            //objsettlements.settlement_pct = (dt.Rows[i]["settlement_pct"]);
-                                                            //            //objsettlements.charge3 = (dt.Rows[i]["charge3"]);
-                                                            //            //objsettlements.transaction_type_text = (dt.Rows[i]["transaction_type_text"]);
-                                                            //            //objsettlements.transaction_type = (dt.Rows[i]["transaction_type"]);
-                                                            //            //objsettlements.voucher_date = (dt.Rows[i]["voucher_date"]);
-                                                            //            //objsettlements.fuel_price_source = (dt.Rows[i]["fuel_price_source"]);
-                                                            //            //objsettlements.pay_chart_used = (dt.Rows[i]["pay_chart_used"]);
-                                                            //            //objsettlements.settlement_bucket5_pct = (dt.Rows[i]["settlement_bucket5_pct"]);
-                                                            //            //objsettlements.charge2 = (dt.Rows[i]["charge2"]);
-                                                            //            if (dt.Columns.Contains("control_number"))
-                                                            //            {
-                                                            //                objsettlements.control_number = (dt.Rows[i]["control_number"]);
-                                                            //            }
-                                                            //            //objsettlements.settlement_bucket3_pct = (dt.Rows[i]["settlement_bucket3_pct"]);
-                                                            //            //objsettlements.charge5 = (dt.Rows[i]["charge5"]);
-                                                            //            //objsettlements.pre_book_percentage = (dt.Rows[i]["pre_book_percentage"]);
-                                                            //            //objsettlements.settlement_period_end_date = (dt.Rows[i]["settlement_period_end_date"]);
-                                                            //            settelmentList.Add(objsettlements);
-                                                            //        }
-
-                                                            //        objCommon.SaveOutputDataToCsvFileParallely(settelmentList, "Order-Settlements-AddRecord",
-                                                            //            processingFileName, strDatetime);
-
-                                                            //    }
-                                                            //    if (dsOrderResponse.Tables.Contains("progress"))
-                                                            //    {
-
-                                                            //        List<Progress> progressList = new List<Progress>();
-                                                            //        for (int i = 0; i < dsOrderResponse.Tables["progress"].Rows.Count; i++)
-                                                            //        {
-                                                            //            Progress progress = new Progress();
-                                                            //            DataTable dt = dsOrderResponse.Tables["progress"];
-                                                            //            if (dt.Columns.Contains("status_date"))
-                                                            //            {
-                                                            //                progress.status_date = (dt.Rows[i]["status_date"]);
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("status_text"))
-                                                            //            {
-                                                            //                progress.status_text = (dt.Rows[i]["status_text"]);
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("status_time"))
-                                                            //            {
-                                                            //                progress.status_time = (dt.Rows[i]["status_time"]);
-                                                            //            }
-                                                            //            if (dt.Columns.Contains("id"))
-                                                            //            {
-                                                            //                progress.id = (dt.Rows[i]["id"]);
-                                                            //            }
-                                                            //            progressList.Add(progress);
-                                                            //        }
-
-                                                            //        objCommon.SaveOutputDataToCsvFileParallely(progressList, "Order-Progress",
-                                                            //           processingFileName, strDatetime);
-                                                            //    }
-                                                            //}
-                                                            //catch (Exception ex)
-                                                            //{
-                                                            //    strExecutionLogMessage = "ProcessAddOrderFiles Exception -" + ex.Message + System.Environment.NewLine;
-                                                            //    strExecutionLogMessage += "File Path is  -" + strInputFilePath + System.Environment.NewLine;
-                                                            //    strExecutionLogMessage += "Found exception while processing the file, filename  -" + strFileName + System.Environment.NewLine;
-                                                            //    strExecutionLogMessage += "For Customer Reference -" + ReferenceId + System.Environment.NewLine;
-                                                            //    //objCommon.WriteErrorLog(ex, strExecutionLogMessage);
-                                                            //    //objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-                                                            //    objCommon.WriteErrorLogParallelly(ex, fileName, strExecutionLogMessage);
-
-                                                            //    ErrorResponse objErrorResponse = new ErrorResponse();
-                                                            //    objErrorResponse.error = ex.Message;
-                                                            //    objErrorResponse.status = "Error";
-                                                            //    objErrorResponse.code = "Exception while writing the response into csv";
-                                                            //    objErrorResponse.reference = ReferenceId;
-                                                            //    string strErrorResponse = JsonConvert.SerializeObject(objErrorResponse);
-                                                            //    DataSet dsFailureResponse = objCommon.jsonToDataSet(strErrorResponse);
-                                                            //    dsFailureResponse.Tables[0].TableName = "OrderFailure";
-                                                            //    objCommon.WriteDataToCsvFileParallely(dsFailureResponse.Tables[0],
-                                                            //strInputFilePath, processingFileName, strDatetime);
-
-                                                            //}
+                                                          
                                                             //  if (driver1 != null) 
                                                             if (objOrder.driver1 != null)
                                                             {
@@ -1667,9 +1276,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             {
                                                                                 if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                 {
-                                                                                    charge1 = objOrder.number_of_pieces * charge1;
+                                                                                   // charge1 = objOrder.number_of_pieces * charge1;
+                                                                                    charge1 = carrierBasepay;
                                                                                 }
                                                                             }
+                                                                            
                                                                             ordersettlementputrequest = ordersettlementputrequest + @"'charge1': " + charge1 + ",";
                                                                         }
                                                                         else
@@ -1837,6 +1448,15 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 }
                                                                             }
                                                                             ordersettlementputrequest = ordersettlementputrequest + @"'charge4': " + charge4 + ",";
+                                                                        }
+                                                                    }
+
+                                                                    if (drow.Table.Columns.Contains("settlement_pct"))
+                                                                    {
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["settlement_pct"])))
+                                                                        {
+                                                                            double settlement_pct = Convert.ToDouble(drow["settlement_pct"]);
+                                                                            ordersettlementputrequest = ordersettlementputrequest + @"'settlement_pct': " + settlement_pct + ",";
                                                                         }
                                                                     }
 
@@ -2196,7 +1816,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                                 {
                                                                                                     if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                                     {
-                                                                                                        charge1 = objOrder.number_of_pieces * charge1;
+                                                                                                       // charge1 = objOrder.number_of_pieces * charge1;
+                                                                                                        charge1 = carrierBasepay;
                                                                                                     }
                                                                                                 }
                                                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge1': " + charge1 + ",";
@@ -2970,6 +2591,29 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         objOrder.status_code = Convert.ToString(dr["status_code"]);
                                                     }
                                                 }
+
+                                                if (dr.Table.Columns.Contains("pickup_route_code"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["pickup_route_code"])))
+                                                    {
+                                                        objOrder.pickup_route_code = Convert.ToString(dr["pickup_route_code"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("pickup_route_seq"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["pickup_route_seq"])))
+                                                    {
+                                                        objOrder.pickup_route_seq = Convert.ToString(dr["pickup_route_seq"]);
+                                                    }
+                                                }
+                                                if (dr.Table.Columns.Contains("pu_arrive_notification_sent"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["pu_arrive_notification_sent"])))
+                                                    {
+                                                        objOrder.pu_arrive_notification_sent = Convert.ToString(dr["pu_arrive_notification_sent"]);
+                                                    }
+                                                }
+
                                             }
                                             catch (Exception ex)
                                             {
@@ -4036,7 +3680,8 @@ namespace DatatracAPIOrder_OrderSettlement
                             objCommon.MergeSplittedOutputFiles(strFileName, "OrderSettlementFailure", strDatetime);
                             objCommon.MoveMergedOutputFilesToOutputLocation(strInputFilePath);
                             objCommon.CleanSplittedOutputFilesWorkingFolder();
-                            if (CustomerName == "BBB")
+
+                            if (CustomerName == "BBB" || CustomerName == "BURL")
                             {
                                 if (dtEBusy.Rows.Count > 0)
                                 {
@@ -4786,6 +4431,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 orderputrequest = orderputrequest + @"'status_code': '" + Convert.ToString(dr["status_code"]) + "', ";
                                             }
                                         }
+
                                         orderputrequest = @"{" + orderputrequest + "}";
                                         string orderObject = @"{'order': " + orderputrequest + "}";
 
@@ -5677,12 +5323,19 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge3': " + Convert.ToDouble(dr["charge3"]) + ",";
                                                             }
                                                         }
-
                                                         if (dr.Table.Columns.Contains("charge4"))
                                                         {
                                                             if (!string.IsNullOrEmpty(Convert.ToString(dr["charge4"])))
                                                             {
                                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge4': " + Convert.ToDouble(dr["charge4"]) + ",";
+                                                            }
+                                                        }
+                                                        if (dr.Table.Columns.Contains("settlement_pct"))
+                                                        {
+                                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["settlement_pct"])))
+                                                            {
+                                                                double settlement_pct = Convert.ToDouble(dr["settlement_pct"]);
+                                                                ordersettlementputrequest = ordersettlementputrequest + @"'settlement_pct': " + settlement_pct + ",";
                                                             }
                                                         }
 
@@ -6356,6 +6009,15 @@ namespace DatatracAPIOrder_OrderSettlement
                                             if (!string.IsNullOrEmpty(Convert.ToString(dr["charge4"])))
                                             {
                                                 ordersettlementputrequest = ordersettlementputrequest + @"'charge4': " + Convert.ToDouble(dr["charge4"]) + ",";
+                                            }
+                                        }
+
+                                        if (dr.Table.Columns.Contains("settlement_pct"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["settlement_pct"])))
+                                            {
+                                                double settlement_pct = Convert.ToDouble(dr["settlement_pct"]);
+                                                ordersettlementputrequest = ordersettlementputrequest + @"'settlement_pct': " + settlement_pct + ",";
                                             }
                                         }
                                         ordersettlementputrequest = @"{" + ordersettlementputrequest + "}";

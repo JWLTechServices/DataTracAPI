@@ -556,7 +556,6 @@ namespace DatatracAPIOrder_OrderSettlement
         public string pickup_attention { get; set; }
         public string deliver_attention { get; set; }
         public string pickup_special_instr_long { get; set; }
-
         public double add_charge_amt1 { get; set; }
         public double add_charge_amt2 { get; set; }
         public double add_charge_amt3 { get; set; }
@@ -570,6 +569,9 @@ namespace DatatracAPIOrder_OrderSettlement
         public string add_charge_code5 { get; set; }
         public string add_charge_code6 { get; set; }
         public string status_code { get; set; }
+        public string pickup_route_code { get; set; }
+        public string pickup_route_seq { get; set; }
+        public string pu_arrive_notification_sent { get; set; }
 
     }
     public class notes
@@ -591,9 +593,9 @@ namespace DatatracAPIOrder_OrderSettlement
         //public int expected_pieces { get; set; }
         public string item_description { get; set; }
         //public string item_long_desc { get; set; }
-        //public string item_name { get; set; }
+        public string item_name { get; set; }
         public string item_number { get; set; }
-        //public double item_price { get; set; }
+        public double item_price { get; set; }
         //public string item_url { get; set; }
         //public int line_actual_weight { get; set; }
         //public double number_of_pieces { get; set; }
