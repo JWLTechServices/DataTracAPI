@@ -418,11 +418,165 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     objOrder = new order();
                                                     objorder_line_itemList = new List<order_line_item>();
 
+
+                                                    DataTable dtFSCRates = new DataTable();
+                                                    DataTable dtFSCRatesfromDB = new DataTable();
+                                                    DataTable tblFSCRatesFiltered = new DataTable();
+                                                    DataTable dtBBBDificitWeightRating = new DataTable();
+                                                    DataTable dtBBBDificitWeightRatingPayable = new DataTable();
+                                                    DataTable dtBBBStoreBands = new DataTable();
+                                                    DataTable dtCarrierFSCRatesfromDB = new DataTable();
+                                                    DataTable tblCarrierFSCRatesFiltered = new DataTable();
+                                                    DataTable dtBillingRates = new DataTable();
+                                                    DataTable dtPayableRates = new DataTable();
+
+
+                                                    if (CustomerName == "BURL")
+                                                    {
+                                                        objOrder.company_number = Convert.ToInt32(datatable1.Rows[0]["Company"]);
+                                                        objOrder.customer_number = Convert.ToInt32(datatable1.Rows[0]["Billing Customer Number"]);
+
+                                                       
+                                                        string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
+                                                        DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, objOrder.company_number, objOrder.customer_number);
+                                                        if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
+                                                        {
+                                                            dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
+                                                        }
+                                                        else
+                                                        {
+                                                            strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                            strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
+                                                            //  objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                            string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                            string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                            string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                            string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
+                                                            string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                                                            objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                            throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+                                                        }
+
+                                                        clsDBContext objclsDBContext = new clsDBContext();
+
+                                                        clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
+                                                        objDificitRatesResponse = objclsDBContext.GetDeficitWeightRatingDetails(objOrder.company_number, objOrder.customer_number);
+                                                        if (objDificitRatesResponse.dsResp.ResponseVal)
+                                                        {
+                                                            if (objDificitRatesResponse.DS.Tables.Count > 0)
+                                                            {
+                                                                dtBBBStoreBands = objDificitRatesResponse.DS.Tables[0];
+                                                            }
+                                                            if (objDificitRatesResponse.DS.Tables.Count > 1)
+                                                            {
+                                                                dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
+                                                            }
+                                                            if (objDificitRatesResponse.DS.Tables.Count > 2)
+                                                            {
+                                                                dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (objDificitRatesResponse.dsResp.Reason.Contains("Exception"))
+                                                            {
+                                                                strExecutionLogMessage = "Found exception while getting  Dificit Weight Rating details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
+                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += " " + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "Error : " + objDificitRatesResponse.dsResp.Reason;
+                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                                                string subject = "Found exception while processing the file - "+ fileName;
+                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                throw new NullReferenceException("Found exception while processing the file - " + fileName);
+                                                            }
+                                                        }
+
+                                                        clsCommon.DSResponse objfscRatesResponse = new clsCommon.DSResponse();
+                                                        objfscRatesResponse = objclsDBContext.GetFSCRates_MappingDetails(objOrder.company_number, objOrder.customer_number);
+                                                        if (objfscRatesResponse.dsResp.ResponseVal)
+                                                        {
+                                                            if (objfscRatesResponse.DS.Tables.Count > 0)
+                                                            {
+                                                                dtFSCRatesfromDB = objfscRatesResponse.DS.Tables[0];
+                                                            }
+                                                            if (objfscRatesResponse.DS.Tables.Count > 1)
+                                                            {
+                                                                dtCarrierFSCRatesfromDB = objfscRatesResponse.DS.Tables[1];
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (objfscRatesResponse.dsResp.Reason.Contains("Exception"))
+                                                            {
+                                                                strExecutionLogMessage = "Found exception while getting FSC Rate details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
+                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += " " + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "Error : " + objfscRatesResponse.dsResp.Reason;
+                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                                                string subject = "Found exception while processing the file - " + fileName;
+                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                throw new NullReferenceException("Found exception while processing the file - " + fileName);
+                                                            }
+                                                        }
+
+                                                        clsCommon.DSResponse objBPRatesResponse = new clsCommon.DSResponse();
+                                                        objBPRatesResponse = objclsDBContext.GetBillingRatesAndPayableRates_CustomerMappingDetails(objOrder.company_number, objOrder.customer_number);
+                                                        if (objBPRatesResponse.dsResp.ResponseVal)
+                                                        {
+
+                                                            if (objBPRatesResponse.DS.Tables.Count > 0)
+                                                            {
+                                                                dtBillingRates = objBPRatesResponse.DS.Tables[0].Copy();
+                                                            }
+                                                            if (objBPRatesResponse.DS.Tables.Count > 1)
+                                                            {
+                                                                dtPayableRates = objBPRatesResponse.DS.Tables[1].Copy();
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            if (objBPRatesResponse.dsResp.Reason.Contains("Exception"))
+                                                            {
+                                                                strExecutionLogMessage = "Found exception while getting FSC Rate details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
+                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += " " + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "Error : " + objBPRatesResponse.dsResp.Reason;
+                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                                                string subject = "Found exception while processing the file - " + fileName;
+                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                throw new NullReferenceException("Found exception while processing the file - " + fileName);
+                                                            }
+                                                        }
+                                                    }
+
+
                                                     foreach (DataRow drow in datatable1.Rows)
                                                     {
                                                         double carrierBasepay = 0;
                                                         double billrate = 0;
-
+                                                        double carrierFSC = 0;
                                                         try
                                                         {
                                                             ReferenceId = Convert.ToString(drow["Customer Reference"]);
@@ -460,6 +614,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 if (drItems.Table.Columns.Contains("item_price"))
                                                                 {
                                                                     objitems.item_price = Convert.ToDouble(drItems["item_price"]);
+                                                                }
+
+                                                                if (drItems.Table.Columns.Contains("item_long_desc"))
+                                                                {
+                                                                    objitems.item_long_desc = Convert.ToString(drItems["item_long_desc"]);
                                                                 }
 
                                                                 objorder_line_itemList.Add(objitems);
@@ -744,11 +903,12 @@ namespace DatatracAPIOrder_OrderSettlement
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Weight"])))
                                                                 {
-                                                                    objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
+                                                                    //  objOrder.weight = Convert.ToInt32(Convert.ToDouble(drow["Weight"]));
+                                                                    objOrder.weight = Convert.ToInt32(Math.Round(Convert.ToDouble(drow["Weight"])));
                                                                 }
                                                             }
 
-                                                          
+
                                                             if (drow.Table.Columns.Contains("Pieces"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
@@ -758,11 +918,12 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 else
                                                                 {
                                                                     // to set billing rates in case of detailed data
-                                                                 
+
                                                                     if (CustomerName == "BURL")
                                                                     {
                                                                         var totalWeight = drItemresult.Sum(r => Convert.ToDouble(r.Field<string>("Weight")));
-                                                                        objOrder.weight = Convert.ToInt32( Math.Round(Convert.ToDouble(totalWeight)));
+
+                                                                        objOrder.weight = Convert.ToInt32(Math.Round(Convert.ToDouble(totalWeight)));
 
                                                                         string storenumber = objOrder.deliver_name;
                                                                         int band = 0;
@@ -772,30 +933,10 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             storenumberfordbverifaction = Convert.ToString(Convert.ToInt32(storenumber));
                                                                         }
 
-                                                                        clsDBContext objclsDBContext = new clsDBContext();
-                                                                        DataTable dtBBBDificitWeightRating = new DataTable();
-                                                                        DataTable dtBBBDificitWeightRatingPayable = new DataTable();
-                                                                        DataTable dtBBBStoreBands = new DataTable();
-                                                                      
-                                                                        clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
-                                                                        objDificitRatesResponse = objclsDBContext.GetDeficitWeightRatingDetails(objOrder.company_number, objOrder.customer_number);
-                                                                        if (objDificitRatesResponse.dsResp.ResponseVal)
-                                                                        {
-                                                                            if (objDificitRatesResponse.DS.Tables.Count > 0)
-                                                                            {
-                                                                                dtBBBStoreBands = objDificitRatesResponse.DS.Tables[0];
-                                                                            }
-                                                                            if (objDificitRatesResponse.DS.Tables.Count > 1)
-                                                                            {
-                                                                                dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
-                                                                            }
-                                                                            if (objDificitRatesResponse.DS.Tables.Count > 2)
-                                                                            {
-                                                                                dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
-                                                                            }
-                                                                        }
+                                                                        string deliveryName = objOrder.deliver_name.Replace("'", "");
 
-                                                                        int weight = objOrder.weight;
+                                                                       
+                                                                        double weight = totalWeight;
 
                                                                         DataTable dtstorebandsfiltered = new DataTable();
 
@@ -827,11 +968,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         if (dtDeficitWeightRatingfiltered.Rows.Count > 0)
                                                                         {
 
-                                                                           // billrate = Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                            // billrate = Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
                                                                             billrate = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
                                                                         }
 
-                                                                       
+
                                                                         DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
                                                                         IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
                                                                                                                                   .Where(row => (row.Field<int>("Band") == band)
@@ -848,14 +989,148 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             //carrierBasepay = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
                                                                             carrierBasepay = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
                                                                         }
+
+                                                                        DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(objOrder.pickup_requested_date.ToString(), @"\t", ""));
+
+                                                                        var invCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+                                                                        DataTable tblBillRatesFiltered = new DataTable();
+                                                                        IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                        if (billratesfilteredRows.Any())
+                                                                        {
+                                                                            tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                                                                        }
+
+                                                                        DataTable tblPayableRatesFiltered = new DataTable();
+                                                                        IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+
+                                                                        if (payableratesfilteredRows.Any())
+                                                                        {
+                                                                            tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                                                                        }
+
+
+                                                                        DataTable tblFSCBillRatesFiltered = new DataTable();
+                                                                        double fscratePercentage = 0;
+                                                                        double carrierfscratePercentage = 0;
+
+                                                                        string fscratetype = string.Empty;
+                                                                        string carrierfscratetype = string.Empty;
+
+                                                                        IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+                                                                        && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                        if (fscbillratesfilteredRows.Any())
+                                                                        {
+                                                                            tblFSCBillRatesFiltered = fscbillratesfilteredRows.CopyToDataTable();
+
+                                                                            decimal fuelcharge = 0;
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"])))
+                                                                            {
+                                                                                fuelcharge = Convert.ToDecimal(Convert.ToString(tblFSCBillRatesFiltered.Rows[0]["fuelcharge"]));
+                                                                            }
+
+                                                                            if (dtFSCRatesfromDB.Rows.Count > 0)
+                                                                            {
+                                                                                IEnumerable<DataRow> fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                                                                                .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                                                                                 && row.Field<string>("IsActive") == "Y");
+
+                                                                                if (fscratesfilteredRows.Any())
+                                                                                {
+                                                                                    tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                                                                                    fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                                                                    fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                                                                                }
+                                                                                else
+                                                                                {
+
+                                                                                    fscratesfilteredRows = dtFSCRatesfromDB.AsEnumerable()
+                                                                                   .Where(row => (row.Field<decimal>("Start") <= fuelcharge) && (fuelcharge <= row.Field<decimal>("Stop"))
+                                                                                    && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                                                                                    if (fscratesfilteredRows.Any())
+                                                                                    {
+                                                                                        tblFSCRatesFiltered = fscratesfilteredRows.CopyToDataTable();
+                                                                                        fscratePercentage = Convert.ToDouble(tblFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                                                                        fscratetype = Convert.ToString(tblFSCRatesFiltered.Rows[0]["Type"]);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            if (dtCarrierFSCRatesfromDB.Rows.Count > 0)
+                                                                            {
+                                                                                IEnumerable<DataRow> CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                                                                                .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                                                                                && (fuelcharge <= row.Field<decimal>("Stop"))
+                                                                                && row.Field<string>("DeliveryName") == deliveryName && row.Field<string>("IsActive") == "Y");
+
+                                                                                if (CarrierfscratesfilteredRows.Any())
+                                                                                {
+                                                                                    tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                                                                                    carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                                                                    carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    CarrierfscratesfilteredRows = dtCarrierFSCRatesfromDB.AsEnumerable()
+                                                                                .Where(row => (row.Field<decimal>("Start") <= fuelcharge)
+                                                                                && (fuelcharge <= row.Field<decimal>("Stop"))
+                                                                                && row.Field<string>("DeliveryName") is null && row.Field<string>("IsActive") == "Y");
+                                                                                    if (CarrierfscratesfilteredRows.Any())
+                                                                                    {
+                                                                                        tblCarrierFSCRatesFiltered = CarrierfscratesfilteredRows.CopyToDataTable();
+                                                                                        carrierfscratePercentage = Convert.ToDouble(tblCarrierFSCRatesFiltered.Rows[0]["Percent_FSCAMount"]);
+                                                                                        carrierfscratetype = Convert.ToString(tblCarrierFSCRatesFiltered.Rows[0]["Type"]);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
+                                                                        {
+                                                                            if (fscratetype.ToString().ToUpper() == "F")
+                                                                            {
+                                                                                objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(fscratePercentage), 2);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(billrate * fscratePercentage) / 100, 2);
+                                                                            }
+                                                                        }
+
+                                                                        if (!string.IsNullOrEmpty(Convert.ToString(carrierfscratePercentage)))
+                                                                        {
+                                                                            if (carrierfscratetype.ToString().ToUpper() == "F")
+                                                                            {
+                                                                                carrierFSC = Math.Round(Convert.ToDouble(carrierfscratePercentage), 2);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                carrierFSC = Math.Round(Convert.ToDouble(carrierBasepay * carrierfscratePercentage) / 100, 2);
+                                                                            }
+                                                                        }
+
+
+
                                                                     }
-                                                                   else if (CustomerName == "BBB")
+                                                                    else if (CustomerName == "BBB")
                                                                     {
                                                                         if (drow.Table.Columns.Contains("Bill Rate"))
                                                                         {
                                                                             if (!string.IsNullOrEmpty(Convert.ToString(drow["Bill Rate"])))
                                                                             {
                                                                                 billrate = objOrder.number_of_pieces * Convert.ToDouble(drow["Bill Rate"]);
+                                                                            }
+                                                                        }
+                                                                        if (drow.Table.Columns.Contains("FSC"))
+                                                                        {
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
+                                                                            {
+                                                                                objOrder.rate_buck_amt10 = objOrder.number_of_pieces * Convert.ToDouble(drow["FSC"]);
                                                                             }
                                                                         }
                                                                         if (drow.Table.Columns.Contains("Carrier Base Pay"))
@@ -866,6 +1141,16 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 carrierBasepay = Convert.ToDouble(objOrder.number_of_pieces * charge1);
                                                                             }
                                                                         }
+
+                                                                        if (drow.Table.Columns.Contains("Carrier FSC"))
+                                                                        {
+                                                                            if (!string.IsNullOrEmpty(Convert.ToString(drow["Carrier FSC"])))
+                                                                            {
+                                                                                double charge6 = Convert.ToDouble(drow["Carrier FSC"]);
+                                                                                carrierFSC = Convert.ToDouble(objOrder.number_of_pieces * charge6);
+                                                                            }
+                                                                        }
+
                                                                     }
 
                                                                     objOrder.rate_buck_amt1 = billrate;
@@ -877,13 +1162,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             objOrder.rate_buck_amt3 = objOrder.number_of_pieces * Convert.ToDouble(drow["Pieces ACC"]);
                                                                         }
                                                                     }
-                                                                    if (drow.Table.Columns.Contains("FSC"))
-                                                                    {
-                                                                        if (!string.IsNullOrEmpty(Convert.ToString(drow["FSC"])))
-                                                                        {
-                                                                            objOrder.rate_buck_amt10 = objOrder.number_of_pieces * Convert.ToDouble(drow["FSC"]);
-                                                                        }
-                                                                    }
+
                                                                     if (drow.Table.Columns.Contains("rate_buck_amt2"))
                                                                     {
                                                                         if (!string.IsNullOrEmpty(Convert.ToString(drow["rate_buck_amt2"])))
@@ -982,7 +1261,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                     objOrder.pickup_signature = Convert.ToString(drow["Pickup text signature"]);
                                                                 }
                                                             }
-                                                          
+
                                                             if (drow.Table.Columns.Contains("Insurance Amount"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Insurance Amount"])))
@@ -1222,7 +1501,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                             WriteOrderPostOutput(dsOrderResponse, processingFileName, strDatetime, ReferenceId, strInputFilePath, strFileName, fileName);
 
-                                                          
+
                                                             //  if (driver1 != null) 
                                                             if (objOrder.driver1 != null)
                                                             {
@@ -1276,11 +1555,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             {
                                                                                 if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                 {
-                                                                                   // charge1 = objOrder.number_of_pieces * charge1;
+                                                                                    // charge1 = objOrder.number_of_pieces * charge1;
                                                                                     charge1 = carrierBasepay;
                                                                                 }
                                                                             }
-                                                                            
+
                                                                             ordersettlementputrequest = ordersettlementputrequest + @"'charge1': " + charge1 + ",";
                                                                         }
                                                                         else
@@ -1391,7 +1670,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             {
                                                                                 if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                 {
-                                                                                    charge6 = objOrder.number_of_pieces * charge6;
+                                                                                   // charge6 = objOrder.number_of_pieces * charge6;
+                                                                                    charge6 = carrierFSC;
                                                                                 }
                                                                             }
                                                                             ordersettlementputrequest = ordersettlementputrequest + @"'charge6': " + charge6 + ",";
@@ -1816,7 +2096,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                                 {
                                                                                                     if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                                     {
-                                                                                                       // charge1 = objOrder.number_of_pieces * charge1;
+                                                                                                        // charge1 = objOrder.number_of_pieces * charge1;
                                                                                                         charge1 = carrierBasepay;
                                                                                                     }
                                                                                                 }
@@ -2419,7 +2699,9 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 {
                                                     if (!string.IsNullOrEmpty(Convert.ToString(dr["Weight"])))
                                                     {
-                                                        objOrder.weight = Convert.ToInt32(Convert.ToDouble(dr["Weight"]));
+                                                        // objOrder.weight = Convert.ToInt32(Convert.ToDouble(dr["Weight"]));
+                                                        objOrder.weight = Convert.ToInt32(Math.Round(Convert.ToDouble(dr["Weight"])));
+
                                                     }
                                                 }
                                                 if (dr.Table.Columns.Contains("Insurance Amount"))

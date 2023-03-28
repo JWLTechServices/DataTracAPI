@@ -592,7 +592,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public int dim_width { get; set; }
         //public int expected_pieces { get; set; }
         public string item_description { get; set; }
-        //public string item_long_desc { get; set; }
+        public string item_long_desc { get; set; }
         public string item_name { get; set; }
         public string item_number { get; set; }
         public double item_price { get; set; }
