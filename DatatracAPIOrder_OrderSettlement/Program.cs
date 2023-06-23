@@ -436,7 +436,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         objOrder.company_number = Convert.ToInt32(datatable1.Rows[0]["Company"]);
                                                         objOrder.customer_number = Convert.ToInt32(datatable1.Rows[0]["Billing Customer Number"]);
 
-                                                       
+
                                                         string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
                                                         DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, objOrder.company_number, objOrder.customer_number);
                                                         if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
@@ -495,7 +495,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
                                                                 string toMail = objCommon.GetConfigValue("ToMailID");
-                                                                string subject = "Found exception while processing the file - "+ fileName;
+                                                                string subject = "Found exception while processing the file - " + fileName;
                                                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
                                                                 throw new NullReferenceException("Found exception while processing the file - " + fileName);
                                                             }
@@ -935,7 +935,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                                         string deliveryName = objOrder.deliver_name.Replace("'", "");
 
-                                                                       
+
                                                                         double weight = totalWeight;
 
                                                                         DataTable dtstorebandsfiltered = new DataTable();
@@ -1670,7 +1670,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             {
                                                                                 if (string.IsNullOrEmpty(Convert.ToString(drow["Pieces"])))
                                                                                 {
-                                                                                   // charge6 = objOrder.number_of_pieces * charge6;
+                                                                                    // charge6 = objOrder.number_of_pieces * charge6;
                                                                                     charge6 = carrierFSC;
                                                                                 }
                                                                             }
@@ -7688,7 +7688,20 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                             objitems.photos_exist = Convert.ToString(dtCustomerMapping.Rows[0]["photos_exist"]);
                                             //objitems.@return = Convert.ToString(drItems["Return"]);
-                                            objitems.expected_pieces = Convert.ToInt32(drItems["Pieces"]);
+                                            // objitems.expected_pieces = Convert.ToInt32(drItems["Pieces"]);
+                                            if (drItems.Table.Columns.Contains("Pieces"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drItems["Pieces"])))
+                                                {
+                                                    objitems.expected_pieces = Convert.ToInt32(drItems["Pieces"]);
+                                                }
+                                            }
+
+                                            if (objitems.expected_pieces == 0)
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(dtCustomerMapping.Rows[0]["item_expected_pieces"])))
+                                                    objitems.expected_pieces = Convert.ToInt32(dtCustomerMapping.Rows[0]["item_expected_pieces"]);
+                                            }
                                             //   objitems.expected_weight = Convert.ToInt32(drItems["Weight"]);
                                             if (drItems.Table.Columns.Contains("Weight"))
                                             {
@@ -7708,7 +7721,24 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     objitems.expected_weight = Convert.ToInt32(dtCustomerMapping.Rows[0]["item_expected_weight"]);
                                             }
 
-                                            objitems.item_description = StripUnicodeCharactersFromString(Convert.ToString(drItems["Item Description"]));
+                                            //  objitems.item_description = StripUnicodeCharactersFromString(Convert.ToString(drItems["Item Description"]));
+
+                                            if (drItems.Table.Columns.Contains("Item Description"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drItems["Item Description"])))
+                                                {
+                                                    objitems.item_description = StripUnicodeCharactersFromString(Convert.ToString(drItems["Item Description"]));
+                                                }
+                                            }
+
+                                            if (drItems.Table.Columns.Contains("Item Comment"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drItems["Item Comment"])))
+                                                {
+                                                    objitems.comments = Convert.ToString(drItems["Item Comment"]);
+                                                }
+                                            }
+
                                             // objitems.item_number = Convert.ToString(drItems["Item Number"]);
                                             objitems.item_number = Regex.Replace(Convert.ToString(drItems["Item Number"]), @"\\t", "");
 
@@ -7789,6 +7819,23 @@ namespace DatatracAPIOrder_OrderSettlement
                                             if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Delivery Phone Number"])))
                                             {
                                                 objroute_stop.phone = Convert.ToString(drresult[0]["Delivery Phone Number"]);
+                                            }
+                                        }
+
+
+                                        if (dtDataTable.Columns.Contains("Special Instructions 1"))
+                                        {
+                                            if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Special Instructions 1"])))
+                                            {
+                                                objroute_stop.special_instructions1 = Convert.ToString(drresult[0]["Special Instructions 1"]);
+                                            }
+                                        }
+
+                                        if (dtDataTable.Columns.Contains("Special Instructions 2"))
+                                        {
+                                            if (!String.IsNullOrEmpty(Convert.ToString(drresult[0]["Special Instructions 2"])))
+                                            {
+                                                objroute_stop.special_instructions2 = Convert.ToString(drresult[0]["Special Instructions 2"]);
                                             }
                                         }
 

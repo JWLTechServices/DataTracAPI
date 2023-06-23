@@ -1439,6 +1439,7 @@ namespace DatatracAPIOrder_OrderSettlement
         public string item_number { get; set; }
         public string container_id { get; set; }
         public string reference { get; set; }
+        public string comments { get; set; }
 
     }
     public class ResponseRouteStop
