@@ -7743,6 +7743,15 @@ namespace DatatracAPIOrder_OrderSettlement
                                             objitems.item_number = Regex.Replace(Convert.ToString(drItems["Item Number"]), @"\\t", "");
 
                                             //  objitems.container_id = Convert.ToString(drItems["Container Id"]);
+
+                                            if (drItems.Table.Columns.Contains("Item Container Id"))
+                                            {
+                                                if (!String.IsNullOrEmpty(Convert.ToString(drItems["Item Container Id"])))
+                                                {
+                                                    objitems.container_id = Convert.ToString(drItems["Item Container Id"]);
+                                                }
+                                            }
+
                                             // objitems.reference = Convert.ToString(drItems["Customer_Reference"]);
                                             objitems.reference = Regex.Replace(Convert.ToString(drItems["Customer_Reference"]), @"\\t", "");
 
