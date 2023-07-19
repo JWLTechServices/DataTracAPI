@@ -652,6 +652,43 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                     objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
                                                                 }
                                                             }
+
+                                                            if (drow.Table.Columns.Contains("Pickup requested date"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup requested date"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Pickup requested date"]);
+                                                                    objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                                }
+                                                            }
+
+                                                            if (drow.Table.Columns.Contains("Pickup actual date"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual date"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Pickup actual date"]);
+                                                                    objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                                }
+                                                            }
+
+                                                            if (drow.Table.Columns.Contains("Delivery requested date"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery requested date"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Delivery requested date"]);
+                                                                    objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                                }
+                                                            }
+
+                                                            if (drow.Table.Columns.Contains("Delivery actual date"))
+                                                            {
+                                                                if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery actual date"])))
+                                                                {
+                                                                    DateTime dtValue = Convert.ToDateTime(drow["Delivery actual date"]);
+                                                                    objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                                }
+                                                            }
+
                                                             if (drow.Table.Columns.Contains("Pickup actual arrival time"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Pickup actual arrival time"])))
@@ -2400,6 +2437,42 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
                                                     }
                                                 }
+                                                if (dr.Table.Columns.Contains("Pickup requested date"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup requested date"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Pickup requested date"]);
+                                                        objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("Pickup actual date"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual date"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Pickup actual date"]);
+                                                        objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("Delivery requested date"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery requested date"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Delivery requested date"]);
+                                                        objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
+                                                    }
+                                                }
+
+                                                if (dr.Table.Columns.Contains("Delivery actual date"))
+                                                {
+                                                    if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual date"])))
+                                                    {
+                                                        DateTime dtValue = Convert.ToDateTime(dr["Delivery actual date"]);
+                                                        objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
+                                                    }
+                                                }
+
                                                 if (dr.Table.Columns.Contains("Pickup actual arrival time"))
                                                 {
                                                     if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual arrival time"])))
@@ -4293,6 +4366,41 @@ namespace DatatracAPIOrder_OrderSettlement
                                                 orderputrequest = orderputrequest + @"'pickup_requested_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
                                                 orderputrequest = orderputrequest + @"'pickup_actual_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
                                                 orderputrequest = orderputrequest + @"'deliver_requested_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                                orderputrequest = orderputrequest + @"'deliver_actual_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                            }
+                                        }
+
+
+                                        if (dr.Table.Columns.Contains("Pickup requested date"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup requested date"])))
+                                            {
+                                                DateTime dtValue = Convert.ToDateTime(dr["Pickup requested date"]);
+                                                orderputrequest = orderputrequest + @"'pickup_requested_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                            }
+                                        }
+                                        if (dr.Table.Columns.Contains("Pickup actual date"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["Pickup actual date"])))
+                                            {
+                                                DateTime dtValue = Convert.ToDateTime(dr["Pickup actual date"]);
+                                                orderputrequest = orderputrequest + @"'pickup_actual_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                            }
+                                        }
+
+                                        if (dr.Table.Columns.Contains("Delivery requested date"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery requested date"])))
+                                            {
+                                                DateTime dtValue = Convert.ToDateTime(dr["Delivery requested date"]);
+                                                orderputrequest = orderputrequest + @"'deliver_requested_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
+                                            }
+                                        }
+                                        if (dr.Table.Columns.Contains("Delivery actual date"))
+                                        {
+                                            if (!string.IsNullOrEmpty(Convert.ToString(dr["Delivery actual date"])))
+                                            {
+                                                DateTime dtValue = Convert.ToDateTime(dr["Delivery actual date"]);
                                                 orderputrequest = orderputrequest + @"'deliver_actual_date': '" + dtValue.ToString("yyyy-MM-dd") + "',";
                                             }
                                         }
