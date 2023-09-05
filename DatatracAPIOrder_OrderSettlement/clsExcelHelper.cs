@@ -158,7 +158,7 @@ namespace DatatracAPIOrder_OrderSettlement
 
         }
 
-        public static DataSet ImportExcelXLSXToDataSet_FSCRATES(string Filepath, bool hasHeaders, int company, int customernumber)
+        public static DataSet ImportExcelXLSXToDataSet_FSCRATES_All(string Filepath, bool hasHeaders)
         {
             clsCommon objCommon = new clsCommon();
             string HDR = (hasHeaders ? "Yes" : "No");
@@ -185,12 +185,13 @@ namespace DatatracAPIOrder_OrderSettlement
                     string sheet = row["TABLE_NAME"].ToString();
 
                     // string sqlSelect = "SELECT * FROM [" + sheet + "] ;";
-                    string sqlSelect = "SELECT * FROM [" + sheet + "]  where [Company]= @company AND [CustomerNumber]=@customernumber AND [IsActive] =@IsActive ";
+                    // string sqlSelect = "SELECT * FROM [" + sheet + "]  where [Company]= @company AND [CustomerNumber]=@customernumber AND [IsActive] =@IsActive ";
+                    string sqlSelect = "SELECT * FROM [" + sheet + "]  where [IsActive] =@IsActive ";
 
                     OleDbCommand comm = new OleDbCommand();
                     comm.Connection = conn;
-                    comm.Parameters.AddWithValue("@Company", company);
-                    comm.Parameters.AddWithValue("@CustomerNumber", customernumber);
+                    // comm.Parameters.AddWithValue("@Company", company);
+                    // comm.Parameters.AddWithValue("@CustomerNumber", customernumber);
                     comm.Parameters.AddWithValue("@IsActive", "Y");
                     comm.CommandText = sqlSelect;
 

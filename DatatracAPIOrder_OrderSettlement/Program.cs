@@ -316,11 +316,13 @@ namespace DatatracAPIOrder_OrderSettlement
                                     dr.Delete();
                             }
                             dsExcel.Tables[0].AcceptChanges();
-                            // For BBB Customer
+                            // For BBB, BURL Customer
                             string CustomerName = "";
+                            string locationCode = "";
                             try
                             {
                                 CustomerName = strFileName.Split('-')[0].ToUpper();
+                                locationCode = strFileName.Split('-')[1].ToUpper();
                             }
                             catch (Exception e)
                             {
@@ -374,6 +376,45 @@ namespace DatatracAPIOrder_OrderSettlement
                                     datatable = currentDatatable;
                                 }
 
+
+                                DataTable dtFSCRates = new DataTable();
+
+                                string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
+                                if (CustomerName == "BURL")
+                                {
+
+                                    DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES_All(strFscRateDetailsfilepath, true);
+                                    if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
+                                    {
+                                        dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
+
+                                        for (int i = dtFSCRates.Rows.Count - 1; i >= 0; i--)
+                                        {
+                                            DataRow dr = dtFSCRates.Rows[i];
+                                            if (dr["Company"] == DBNull.Value && dr["CustomerNumber"] == DBNull.Value)
+                                                dr.Delete();
+                                        }
+                                        dtFSCRates.AcceptChanges();
+                                    }
+                                    else
+                                    {
+                                        strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                                        strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                                        strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                        strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
+                                        //  objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                        objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                        string fromMail = objCommon.GetConfigValue("FromMailID");
+                                        string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                        string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                        string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
+                                        string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                                        objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                        throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+                                    }
+                                }
+
                                 foreach (DataRow dr in datatable.Rows)
                                 {
                                     ReferenceId = Convert.ToString(dr["Customer Reference"]);
@@ -400,6 +441,8 @@ namespace DatatracAPIOrder_OrderSettlement
                                             //        dr1.Delete();
                                             //}
                                             //dtdistinctDeldate.AcceptChanges();
+                                          
+
 
                                             foreach (DataRow drow1 in dtdistinctDeliveryDate.Rows)
                                             {
@@ -418,13 +461,11 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     objOrder = new order();
                                                     objorder_line_itemList = new List<order_line_item>();
 
-
-                                                    DataTable dtFSCRates = new DataTable();
                                                     DataTable dtFSCRatesfromDB = new DataTable();
                                                     DataTable tblFSCRatesFiltered = new DataTable();
-                                                    DataTable dtBBBDificitWeightRating = new DataTable();
-                                                    DataTable dtBBBDificitWeightRatingPayable = new DataTable();
-                                                    DataTable dtBBBStoreBands = new DataTable();
+                                                    DataTable dtDeficitWeightRating = new DataTable();
+                                                    DataTable dtDeficitWeightRatingPayable = new DataTable();
+                                                    DataTable dtStoreBands = new DataTable();
                                                     DataTable dtCarrierFSCRatesfromDB = new DataTable();
                                                     DataTable tblCarrierFSCRatesFiltered = new DataTable();
                                                     DataTable dtBillingRates = new DataTable();
@@ -435,60 +476,35 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     {
                                                         objOrder.company_number = Convert.ToInt32(datatable1.Rows[0]["Company"]);
                                                         objOrder.customer_number = Convert.ToInt32(datatable1.Rows[0]["Billing Customer Number"]);
-
-
-                                                        string strFscRateDetailsfilepath = objCommon.GetConfigValue("FSCRatesCustomerMappingFilepath");
-                                                        DataSet dsFscData = clsExcelHelper.ImportExcelXLSXToDataSet_FSCRATES(strFscRateDetailsfilepath, true, objOrder.company_number, objOrder.customer_number);
-                                                        if (dsFscData != null && dsFscData.Tables[0].Rows.Count > 0)
-                                                        {
-                                                            dtFSCRates = dsFscData.Tables["FSCRatesMapping$"];
-                                                        }
-                                                        else
-                                                        {
-                                                            strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
-                                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
-                                                            strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
-                                                            //  objCommon.WriteExecutionLog(strExecutionLogMessage);
-                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
-
-                                                            string fromMail = objCommon.GetConfigValue("FromMailID");
-                                                            string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
-                                                            string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                                            string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
-                                                            string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
-                                                            objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
-                                                            throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
-                                                        }
-
+                                                        
                                                         clsDBContext objclsDBContext = new clsDBContext();
 
-                                                        clsCommon.DSResponse objDificitRatesResponse = new clsCommon.DSResponse();
-                                                        objDificitRatesResponse = objclsDBContext.GetDeficitWeightRatingDetails(objOrder.company_number, objOrder.customer_number);
-                                                        if (objDificitRatesResponse.dsResp.ResponseVal)
+                                                        clsCommon.DSResponse objDeficitRatesResponse = new clsCommon.DSResponse();
+                                                        objDeficitRatesResponse = objclsDBContext.GetDeficitWeightRatingDetails(objOrder.company_number, objOrder.customer_number);
+                                                        if (objDeficitRatesResponse.dsResp.ResponseVal)
                                                         {
-                                                            if (objDificitRatesResponse.DS.Tables.Count > 0)
+                                                            if (objDeficitRatesResponse.DS.Tables.Count > 0)
                                                             {
-                                                                dtBBBStoreBands = objDificitRatesResponse.DS.Tables[0];
+                                                                dtStoreBands = objDeficitRatesResponse.DS.Tables[0];
                                                             }
-                                                            if (objDificitRatesResponse.DS.Tables.Count > 1)
+                                                            if (objDeficitRatesResponse.DS.Tables.Count > 1)
                                                             {
-                                                                dtBBBDificitWeightRating = objDificitRatesResponse.DS.Tables[1];
+                                                                dtDeficitWeightRating = objDeficitRatesResponse.DS.Tables[1];
                                                             }
-                                                            if (objDificitRatesResponse.DS.Tables.Count > 2)
+                                                            if (objDeficitRatesResponse.DS.Tables.Count > 2)
                                                             {
-                                                                dtBBBDificitWeightRatingPayable = objDificitRatesResponse.DS.Tables[2];
+                                                                dtDeficitWeightRatingPayable = objDeficitRatesResponse.DS.Tables[2];
                                                             }
                                                         }
                                                         else
                                                         {
-                                                            if (objDificitRatesResponse.dsResp.Reason.Contains("Exception"))
+                                                            if (objDeficitRatesResponse.dsResp.Reason.Contains("Exception"))
                                                             {
-                                                                strExecutionLogMessage = "Found exception while getting  Dificit Weight Rating details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage = "Found exception while getting  Deficit Weight Rating details for  this file " + fileName + System.Environment.NewLine;
                                                                 strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
                                                                 strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
                                                                 strExecutionLogMessage += " " + System.Environment.NewLine;
-                                                                strExecutionLogMessage += "Error : " + objDificitRatesResponse.dsResp.Reason;
+                                                                strExecutionLogMessage += "Error : " + objDeficitRatesResponse.dsResp.Reason;
                                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                                                 string fromMail = objCommon.GetConfigValue("FromMailID");
@@ -641,15 +657,21 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 }
                                                             }
 
+                                                            DateTime dtdeliveryDate =new DateTime();
+                                                            bool deliverydate = false;
+
                                                             if (drow.Table.Columns.Contains("Delivery Date"))
                                                             {
                                                                 if (!string.IsNullOrEmpty(Convert.ToString(drow["Delivery Date"])))
                                                                 {
                                                                     DateTime dtValue = Convert.ToDateTime(drow["Delivery Date"]);
+                                                                    dtdeliveryDate = Convert.ToDateTime(Regex.Replace(dtValue.ToString(), @"\t", ""));
+                                                                    deliverydate = true;
                                                                     objOrder.pickup_requested_date = dtValue.ToString("yyyy-MM-dd");
                                                                     objOrder.pickup_actual_date = dtValue.ToString("yyyy-MM-dd");
                                                                     objOrder.deliver_requested_date = dtValue.ToString("yyyy-MM-dd");
                                                                     objOrder.deliver_actual_date = dtValue.ToString("yyyy-MM-dd");
+
                                                                 }
                                                             }
 
@@ -964,10 +986,49 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                                         string storenumber = objOrder.deliver_name;
                                                                         int band = 0;
-                                                                        string storenumberfordbverifaction = objOrder.deliver_name;
+
+                                                                        int billingRates_ID = 0;
+                                                                        //int pieces = 0;
+                                                                        double weight_pieces = 0;
+                                                                        bool billrateCalculationBasedOnPieces = false;
+
+                                                                        if (!deliverydate)
+                                                                        {
+                                                                            dtdeliveryDate = Convert.ToDateTime(Regex.Replace(objOrder.pickup_requested_date.ToString(), @"\t", ""));
+                                                                        }
+
+                                                                        if (locationCode == "SEA" || locationCode == "PDX")
+                                                                        {
+                                                                            DateTime dtSEAandPDXDeliveryDateCalculationBasedOnPieces = Convert.ToDateTime(objCommon.GetConfigValue("BURLSEAandPDXDeliveryDateCalculationBasedOnPieces"));
+
+                                                                            if (dtdeliveryDate >= dtSEAandPDXDeliveryDateCalculationBasedOnPieces)
+                                                                            {
+                                                                                billrateCalculationBasedOnPieces = true;
+                                                                                string SEAandPDXLocationCodeCalculationBasedOnPieces = objCommon.GetConfigValue("BURLSEAandPDXLocationCodeCalculationBasedOnPieces");
+                                                                                if (SEAandPDXLocationCodeCalculationBasedOnPieces.Split(',').Contains(locationCode))
+                                                                                {
+                                                                                    billrateCalculationBasedOnPieces = false;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            DateTime dtOtherThanSEAandPDXDeliveryDateCalculationBasedOnPieces = Convert.ToDateTime(objCommon.GetConfigValue("BURLOtherThanSEAandPDXDeliveryDateCalculationBasedOnPieces"));
+
+                                                                            if (dtdeliveryDate >= dtOtherThanSEAandPDXDeliveryDateCalculationBasedOnPieces)
+                                                                            {
+                                                                                billrateCalculationBasedOnPieces = true;
+                                                                                string otherThanSEAandPDXLocationCodeCalculationBasedOnPieces = objCommon.GetConfigValue("BURLOtherThanSEAandPDXLocationCodeCalculationBasedOnPieces");
+                                                                                if (otherThanSEAandPDXLocationCodeCalculationBasedOnPieces.Split(',').Contains(locationCode))
+                                                                                {
+                                                                                    billrateCalculationBasedOnPieces = false;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        string storenumberfordbverification = objOrder.deliver_name;
                                                                         if (IsDigitsOnly(storenumber))
                                                                         {
-                                                                            storenumberfordbverifaction = Convert.ToString(Convert.ToInt32(storenumber));
+                                                                            storenumberfordbverification = Convert.ToString(Convert.ToInt32(storenumber));
                                                                         }
 
                                                                         string deliveryName = objOrder.deliver_name.Replace("'", "");
@@ -975,10 +1036,45 @@ namespace DatatracAPIOrder_OrderSettlement
 
                                                                         double weight = totalWeight;
 
+                                                                        if (billrateCalculationBasedOnPieces)
+                                                                        {
+                                                                            weight_pieces = objOrder.number_of_pieces;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            weight_pieces = weight;
+                                                                        }
+
+                                                                        var invCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+                                                                        DataTable tblBillRatesFiltered = new DataTable();
+                                                                        IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                        if (billratesfilteredRows.Any())
+                                                                        {
+                                                                            tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
+                                                                            billingRates_ID = Convert.ToInt16(tblBillRatesFiltered.Rows[0]["BillingRates_ID"]);
+                                                                        }
+
+                                                                        DataTable tblPayableRatesFiltered = new DataTable();
+                                                                        IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                        if (payableratesfilteredRows.Any())
+                                                                        {
+                                                                            tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
+                                                                        }
+
                                                                         DataTable dtstorebandsfiltered = new DataTable();
 
-                                                                        IEnumerable<DataRow> storebandsfilteredRows = dtBBBStoreBands.AsEnumerable()
-                                                                                                              .Where(row => row.Field<string>("Store") == storenumberfordbverifaction && row.Field<string>("IsActive") == "Y");
+                                                                        //IEnumerable<DataRow> storebandsfilteredRows = dtBBBStoreBands.AsEnumerable()
+                                                                        //                                      .Where(row => row.Field<string>("Store") == storenumberfordbverification && row.Field<string>("IsActive") == "Y");
+
+                                                                        IEnumerable<DataRow> storebandsfilteredRows = dtStoreBands.AsEnumerable()
+                                                                                                      .Where(row => (row.Field<string>("Store") == storenumberfordbverification) && (row.Field<string>("IsActive") == "Y")
+                                                                       && (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
                                                                         if (storebandsfilteredRows.Any())
                                                                         {
                                                                             dtstorebandsfiltered = storebandsfilteredRows.CopyToDataTable();
@@ -989,12 +1085,17 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             band = Convert.ToInt16(dtstorebandsfiltered.Rows[0]["Band"]);
                                                                         }
 
+                                                                        //DataTable dtDeficitWeightRatingfiltered = new DataTable();
+                                                                        //IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtBBBDificitWeightRating.AsEnumerable()
+                                                                        //                                                          .Where(row => (row.Field<int>("Band") == band)
+                                                                        //                                                          && (row.Field<int>("WeightFrom") <= weight)
+                                                                        //                                                          && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
 
                                                                         DataTable dtDeficitWeightRatingfiltered = new DataTable();
-                                                                        IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtBBBDificitWeightRating.AsEnumerable()
-                                                                                                                                  .Where(row => (row.Field<int>("Band") == band)
-                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight)
-                                                                                                                                  && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+                                                                        IEnumerable<DataRow> deficitWeightRatingfilteredRows = dtDeficitWeightRating.AsEnumerable()
+                                                                                                                                  .Where(row => (row.Field<int>("Band") == band) && (row.Field<int>("BillingRates_ID") == billingRates_ID)
+                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight_pieces)
+                                                                                                                                  && (weight_pieces <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
 
 
                                                                         if (deficitWeightRatingfilteredRows.Any())
@@ -1006,15 +1107,31 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         {
 
                                                                             // billrate = Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
-                                                                            billrate = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                            // billrate = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+
+                                                                            if (billrateCalculationBasedOnPieces)
+                                                                            {
+                                                                                billrate = objOrder.number_of_pieces * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                // old logic
+                                                                                billrate = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingfiltered.Rows[0]["Rate"]);
+                                                                            }
                                                                         }
 
 
+                                                                        //DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
+                                                                        //IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                        //                                                          .Where(row => (row.Field<int>("Band") == band)
+                                                                        //                                                          && (row.Field<int>("WeightFrom") <= weight)
+                                                                        //                                                          && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+
                                                                         DataTable dtDeficitWeightRatingPayablefiltered = new DataTable();
-                                                                        IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtBBBDificitWeightRatingPayable.AsEnumerable()
+                                                                        IEnumerable<DataRow> deficitWeightRatingPayablefilteredRows = dtDeficitWeightRatingPayable.AsEnumerable()
                                                                                                                                   .Where(row => (row.Field<int>("Band") == band)
-                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight)
-                                                                                                                                  && (weight <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
+                                                                                                                                  && (row.Field<int>("WeightFrom") <= weight_pieces)
+                                                                                                                                  && (weight_pieces <= row.Field<int>("WeightTo")) && row.Field<string>("IsActive") == "Y");
 
                                                                         if (deficitWeightRatingPayablefilteredRows.Any())
                                                                         {
@@ -1024,32 +1141,16 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         if (dtDeficitWeightRatingPayablefiltered.Rows.Count > 0)
                                                                         {
                                                                             //carrierBasepay = Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
-                                                                            carrierBasepay = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                                                            // carrierBasepay = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                                                            if (billrateCalculationBasedOnPieces)
+                                                                            {
+                                                                                carrierBasepay = objOrder.number_of_pieces * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                carrierBasepay = (weight / 100.00) * Convert.ToDouble(dtDeficitWeightRatingPayablefiltered.Rows[0]["Rate"]);
+                                                                            }
                                                                         }
-
-                                                                        DateTime dtdeliveryDate = Convert.ToDateTime(Regex.Replace(objOrder.pickup_requested_date.ToString(), @"\t", ""));
-
-                                                                        var invCulture = System.Globalization.CultureInfo.InvariantCulture;
-
-                                                                        DataTable tblBillRatesFiltered = new DataTable();
-                                                                        IEnumerable<DataRow> billratesfilteredRows = dtBillingRates.AsEnumerable()
-                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
-
-                                                                        if (billratesfilteredRows.Any())
-                                                                        {
-                                                                            tblBillRatesFiltered = billratesfilteredRows.CopyToDataTable();
-                                                                        }
-
-                                                                        DataTable tblPayableRatesFiltered = new DataTable();
-                                                                        IEnumerable<DataRow> payableratesfilteredRows = dtPayableRates.AsEnumerable()
-                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
-
-
-                                                                        if (payableratesfilteredRows.Any())
-                                                                        {
-                                                                            tblPayableRatesFiltered = payableratesfilteredRows.CopyToDataTable();
-                                                                        }
-
 
                                                                         DataTable tblFSCBillRatesFiltered = new DataTable();
                                                                         double fscratePercentage = 0;
@@ -1058,8 +1159,14 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         string fscratetype = string.Empty;
                                                                         string carrierfscratetype = string.Empty;
 
-                                                                        IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
-                                                                        .Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+                                                                      //  IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                                                                      //.Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+
+
+                                                                        IEnumerable < DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                                                                        .Where(row =>  (row.Field<double>("Company") == objOrder.company_number) 
+                                                                        && (row.Field<double>("CustomerNumber") == objOrder.customer_number)
+                                                                        && (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
                                                                         && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
 
                                                                         if (fscbillratesfilteredRows.Any())
@@ -1126,6 +1233,24 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 }
                                                                             }
                                                                         }
+                                                                        else
+                                                                        {
+                                                                           
+                                                                                strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                                                                                strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                                strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
+                                                                                //  objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                                string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
+                                                                                string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                                throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+                                                                        }
 
                                                                         if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
                                                                         {
@@ -1150,9 +1275,6 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 carrierFSC = Math.Round(Convert.ToDouble(carrierBasepay * carrierfscratePercentage) / 100, 2);
                                                                             }
                                                                         }
-
-
-
                                                                     }
                                                                     else if (CustomerName == "BBB")
                                                                     {
