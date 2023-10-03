@@ -81,6 +81,40 @@ namespace DatatracAPIOrder_OrderSettlement
             }
             return objResponse;
         }
+        public DSResponse GetBilling_Payable_RateBreakdown_Details(int company, int customerNumber)
+        {
+            DSResponse objResponse = new DSResponse();
+            try
+            {
+                DataSet dsDtls = new DataSet();
+
+                SqlParameter paramCompany = new SqlParameter("@Company", SqlDbType.Int);
+                paramCompany.Value = company;
+
+                SqlParameter paramCustomerNumber = new SqlParameter("@CustomerNumber", SqlDbType.Int);
+                paramCustomerNumber.Value = customerNumber;
+
+                dsDtls = SqlHelper.ExecuteDataset(GetConfigValue("DBConnection"), CommandType.StoredProcedure, "USP_S_Billing_Payable_RatesBreakDown",
+                    paramCompany, paramCustomerNumber);
+                if (dsDtls.Tables[0].Rows.Count > 0)
+                {
+                    objResponse.DS = dsDtls;
+                    objResponse.dsResp.ResponseVal = true;
+                }
+                else
+                {
+                    objResponse.dsResp.ResponseVal = false;
+                    objResponse.dsResp.Reason = "Billing or Payable Rates Breakdwon details not found";
+                }
+            }
+            catch (Exception ex)
+            {
+                objResponse.dsResp.ResponseVal = false;
+                WriteErrorLog(ex, "GetBilling_Payable_RateBreakdown_Details");
+            }
+            return objResponse;
+        }
+
 
         public DSResponse GetFSCRates_MappingDetails(int company, int customerNumber)
         {

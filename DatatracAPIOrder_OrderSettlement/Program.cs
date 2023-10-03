@@ -470,7 +470,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     DataTable tblCarrierFSCRatesFiltered = new DataTable();
                                                     DataTable dtBillingRates = new DataTable();
                                                     DataTable dtPayableRates = new DataTable();
-
+                                                    DataTable dtBillingRatesBreakdown = new DataTable();
 
                                                     if (CustomerName == "BURL")
                                                     {
@@ -569,11 +569,48 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         {
                                                             if (objBPRatesResponse.dsResp.Reason.Contains("Exception"))
                                                             {
-                                                                strExecutionLogMessage = "Found exception while getting FSC Rate details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage = "Found exception while getting Billing/Payable Rate details for  this file " + fileName + System.Environment.NewLine;
                                                                 strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
                                                                 strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
                                                                 strExecutionLogMessage += " " + System.Environment.NewLine;
                                                                 strExecutionLogMessage += "Error : " + objBPRatesResponse.dsResp.Reason;
+                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                string toMail = objCommon.GetConfigValue("ToMailID");
+                                                                string subject = "Found exception while processing the file - " + fileName;
+                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                throw new NullReferenceException("Found exception while processing the file - " + fileName);
+                                                            }
+                                                        }
+
+
+                                                       
+                                                        // DataTable dtPayableRatesBreakdown = new DataTable();
+                                                        clsCommon.DSResponse objBPRatesBreakdownResponse = new clsCommon.DSResponse();
+                                                        objBPRatesBreakdownResponse = objclsDBContext.GetBilling_Payable_RateBreakdown_Details(objOrder.company_number, objOrder.customer_number);
+                                                        if (objBPRatesBreakdownResponse.dsResp.ResponseVal)
+                                                        {
+                                                            if (objBPRatesBreakdownResponse.DS.Tables.Count > 0)
+                                                            {
+                                                                dtBillingRatesBreakdown = objBPRatesBreakdownResponse.DS.Tables[0].Copy();
+                                                            }
+                                                            //if (objBPRatesBreakdownResponse.DS.Tables.Count > 1)
+                                                            //{
+                                                            //    dtPayableRatesBreakdown = objBPRatesBreakdownResponse.DS.Tables[1].Copy();
+                                                            //}
+                                                        }
+                                                        else
+                                                        {
+                                                            if (objBPRatesBreakdownResponse.dsResp.Reason.Contains("Exception"))
+                                                            {
+                                                                strExecutionLogMessage = "Found exception while getting Billing/Payable rate Breakdown details for  this file " + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "So not able to process this file,Please look into this immediately";
+                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                strExecutionLogMessage += " " + System.Environment.NewLine;
+                                                                strExecutionLogMessage += "Error : " + objBPRatesBreakdownResponse.dsResp.Reason;
                                                                 objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
                                                                 string fromMail = objCommon.GetConfigValue("FromMailID");
@@ -593,6 +630,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         double carrierBasepay = 0;
                                                         double billrate = 0;
                                                         double carrierFSC = 0;
+                                                        double billingdeliveryrate = 0;
                                                         try
                                                         {
                                                             ReferenceId = Convert.ToString(drow["Customer Reference"]);
@@ -1252,6 +1290,45 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
                                                                         }
 
+
+                                                                        DataTable dtbillingrateBreakDownfiltered = new DataTable();
+
+                                                                        if (billrateCalculationBasedOnPieces)
+                                                                        {
+                                                                            IEnumerable<DataRow> billingrateBreakDownfilteredRows = dtBillingRatesBreakdown.AsEnumerable()
+                                                                                                                                           .Where(row => (row.Field<string>("StoreNumber") == storenumberfordbverification) && (row.Field<int>("BillingRates_ID") == billingRates_ID)
+                                                                                                            && (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate) && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
+
+                                                                            if (billingrateBreakDownfilteredRows.Any())
+                                                                            {
+                                                                                dtbillingrateBreakDownfiltered = billingrateBreakDownfilteredRows.CopyToDataTable();
+                                                                            }
+
+                                                                            if (dtbillingrateBreakDownfiltered.Rows.Count > 0)
+                                                                            {
+                                                                                billingdeliveryrate = Convert.ToDouble(dtbillingrateBreakDownfiltered.Rows[0]["DeliveryRate"]);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                strExecutionLogMessage = "Billing Rate Breakdown Info missing for store number : " + storenumber + " - Band: " + band + " - BillingRates_ID: " + billingRates_ID + System.Environment.NewLine;
+                                                                                strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                                strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
+                                                                                //  objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+
+                                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                                string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
+                                                                                string subject = "Billing Rate Breakdown Info missing found in this file" + strFscRateDetailsfilepath;
+                                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                                throw new NullReferenceException("Billing Rate Breakdown Info missing found in this file " + strFscRateDetailsfilepath);
+
+                                                                            }
+                                                                        }
+
                                                                         if (!string.IsNullOrEmpty(Convert.ToString(fscratePercentage)))
                                                                         {
                                                                             if (fscratetype.ToString().ToUpper() == "F")
@@ -1260,7 +1337,15 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             }
                                                                             else
                                                                             {
-                                                                                objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(billrate * fscratePercentage) / 100, 2);
+                                                                                if (billrateCalculationBasedOnPieces)
+                                                                                {
+                                                                                    objOrder.rate_buck_amt10 =  Math.Round(Convert.ToDouble(billingdeliveryrate * fscratePercentage * objOrder.number_of_pieces) / 100, 2);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(billrate * fscratePercentage) / 100, 2);
+                                                                                }
+                                                                                
                                                                             }
                                                                         }
 
