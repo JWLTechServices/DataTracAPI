@@ -1322,9 +1322,9 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                                 string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
                                                                                 string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
                                                                                 string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
-                                                                                string subject = "Billing Rate Breakdown Info missing found in this file" + strFscRateDetailsfilepath;
+                                                                                string subject = "Billing Rate Breakdown Info missing found while processing this file" + processingFileName;
                                                                                 objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
-                                                                                throw new NullReferenceException("Billing Rate Breakdown Info missing found in this file " + strFscRateDetailsfilepath);
+                                                                                throw new NullReferenceException("Billing Rate Breakdown Info missing while processing this file " + processingFileName);
 
                                                                             }
                                                                         }
