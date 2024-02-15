@@ -573,6 +573,17 @@ namespace DatatracAPIOrder_OrderSettlement
         public string pickup_route_seq { get; set; }
         public string pu_arrive_notification_sent { get; set; }
 
+        public string deliver_route_code { get; set; }
+        public string deliver_route_sequence { get; set; }
+     //   public string deliver_phone { get; set; }
+        public string deliver_room { get; set; }
+        public string callback_to { get; set; }
+        public string pickup_phone { get; set; }
+        public string pickup_pricing_zone { get; set; }
+        public string deliver_special_instr_long { get; set; }
+     //   public string callback_to { get; set; }
+
+
     }
     public class notes
     {
@@ -596,10 +607,10 @@ namespace DatatracAPIOrder_OrderSettlement
         public string item_name { get; set; }
         public string item_number { get; set; }
         public double item_price { get; set; }
-        //public string item_url { get; set; }
-        //public int line_actual_weight { get; set; }
+        public string item_url { get; set; }
+        public int line_actual_weight { get; set; }
         //public double number_of_pieces { get; set; }
-        // public string photos_exist { get; set; }
+        public string photos_exist { get; set; }
         //public int pickup_actual_pieces { get; set; }
         //public int roundtrip_actual_pieces { get; set; }
     }

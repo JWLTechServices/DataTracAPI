@@ -346,7 +346,12 @@ namespace DatatracAPIOrder_OrderSettlement
                                 objCommon.WriteExecutionLog(strExecutionLogFileLocation, strExecutionLogMessage);
                                 continue;
                             }
-
+                            if (CustomerName == "COCH")
+                            {
+                                clsCOCH objclsCOCH = new clsCOCH();
+                                clsCOCH.COCHProcessAddOrderFiles(dsExcel, strFileName, strDatetime, strInputFilePath, strLocationFolder);
+                                return;
+                            }
                             List<DataTable> splitdt = clsCommon.SplitTable(dsExcel.Tables[0], noofrowspertable, strFileName, strDatetime);
 
                             strExecutionLogMessage = "Parallelly Processing Started for the  file : " + strFileName + "." + System.Environment.NewLine + "Number of processess are going to exicute is :" + noofrowspertable;
@@ -441,7 +446,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                             //        dr1.Delete();
                                             //}
                                             //dtdistinctDeldate.AcceptChanges();
-                                          
+
 
 
                                             foreach (DataRow drow1 in dtdistinctDeliveryDate.Rows)
@@ -476,7 +481,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     {
                                                         objOrder.company_number = Convert.ToInt32(datatable1.Rows[0]["Company"]);
                                                         objOrder.customer_number = Convert.ToInt32(datatable1.Rows[0]["Billing Customer Number"]);
-                                                        
+
                                                         clsDBContext objclsDBContext = new clsDBContext();
 
                                                         clsCommon.DSResponse objDeficitRatesResponse = new clsCommon.DSResponse();
@@ -587,7 +592,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                         }
 
 
-                                                       
+
                                                         // DataTable dtPayableRatesBreakdown = new DataTable();
                                                         clsCommon.DSResponse objBPRatesBreakdownResponse = new clsCommon.DSResponse();
                                                         objBPRatesBreakdownResponse = objclsDBContext.GetBilling_Payable_RateBreakdown_Details(objOrder.company_number, objOrder.customer_number);
@@ -695,7 +700,7 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                 }
                                                             }
 
-                                                            DateTime dtdeliveryDate =new DateTime();
+                                                            DateTime dtdeliveryDate = new DateTime();
                                                             bool deliverydate = false;
 
                                                             if (drow.Table.Columns.Contains("Delivery Date"))
@@ -1197,12 +1202,12 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         string fscratetype = string.Empty;
                                                                         string carrierfscratetype = string.Empty;
 
-                                                                      //  IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
-                                                                      //.Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
+                                                                        //  IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                                                                        //.Where(row => (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
 
 
-                                                                        IEnumerable < DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
-                                                                        .Where(row =>  (row.Field<double>("Company") == objOrder.company_number) 
+                                                                        IEnumerable<DataRow> fscbillratesfilteredRows = dtFSCRates.AsEnumerable()
+                                                                        .Where(row => (row.Field<double>("Company") == objOrder.company_number)
                                                                         && (row.Field<double>("CustomerNumber") == objOrder.customer_number)
                                                                         && (row.Field<DateTime>("EffectiveStartDate") <= dtdeliveryDate)
                                                                         && (dtdeliveryDate <= row.Field<DateTime>("EffectiveEndDate")));
@@ -1273,21 +1278,21 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                         }
                                                                         else
                                                                         {
-                                                                           
-                                                                                strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
-                                                                                strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
-                                                                                strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
-                                                                                strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
-                                                                                //  objCommon.WriteExecutionLog(strExecutionLogMessage);
-                                                                                objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
 
-                                                                                string fromMail = objCommon.GetConfigValue("FromMailID");
-                                                                                string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
-                                                                                string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
-                                                                                string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
-                                                                                string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
-                                                                                objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
-                                                                                throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
+                                                                            strExecutionLogMessage = "Diesel price data not found in this file " + strFscRateDetailsfilepath + System.Environment.NewLine;
+                                                                            strExecutionLogMessage += "So not able to process this file, please update the fsc sheet with appropriate values";
+                                                                            strExecutionLogMessage += "Found exception while processing the file, filename  -" + fileName + System.Environment.NewLine;
+                                                                            strExecutionLogMessage += "Please look into this immediately." + System.Environment.NewLine;
+                                                                            //  objCommon.WriteExecutionLog(strExecutionLogMessage);
+                                                                            objCommon.WriteExecutionLogParallelly(fileName, strExecutionLogMessage);
+
+                                                                            string fromMail = objCommon.GetConfigValue("FromMailID");
+                                                                            string fromPassword = objCommon.GetConfigValue("FromMailPasssword");
+                                                                            string disclaimer = objCommon.GetConfigValue("MailDisclaimer");
+                                                                            string toMail = objCommon.GetConfigValue("SendDieselPriceMissingEmail");
+                                                                            string subject = "Diesel price data not found in this file " + strFscRateDetailsfilepath;
+                                                                            objCommon.SendMail(fromMail, fromPassword, disclaimer, toMail, "", subject, strExecutionLogMessage, "");
+                                                                            throw new NullReferenceException("Diesel price data not found in this file " + strFscRateDetailsfilepath);
                                                                         }
 
 
@@ -1339,13 +1344,13 @@ namespace DatatracAPIOrder_OrderSettlement
                                                                             {
                                                                                 if (billrateCalculationBasedOnPieces)
                                                                                 {
-                                                                                    objOrder.rate_buck_amt10 =  Math.Round(Convert.ToDouble(billingdeliveryrate * fscratePercentage * objOrder.number_of_pieces) / 100, 2);
+                                                                                    objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(billingdeliveryrate * fscratePercentage * objOrder.number_of_pieces) / 100, 2);
                                                                                 }
                                                                                 else
                                                                                 {
                                                                                     objOrder.rate_buck_amt10 = Math.Round(Convert.ToDouble(billrate * fscratePercentage) / 100, 2);
                                                                                 }
-                                                                                
+
                                                                             }
                                                                         }
 
