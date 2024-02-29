@@ -348,16 +348,18 @@ namespace DatatracAPIOrder_OrderSettlement
                                                     if (!string.IsNullOrEmpty(Convert.ToString(drItems["item_url"])))
                                                         objitems.item_url = Convert.ToString(drItems["item_url"]);
                                                 }
-                                                if (drItems.Table.Columns.Contains("line_actual_weight"))
-                                                {
-                                                    if (!string.IsNullOrEmpty(Convert.ToString(drItems["line_actual_weight"])))
-                                                        objitems.line_actual_weight = Convert.ToInt32(Math.Round(Convert.ToDouble(drItems["line_actual_weight"])));
-                                                }
-                                                else if (drItems.Table.Columns.Contains("item_line_actual_weight"))
-                                                {
-                                                    if (!string.IsNullOrEmpty(Convert.ToString(drItems["item_line_actual_weight"])))
-                                                        objitems.line_actual_weight = Convert.ToInt32(Math.Round(Convert.ToDouble(drItems["item_line_actual_weight"])));
-                                                }
+                                                //commented this code as the calucation of weight over order calculated with sum of this in datatrac side and it varies the calcuation of weight in order and order line item table.
+
+                                                //if (drItems.Table.Columns.Contains("line_actual_weight"))
+                                                //{
+                                                //    if (!string.IsNullOrEmpty(Convert.ToString(drItems["line_actual_weight"])))
+                                                //        objitems.line_actual_weight = Convert.ToInt32(Math.Round(Convert.ToDouble(drItems["line_actual_weight"])));
+                                                //}
+                                                //else if (drItems.Table.Columns.Contains("item_line_actual_weight"))
+                                                //{
+                                                //    if (!string.IsNullOrEmpty(Convert.ToString(drItems["item_line_actual_weight"])))
+                                                //        objitems.line_actual_weight = Convert.ToInt32(Math.Round(Convert.ToDouble(drItems["item_line_actual_weight"])));
+                                                //}
                                                 if (drItems.Table.Columns.Contains("photos_exist"))
                                                 {
                                                     if (!string.IsNullOrEmpty(Convert.ToString(drItems["photos_exist"]).Trim()))
